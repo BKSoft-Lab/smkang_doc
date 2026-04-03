@@ -71,7 +71,13 @@ ul { padding-left: 1.25rem; }
 <td>왼쪽 그리드(부서별 사용자)</td>
 <td>GET</td>
 <td><code>/func/fn_cm_user_dept</code></td>
-<td><code>p1=&lt;dept&gt;</code></td>
+<td><code>p1=&lt;dept&gt;</code> (특정 부서)</td>
+</tr>
+<tr>
+<td>왼쪽 그리드(부서 <strong>전체</strong>)</td>
+<td>GET</td>
+<td><code>/db/tb_cm_user</code></td>
+<td><code>_orderBy=user_id</code> — 화면에서 <code>fetchAllCmUsersForDeptGrid</code>로 DEPT/DUTY 명칭 매핑</td>
 </tr>
 <tr>
 <td>왼쪽 아래(사용자 권한그룹)</td>
@@ -141,12 +147,12 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>4. GET — <code>/func/fn_cm_user_dept?p1=&lt;dept&gt;</code> (왼쪽 가운데 그리드)</h2>
-<h3>4.1 호출 코드</h3>
+<h2>4. 왼쪽 가운데 그리드 — 부서별 / 전체</h2>
+<h3>4.1 특정 부서 — <code>GET /func/fn_cm_user_dept?p1=&lt;dept&gt;</code></h3>
 <ul>
-<li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchCmUserDept(dept)</code></li>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchCmUserDept(dept)</code> (<code>dept</code> 비어 있지 않을 때)</li>
 </ul>
-<h3>4.2 URL·쿼리</h3>
+<h3>4.2 URL·쿼리 (<code>fn_cm_user_dept</code>)</h3>
 <pre><code>GET {base}/func/fn_cm_user_dept?p1=A030
 </code></pre>
 <table>
@@ -161,7 +167,11 @@ ul { padding-left: 1.25rem; }
 <td>부서 코드(<code>DEPT</code> 코드 값)</td>
 </tr>
 </tbody></table>
-<h3>4.3 호출 시점·조건</h3>
+<h3>4.3 부서 <strong>전체</strong> — <code>GET /db/tb_cm_user</code></h3>
+<ul>
+<li>부서 콤보가 <strong>전체</strong>(<code>filterDept === &#39;&#39;</code>)일 때: <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>tbCmUserApi.ts</code></a> <code>fetchTbCmUsers({})</code> 후 <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> <code>fetchAllCmUsersForDeptGrid(deptOpts, dutyOpts)</code> — <code>resolveFnCmCodeLabel</code>로 부서·직급 <strong>명칭</strong> 컬럼 채움(<code>fn_cm_code</code> DEPT·DUTY 옵션은 마운트 시 병렬 로드).</li>
+</ul>
+<h3>4.4 호출 시점·조건</h3>
 <table>
 <thead>
 <tr>
@@ -178,12 +188,12 @@ ul { padding-left: 1.25rem; }
 <td><code>runSearch</code></td>
 </tr>
 </tbody></table>
-<h3>4.4 응답·UI</h3>
+<h3>4.5 응답·UI</h3>
 <ul>
 <li>타입 <code>CmUserDeptRow</code>: <code>user_id</code>, <code>user_name</code>, <code>dept</code>, <code>dept_code_name</code>, <code>duty</code>, <code>duty_code_name</code></li>
 <li>그리드 4열: 사용자 ID | 사용자 이름 | 부서(<code>dept_code_name</code>) | 직급(<code>duty_code_name</code>)</li>
 </ul>
-<h3>4.5 에러</h3>
+<h3>4.6 에러</h3>
 <table>
 <thead>
 <tr>
@@ -461,7 +471,7 @@ Content-Type: application/json
 <li><strong>데이터 247건</strong>: <code>tb_mes_user_authority</code>에 현재 247행, 18개 <code>user_class</code>에 분포.</li>
 <li><strong>복합 PK</strong>: <code>user_id</code> + <code>user_class</code>이므로 DELETE 시 <strong>두 값 모두</strong> 필수.</li>
 <li><strong>권한복사 탭</strong>: PNG에 &quot;권한복사&quot; 탭이 보이나 현재 구현은 조회 위주 — 권한 일괄 복사 기능 추가 시 별도 POST 로직 필요.</li>
-<li><strong><code>fn_cm_user_dept</code> 전체 조회</strong>: 부서 콤보에서 &quot;전체&quot; 선택 시 빈 <code>p1</code>을 보내면 전 부서 사용자를 반환하는지 백엔드 확인 필요.</li>
+<li><strong><code>tb_cm_user</code> 중복 PK</strong>: 동일 <code>user_id</code>가 여러 행이면 그리드에 중복 표시될 수 있음 — 백엔드·데이터 정합 참고.</li>
 </ol>
 <hr>
 <h2>11. 관련 소스 파일</h2>
@@ -476,6 +486,9 @@ Content-Type: application/json
 </tr>
 <tr>
 <td><code>renderer/src/lib/userAuthorityApi.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/tbCmUserApi.ts</code> (전체 사용자)</td>
 </tr>
 <tr>
 <td><code>renderer/src/lib/fnCmCodeApi.ts</code></td>
