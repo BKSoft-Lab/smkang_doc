@@ -1,0 +1,64 @@
+/*!
+@page work_20240913	2024.09.13
+
+# SKB수원
+---
+
+
+
+> Test 
+
+@code
+1|console:/ $ ifconfig
+eth0.2    Link encap:UNSPEC  [  604.673639] audit: rate limit exceeded
+
+          inet addr:192.168.100.9  Bcast:192.168.100.255  Mask:255.255.255.0
+          inet6 addr: fe80::26e4:ceff:fe40:8fa9/64 Scope: Link
+          UP BROADCAST RUNNING  MTU:1500  Metric:1
+          RX packets:785 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:882 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:60651 TX bytes:92737
+
+dummy0    Link encap:UNSPEC
+          inet6 addr: fe80::e089:b4ff:fe53:7dc8/64 Scope: Link
+          UP BROADCAST RUNNING NOARP  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:61 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 TX bytes:12813
+
+lo        Link encap:UNSPEC
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope: Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:87880 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:87880 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:68845291 TX bytes:68845291
+
+eth0      Link encap:UNSPEC
+          inet addr:10.238.98.210  Bcast:10.238.103.255  Mask:255.255.248.0
+          inet6 addr: fe80::a618:ff25:50b1:1d73/64 Scope: Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:80909 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2949 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:67880799 TX bytes:304169
+
+eth0.1    Link encap:UNSPEC
+          inet addr:192.168.17.10  Bcast:192.168.17.255  Mask:255.255.255.0
+          inet6 addr: fe80::26e4:ceff:fe40:8fa9/64 Scope: Link
+          UP BROADCAST RUNNING  MTU:1500  Metric:1
+          RX packets:78565 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:1042 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:65890751 TX bytes:123500
+
+
+@endcode
+
+---
+<br>
+---
+*/

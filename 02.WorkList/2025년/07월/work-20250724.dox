@@ -1,0 +1,84 @@
+/*!
+@page work_20250709	2025.07.24
+
+---
+
+# [SKBB(BKO-UC500) - 이슈 #16988] (신규) Audio 5.1ch 재생 후 2.0 ch Audio 묵음 현상
+
+> https://jira.kaonmedia.com/browse/K1023-329
+
+@code
+
+28 Sep, 2024 12 commits
+AndroidPlatform3's avatar
+PLATFORM_SECURITY_PATCH := 2024-08-01
+AndroidPlatform3 authored 9 months ago
+d1d0eca6
+bkouc500-ota-kaon2025030601-20240928.zip --> OK
+
+
+15 Oct, 2024 1 commit
+강성민(kaongroup)'s avatar
+GTVS 최신 업데이트
+강성민(kaongroup) authored 9 months ago
+cc589402
+bkouc500-ota-kaon2025030601-20241015.zip --> OK
+
+12 Nov, 2024 1 commit
+강성민(kaongroup)'s avatar
+fixed CVE-2024-0044
+강성민(kaongroup) authored 8 months ago
+bb61098f
+bkouc500-ota-kaon2025030601-20241112.zip --> OK
+
+26 Nov, 2024 2 commits
+강성민(kaongroup)'s avatar
+Revert "Revert "Updated: AV Black and STB hangup while aging (audioserver... 
+강성민(kaongroup) authored 7 months ago
+3c1575aa
+bkouc500-ota-kaon2025030601-20241126.zip -->
+
+27 Nov, 2024 1 commit
+강성민(kaongroup)'s avatar
+fixed : xTS fail
+강성민(kaongroup) authored 7 months ago
+5b47b26e
+bkouc500-ota-kaon2025030601-20241127.zip --> fail
+
+
+
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/5b47b26e5e86e115becd68cfc42029f003bf3e3e
+
+
+
+bkouc500-ota-kaon2025070301_direct_fixed_user.zip > 증상발생 O
+X:\SKB\kaon_bcm_androidtv12\vendor\broadcom\bcm_platform\hals\audio\brcm_audio_nexus_direct.cpp
+        } /* fixed : xTS fail
+		else if (bout->nexus.direct.pcm_format) {
+            connectSettings.simpleAudioDecoder.decoderCapabilities.type = NxClient_AudioDecoderType_ePersistent;
+        }*/
+X:\SKB\kaon_bcm_androidtv12\vendor\broadcom\bcm_platform\hals\audio\brcm_audio_nexus_tunnel.cpp
+    } 
+	else if (bout->nexus.tunnel.pcm_format) {
+       connectSettings.simpleAudioDecoder.decoderCapabilities.type = NxClient_AudioDecoderType_ePersistent;
+    }
+
+bkouc500-ota-kaon2025070301_tunnel_fixed_user.zip > 증상발생 X
+X:\SKB\kaon_bcm_androidtv12\vendor\broadcom\bcm_platform\hals\audio\brcm_audio_nexus_direct.cpp
+        } 
+		else if (bout->nexus.direct.pcm_format) {
+            connectSettings.simpleAudioDecoder.decoderCapabilities.type = NxClient_AudioDecoderType_ePersistent;
+        }
+X:\SKB\kaon_bcm_androidtv12\vendor\broadcom\bcm_platform\hals\audio\brcm_audio_nexus_tunnel.cpp
+    } /* fixed : xTS fail
+	else if (bout->nexus.tunnel.pcm_format) {
+       connectSettings.simpleAudioDecoder.decoderCapabilities.type = NxClient_AudioDecoderType_ePersistent;
+    }*/
+	
+@endcode
+
+*/
+
+
+

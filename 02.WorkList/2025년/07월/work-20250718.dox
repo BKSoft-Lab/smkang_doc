@@ -1,0 +1,67 @@
+/*!
+@page work_20250709	2025.07.09
+
+---
+
+# SKB 커널설정 확인
+
+> D:\work\ChatGPT\Kernel Config 확인 요청.mhtml 참고
+
+@code
+
+안녕하세요. 강성민입니다.
+
+-          CONFIG_HARDLOCKUP_DETECTOR=y
+-          CONFIG_BOOTPARAM_HARDLOCKUP_PANIC=y
+-          CONFIG_BOOTPARAM_HARDLOCKUP_PANIC_VALUE=1
+
+확인결과 위 3개 항목은 정의되어 있지 않습니다.
+
+console:/ # zcat /proc/config.gz | egrep "CONFIG_BOOT|CONFIG_HARDLOCKUP"
+CONFIG_BOOT_CONFIG=y
+# CONFIG_BOOT_PRINTK_DELAY is not set
+console:/ #
+
+강성민 드림.
+
+From: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com> 
+Sent: Thursday, July 17, 2025 4:11 PM
+To: 강성민[Kang Sung Min] <sungmin.kang@kaongroup.com>
+Cc: 이민섭[MINSUP LEE] <minsup.lee@kaongroup.com>; Android플랫폼3팀[AndroidPlatform3 Team] <R2298@kaonmedia.com>; PL파트 <R2401@kaonmedia.com>; 지충섭[JI CHOONGSUB] <cs.ji@kaongroup.com>; 신연식[Shin Yeon Sik] <ysshin@kaongroup.com>; 이승엽[Lee Seung Yeup] <saramis@kaongroup.com>
+Subject: FW[SKB UC500]: 부팅 불량 VoC 대응을 위한 기능 설정 여부 확인 요청 건
+
+안녕하세요. 김원균PM입니다.
+
+@강성민매니저님,
+Kernel Config. 에 아래 3개 feature가 정의되어 있는지 확인 요청 드립니다.
+
+감사합니다.
+김원균드림
+
+From: 노경철 <kcrho@sk.com> 
+Sent: Thursday, July 17, 2025 4:05 PM
+To: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>; '여은모' <emyeo@marusys.com>; 김진성 (JinSeong Kim) <js.kim@altimedia.com>
+Cc: 정상립 <sl.jung@sk.com>; 배원규 <angler@sk.com>; 김용 <dyd0905@sk.com>; 간윤식 <kanys@sk.com>; 최규환(마르시스) <khchoi@marusys.com>
+Subject: 부팅 불량 VoC 대응을 위한 기능 설정 여부 확인 요청 건
+
+안녕하세요. 노경철 입니다. 
+
+금일 IPTV쪽에 부팅불량 VoC 분석을 통해 해결한 Case가 있어 CATV STB에도 적용되어 있는지 확인 요청 드립니다. 
+커널의 Config에 HARD LOCKUP 발생 시 즉시 리부팅 기능 적용 여부
+-	CONFIG_HARDLOCKUP_DETECTOR=y
+-	CONFIG_BOOTPARAM_HARDLOCKUP_PANIC=y
+-	CONFIG_BOOTPARAM_HARDLOCKUP_PANIC_VALUE=1
+
+모델별 적용 여부 및 가능 여부 확인 후 회신 바랍니다. 
+관련하여 문의사항은 회신 주세요.
+
+감사합니다.
+
+
+
+@endcode
+
+*/
+
+
+

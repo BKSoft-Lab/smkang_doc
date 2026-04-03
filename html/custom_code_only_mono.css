@@ -1,0 +1,22 @@
+
+/* Only affect Doxygen @code blocks (rendered as .fragment) */
+/* Do NOT touch body/global fonts */
+div.fragment, pre.fragment, div.fragment .line, pre.fragment code, div.fragment code {
+    font-family: 'D2Coding', 'Consolas', 'Courier New', monospace !important;
+    font-size: 0.95em;
+    line-height: 1.3em;
+}
+
+/* Optional visual style for code blocks */
+div.fragment, pre.fragment {
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 6px 8px;
+    overflow-x: auto;
+}
+
+/* Ensure tables/ASCII boxes inside code keep spacing */
+div.fragment .line, pre.fragment {
+    white-space: pre;
+}

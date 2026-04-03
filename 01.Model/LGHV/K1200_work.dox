@@ -1,0 +1,205 @@
+/*!
+@page k1200_work k1200
+
+# 히든메뉴
+녹녹녹녹녹파
+
+# AML bootloader
+@code
+**전원인가시 전원버튼을 누르고 있다가 LED3번 점멸 후 떼고 전원버튼2회 host
+**전원인가시 전원버튼을 누르고 있다가 LED3번 점멸 후 떼고 전원버튼3회 device
+**전원인가시 전원버튼을 누르고 있다가 LED3번 점멸 후 떼고 전원버튼5회 recovery mode
+**전원인가시 전원버튼을 누르고 있다가 LED3번 점멸 후 떼고 전원버튼7회 download mode
+?? **전원인가시 전원버튼을 누르고 있다가 LED3번 점멸 후 떼고 전원버튼9회 fastboot > 안됨.
+@endcode
+
+# FW update 시 Error 대응 - K1200UA 동일
+@code
+ErrorCode::kInstallDeviceOpenError
+
+adb connect
+adb root.
+adb enable-verity
+adb reboot
+
+@endcode
+
+# app 빌드
+
+# 빌드 방법
+@code 
+Hyunsoo.kim 김현수님이 작성, 12월 18, 2024에 최종 변경
+Git 정보 및 관련 source code download
+Clone with SSH
+Kaon gitlab log-in  : http://kkms.kaonmedia.com/gitlab/
+(Gitlab) Login >> Settings >> SSH Keys >> Add an SSH Key
+(PC) 다음과 같이 SSH public key를 생성하고 값을 복사하여 상기 gitlab에 SSH key를 등록 한다.   
+- Create an SSH key (leave all options as default)
+
+$ ssh-keygen
+
+$ cat ~/.ssh/id_rsa.pub
+
+K1200UA android main source 
+$git clone git@kkms.kaonmedia.com:cjhello/k1200ua/k1200ua.git
+kansrc  source code download 
+$cd vendor/kaon/K1200UA
+$git clone git@kkms.kaonmedia.com:cjhello/k1200ua_vendor/kaonsrc.git
+빌드 방법 : 
+Android Main Source Build
+k1200ua$ source build/envsetup.sh
+
+k1200ua$ lunch
+
+ You're building on Linux >> ubuntu 180.04 or 20.04 사용 권고
+
+ Lunch menu... pick a combo:
+
+K1200UA-eng
+K1200UA-user
+K1200UA-userdebug
+ Which would you like? [aosp_arm-eng]
+
+ 
+
+빌드 커맨드는 Git source애 포함되어 있는 build 스크립트를 사용하시면 됩니다.
+
+build script 이용 Build 방법
+
+ 1) ./k1200ua_build.sh -c
+
+    : u-boot, kernel, android clean
+
+ 2) ./k1200ua_build.sh –m
+
+   : android oem image build
+
+ 3) ./k1200ua_build.sh -o
+
+    : include otapackage image
+
+ 4) ./k1200ua_build.sh -s
+
+    :  only android build (u-boot, kernel build skip)
+
+ 5) ./k1200ua_build.sh -u
+
+    : user mode build
+
+
+
+kaonsrc build 방법
+a. Kaonsrc code build enable 
+$vi vendor/kaon/kaon.mk
+TARGET_BUILD_KAON_SRC_BUILD := true
+b. edit .gitignore 
+.gitignore 파일에서 다음의 부분을 찾아 comment 처리
+vendor/kaon/K1200UA/kaonsrc/
+android 전체 빌드 시 자동으로 관련 생성 파일 추가
+kaonsrc 개별 빌드 방법
+개별 빌드 전, 빌드 환경 설정
+go K1200UA PDK root directory
+$source build/envsetup.sh
+$lunch 3
+Lunch menu... pick a combo:q
+     1. K1200UA-eng
+     2. K1200UA-user
+     3. K1200UA-userdebug
+$cd vendor/kaon/K1200UA/kaonsrc
+$mm
+생성 파일 위치 
+KaonDeviceManager : out/target/product/K1200UA/system_ext/app/KaonDeviceManager/KaonDeviceManager.apk
+KaonSystemService : out/target/product/K1200UA/system_ext/app/KaonSystemService/KaonSystemService.apk
+
+
+
+
+
+@endcode
+
+# Quber 빌드
+@code 
+Quber packages/middleware  source code 빌드 방법 입니다. 
+소스 빌드 하려면 다음의 두개 폴더가 모두 존재 하여야 합니다. 
+vendor/quber/packages
+vendor/quber/middleware
+
+$source build/envsetup.sh;lunch 3
+ 
+◼ Quber middleware / packages
+
+vendor/quber/packages/pvs
+m -j$(nproc) pvsd
+adb push out/target/product/K1200UA/system/bin/pvsd system/bin/pvsd
+ 
+vendor/quber/packages/StartupService
+m -j$(nproc) StartupService
+adb push out/target/product/K1200UA/system/priv-app/StartupService/StartupService.apk system/priv-app/StartupService/Startu pService.apk
+ 
+vendor/quber/packages/libdhcp/
+m -j$(nproc) libdhcp
+adb push out/target/product/K1200UA/system/lib/libdhcp.so system/lib/libdhcp.so
+ 
+StbApi/StbApi.cpp
+m -j$(nproc) libstbapi.system libstbapi.vendor
+adb push out/target/product/K1200UA/vendor/lib/libstbapi.vendor.so vendor/lib/libstbapi.vendor.so
+adb push out/target/product/K1200UA/system/lib/libstbapi.system.so system/lib/libstbapi.system.so
+
+$ adb root
+$ adb remount
+adb push libstbapi.vendor.so vendor/lib/libstbapi.vendor.so
+adb push libstbapi.system.so system/lib/libstbapi.system.so
+이미지로 빌드시 
+cp out/target/product/K1200UA/vendor/lib/libstbapi.vendor.so vendor/quber/prebuilts/packages/libstbapi/
+cp out/target/product/K1200UA/system/lib/libstbapi.system.so vendor/quber/prebuilts/packages/libstbapi/
+vendor/quber/packages 재거
+vendor/quber/middleware 제거
+./k1200ua_build.sh -o
+ 
+ 
+hiddenmenu/pages/HiddenMenuPage.cpp
+m -j$(nproc) hiddenmenu
+adb push out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/bin/hiddenmenu
+cp out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/quber/prebuilts/packages/hiddenmenu/
+Z:\K1200UA\k1200ua\vendor\quber\prebuilts\packages\pvs
+
+ 
+@endcode
+
+# sigining
+
+> [K1200UA_Prodloader_1.0.4.tgz](../data/K1200ua_ATV12/K1200UA_Prodloader_1.0.4.tgz)
+
+@code
+
+HOW TO USE sigining tools -------
+ - 2025/09/23 written by LGHV project team
+
+[1] make signing image with unsigned image
+$./ota_gen.sh --file /shared/fwimg/K1200UA-ota-00.43.1820.zip
+
+[2] copy signed FW image to custom folde and name
+$cp K1200UA-ota.scs_and_arb.signed.zip /shared/fwimg/K1200UA-ota-00.43.1820__usrdbg.signed.zip
+
+[*] signing scripts need python version 2.7 
+ - the signing process might be failed if python version is not 2.7xx
+
+
+  선택       경로              우선순� 상태
+------------------------------------------------------------
+  0            /usr/bin/python3.8   2         자동 모드
+* 1            /usr/bin/python2.7   1         수동 모드
+  2            /usr/bin/python3.8   2         수동 모드
+
+
+@endcode
+
+
+# Jenkins
+
+@code
+@endcode
+
+https://confluence.kaonmedia.com/pages/viewpage.action?pageId=115412767
+
+*/

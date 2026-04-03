@@ -1,0 +1,199 @@
+/*!
+@page work_20250307	2025.03.07
+
+---
+
+# 부천SO 방문테스트
+
+1. 준비해간 시료 2대 가개통상태라 가온셋탑 CFG가 아닌 DSG_02_N_SMTSTB_CM_NONE.cfg 가 내려옴
+  > 부천SO 이경수님 : 가개통을 가온개통으로 변경 철자 복잡 -> 테스트용 STB 1대 대여
+  
+2. 부천 개통 STB 테스트용	
+  DSG_02_N_SMTSTB_CM_NONE_K1100UA.cfg 정상적으로 내려받음
+  DSG_02_N_SMTSTB_CM_NONE_K1100UA.cfg 내용 검토 
+  - 내려받은 DSG_02_N_SMTSTB_CM_NONE_K1100UA.cfg 내용에선 펌웨어/서버 정보 없음 (김경달 팀장)
+  - 실제 ftp 서버의 DSG_02_N_SMTSTB_CM_NONE_K1100UA.cfg 검토 요청 to 부천SO 이경수님
+  - CFG파일이 여러게 이며 DSG_02 CFG에는 펌웨어/서버 정보 없음 (부천SO 에 따르면 올해 DSG_02 CFF는 변경되었다고 함)
+  - 테스트 STB의 정보를 DSG_03로 변경하여 테스트 
+
+부천SO 방문 테스트
+
+1. CM이 내려받은 CFG파일 내 CM 업데이트 정보 확인
+  1) 준비해간 시료 2대 : 가개통 상태라 가온CFG가 아닌 DSG_02_N_SMTSTB_CM_NONE.cfg 내려옴 
+  2) 부천SO STB 1대로 테스트
+    - DSG_02_N_SMTSTB_CM_NONE_K1100UA.cfg : 펌웨어/서버 정보 X.
+@code
+CM> /Console/cm/show cfg
+ 
+CM Config File Name: 'DSG_02_N_SMTSTB_CM_NONE_K1100UA.cfg'
+CM Config File Contents:
+       Net access enable: T=0x03 (003)  L=0x01 (001)  V=0x01 (1)
+ 
+         SNMP MIB object: T=0x0b (011)  L=0x13 (019)  V=
+ 
+  30 82 00 0f   06 0a 2b 06   01 02 01 02   02 01 07 01  | 0.....+.........
+  02 01 02                                               | ...
+  [1]: 1.3.6.1.2.1.2.2.1.7.1 -> NUMBER: 2
+ 
+          max CPE per CM: T=0x12 (018)  L=0x01 (001)  V=0x02 (2)
+ 
+v1.1 DS classifier sets: T=0x17 (023)  L=0x11 (017)  V=
+       CM classifier ref: T=0x01 (001)  L=0x01 (001)  V=0x03 (3)
+       CM flow reference: T=0x03 (003)  L=0x02 (002)  V=0x0005 (5)
+ 
+      IP classifier sets: T=0x09 (009)  L=0x08 (008)  V=
+       source port start: T=0x07 (007)  L=0x02 (002)  V=0xea60 (60000)
+         source port end: T=0x08 (008)  L=0x02 (002)  V=0xea60 (60000)
+ 
+       v1.1 US flow sets: T=0x18 (024)  L=0x16 (022)  V=
+             CM flow ref: T=0x01 (001)  L=0x02 (002)  V=0x0001 (1)
+      QoS param set type: T=0x06 (006)  L=0x01 (001)  V=0x07 (7)
+        max tx rate, bps: T=0x08 (008)  L=0x04 (004)  V=0x000f4240 (1000000)
+    max burst, MAC bytes: T=0x09 (009)  L=0x04 (004)  V=0x00000640 (1600)
+    us bw sched strategy: T=0x0f (015)  L=0x01 (001)  V=0x02 (2)
+ 
+       v1.1 DS flow sets: T=0x19 (025)  L=0x13 (019)  V=
+             CM flow ref: T=0x01 (001)  L=0x02 (002)  V=0x0002 (2)
+      QoS param set type: T=0x06 (006)  L=0x01 (001)  V=0x07 (7)
+        max tx rate, bps: T=0x08 (008)  L=0x04 (004)  V=0x01312d00 (20000000)
+    max burst, MAC bytes: T=0x09 (009)  L=0x04 (004)  V=0x00000640 (1600)
+ 
+       v1.1 DS flow sets: T=0x19 (025)  L=0x0a (010)  V=
+             CM flow ref: T=0x01 (001)  L=0x02 (002)  V=0x0005 (5)
+      QoS param set type: T=0x06 (006)  L=0x01 (001)  V=0x07 (7)
+        traffic priority: T=0x07 (007)  L=0x01 (001)  V=0x05 (5)
+      global BPKM enable: T=0x1d (029)  L=0x01 (001)  V=0x00 (0)
+                  CM MIC: T=0x06 (006)  L=0x10 (016)  V=
+  56 cb 34 e3   19 1d bb 1a   01 76 cc 3a   1c 4f 33 79  | V.4......v.:.O3y
+                CMTS MIC: T=0x07 (007)  L=0x10 (016)  V=
+  f6 5c dc 81   b1 b6 ec 01   86 c0 c5 a3   82 7f 07 1a  | .\..............
+ 
+TLV-11 OIDs in human readable format:
+              1.3.6.1.2.1.2.2.1.7.1 -> 2 (i32)
+ 
+CM>
+CM> cd /non/snmp
+ 
+Active Command Table:  CM SNMP NonVol Commands (snmp_cm)
+ 
+CM -> non-vol -> snmp_cm
+/non/snmp/show 
+CM/NonVol/CM SNMP NonVol/show
+ 
+ 
++-------------------------+
+| CM SNMP NonVol Settings |
++-------------------------+
+               Magic Number = 0x736e6d70 'snmp'
+        Version (Permanent) = 0.4
+          Version (Dynamic) = 0.8
+     Bytes used (Permanent) = 1263
+       Bytes used (Dynamic) = 1060
+     Is Default (Permanent) = 0
+       Is Default (Dynamic) = 0
+ 
+Is Manufactured (Permanent) = 1
+  Is Manufactured (Dynamic) = 1
+ 
+CM SNMP Permanent NonVol Settings:
+ 
+         AllowConfiguration = 0
+        docsDevSerialNumber = BS10069017008909
+         Max Download Tries = 4
+ 
+CM SNMP Dynamic NonVol Settings:
+ 
+                 sysContact =
+                    sysName = K1100UA
+                sysLocation =
+       docsDevSwAdminStatus = 3 (ignoreProvisioningUpgrade)
+        docsDevSwOperStatus = 3 (completeFromMgt)
+          docsDevSwFilename =
+            docsDevSwServer = 0.0.0.0
+   Number of Download tries = 0
+            snmpEngineBoots = 1295
+      Rescue image sysDescr =
+Rescue image docsDevSwCurrentVers =
+       Rescue image bitmask = 0
+ 
+CM SNMP Compile-time Settings:
+  ** These are not stored in NV and may not be changed at runtime.
+  ** They must be specified in VendorNonVolDefaults.h
+ 
+                Vendor Name = Kaon Media Co., Ltd.
+                   sysDescr = BFC cablemodem reference design <<HW_REV: V1.0; VENDOR: Kaonmedia; BOOTR: 2.4.0mp1; SW_REV: 2.0.1; MODEL: K1100UA>>
+                sysObjectID = 1.3.6.1.4.1.4413.2.1.2.1.3383
+                  sysORID.1 = 1.3.6.1.4.1.4413.2.3.2.5
+               sysORDescr.1 = An agent which supports all MIBs required by the DOCSIS 3.0 OSS specification.
+                sysServices = 0x4a
+       docsDevSwCurrentVers = 2.0.1
+ 
+ 
+CM/NonVol/CM SNMP NonVol>
+
+
+/Console/cm/show cfg
+
+@endcode
+    - DSG_03_N_SMTSTB_CM_VOIP_K1100UA.cfg : 펌웨어/서버 정보 O.
+  * DSG_02 CFG는 올해 변경이 있었음. 모든 CFG 에 펌웨어/서버 정보가 있지는 않은 것으로 보임.
+
+
+2. CFG에 업데이트 정보가 있을 때 STB에서 Filename, server set하지 않고 CM업데이트 시도 시 CFG의 정보로 업데이트 되는지 확인.
+ - 관련 정보(파일/서버 정보) set 하지 않고 /snmp/snmp_set 1.3.6.1.2.1.69.1.3.3.0 i 1 수행 시 
+   > 그냥 재부팅됨 업데이트 일어나지 않음.
+
+
+3. CFG에 업데이트 정보가 있을때 CM업데이트 반복 수행
+ - USB로 2.0.1로 업데이트 <-> FW 자동 CM업그레이드 (2.0.6) 
+   > 반복 20회 문제 발생하지 않음 
+
+@endcode
+logcat | egrep "KaonCmAutoUpgradeService|smkang" 
+
+getprop debug.cm.auto.firmware.name
+
+1. CmAutoUpgradeService app에서 파일이름을 프로퍼티에 기록하지 못한 경우.
+2. TFTP 서버의 동작에 문제가 있을 경우.
+3. TFTP 서버주소 set OID 가 실패했을 경우.
+
+
+plapiapp-system  plapi setloglevel 6
+setprop persist.odm.block.cm.auto.upgrade 0
+getprop persist.odm.block.cm.auto.upgrade
+logcat | egrep "upgrade"
+
+10.5.113.44
+10.45.191.69
+10.45.240.5
+
+dumpsys notification | grep "low_battery_channel"
+
+adb uninstall com.kaon.lowbettery
+adb shell am start -n com.kaon.lowbettery/.MainActivity
+adb shell am startservice -n com.kaon.lowbettery/.KeyEventService
+adb install KaonLowBetteryManager.apk
+
+logcat | egrep "smkang"
+logcat | egrep "smkang|GLOBAL_BUTTON"
+ 
+안녕하세요. 강성민입니다.
+
+수유국사(v2024122401 최신 펌웨어 배포완료)는 금일 새벽 장비작업을 수행 하였지만 해당 이슈는 발생하지 않았다고 합니다. 
+
+테스트 STB에 CCM reset 전송 후 히든메뉴에서 CM IP 사라졌다가 다시 IP가 잡히는 것을 확인 후 
+"cmts로 ping 시험" 성공을 확인 하였습니다. 
+HOST IP를 못 받아 네트워크가 안되는 증상은 발생하지 않았습니다.
+
+증상 발생시 soft reset(STB만 reset) 시 회복이 안되고 hard reset(CM & STB 모두 reset) 시 복구가 된다는 것은 
+이전에 발생한 블랙화면과 동일하게 CM 과 STB간의 인터페이스에 문제가 생겨서 
+stb reset만으로는 해결이 안되는 것 같습니다.
+
+강성민 드림
+
+@endcode
+
+*/
+
+
+

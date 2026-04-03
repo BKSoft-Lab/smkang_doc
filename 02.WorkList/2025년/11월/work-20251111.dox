@@ -1,0 +1,68 @@
+/*!
+@page work_20251111	2025.11.11
+
+---
+
+# eMMC HQA, 4M 작업 - 8대 eMMC (Hynix)
+
+@code
+
+K10785BM10003A12
+K10785BM10004A12
+K10785BM10005A12
+K10785BM10006A12
+K10785BM10007A12
+K10785BM10008A12
+K10785BM10009A12
+K10785BM10010A12
+
+@endcode
+
+
+# LGHV K1100UA HQA 용 펌웨어 제작 - eMMC (Hynix)
+> https://confluence.kaonmedia.com/pages/viewpage.action?pageId=177932161
+@code
+
+임의의 mac
+macprog 22-22-85-0c-bd-a1
+macprog 22-22-85-0c-bd-a2
+macprog 22-22-85-0c-bd-a3
+macprog 22-22-85-0c-bd-a4
+macprog 22-22-85-0c-bd-a5
+macprog 22-22-85-0c-bd-a6
+macprog 22-22-85-0c-bd-a7
+macprog 22-22-85-0c-bd-a8
+macprog 22-22-85-0c-bd-a9
+macprog 22-22-85-0c-bd-aa
+
+atlas 용 vmlinuz : vmlinuz-initrd-arm
+
+atlas 실행 파일 : atlas.zip
+
+BOLT 진입
+flash usbdisk0:vmlinuz-initrd-arm flash0.boot_a
+setenv -p STARTUP "boot flash0.boot_a: 'rootwait rw debug vmalloc=387m bmem=863m@3216m'"
+1,2,3,4,5,6 or 7.8.9.a
+setenv -p STARTUP "boot flash0.boot_a: 'rootwait rw debug vmalloc=387m bmem=862m@3214m'"
+macprog 22-22-85-0c-bd-aa
+reboot
+
+mmcblk0p34(userdata) 파티션 포맷
+dd if=dev/zero of=/dev/mmcblk0p34
+mkfs.ext4 /dev/mmcblk0p34
+
+atlas.zip 파일을 압축 해제하여 USB 저장소에 복사 후 STB 에 연결
+mount /dev/mmcblk0p34 /app
+mount /dev/sda1 /mnt/usb
+cd /mnt/usb/atlas
+cp -arf * /app/
+cd /app
+sync
+
+/app 폴더 안에 파일들이 잘 복사 되어 있는지 확인
+USB 제거 후 STB 재부팅 하여 atlas 동작 되는지 확인
+
+@endcode
+
+
+*/

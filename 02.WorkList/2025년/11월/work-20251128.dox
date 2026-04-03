@@ -1,0 +1,384 @@
+/*!
+@page work_20251128	2025.11.28
+
+---
+
+# [ATV14 신규구현]Issue #12907: [AOS14] data p/f 리모콘 찾기 기능 데이터 수집
+> https://jira.kaonmedia.com/browse/K1078A14-114
+
+@code
+1. PhoneWindowManager 수정 (F1 키 처리)
+// Z:\K1200_ATV14\lghv_k1200ua\frameworks\base\services\core\java\com\android\server\policy\PhoneWindowManager.java
+
+public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
+    ...
+    final int keyCode = event.getKeyCode();
+    final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+    ...
+    InputDevice inputdevice = event.getDevice();
+    ...
+    if (keyCode == KeyEvent.KEYCODE_F1) {
+        if (!down) {
+            /* Start RCU find me */
+            if (DEBUG_INPUT) Log.d(TAG, "send find-me key");
+
+            // 기존 리모콘 찾기 동작
+            Intent pairintent = new Intent("kaon.android.intent.action.FIND_ME");
+            if (DEBUG_INPUT) Log.d(TAG, "intent: " + pairintent);
+            mContext.sendBroadcastAsUser(pairintent, UserHandle.ALL);
+
+            // ★ 데이터플랫폼 로그용 브로드캐스트
+            Intent logIntent =
+                    new Intent("kaon.android.intent.action.STB_EVENT_RCU_FIND");
+            logIntent.putExtra("keyCode", keyCode);
+            if (inputdevice != null) {
+                logIntent.putExtra("deviceName", inputdevice.getName());
+            }
+            mContext.sendBroadcastAsUser(logIntent, UserHandle.ALL);
+        }
+    }
+    ...
+}
+
+2. KaonManagerService – 브로드캐스트 리시버
+2-1. RcuFindEventReceiver.java (새 파일)
+경로(예시)
+// Z:\K1200_ATV14\lghv_k1200ua\vendor\kaon\K1200UA\kaonsrc\apps\KaonDeviceManager\src\com\lghv\atv\iptv\fw\dmsvc\RcuFindEventReceiver.java
+
+package com.lghv.atv.iptv.fw.dmsvc;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+
+/**
+ * 리모콘 찾기(F1) 브로드캐스트 수신 → DP 서버로 전송 트리거
+ */
+public class RcuFindEventReceiver extends BroadcastReceiver {
+
+    private static final String TAG = "RcuFindEventReceiver";
+    private static final String ACTION_RCU_FIND =
+            "kaon.android.intent.action.STB_EVENT_RCU_FIND";
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (!ACTION_RCU_FIND.equals(intent.getAction())) {
+            return;
+        }
+
+        int keyCode = intent.getIntExtra("keyCode", -1);
+        String deviceName = intent.getStringExtra("deviceName");
+
+        Log.d(TAG, "RCU find-me key pressed. keyCode=" + keyCode
+                + ", deviceName=" + deviceName);
+
+        // IPTV 모델용: 리모콘 찾기 이벤트 하나만 전송
+        new Post();   // 아래 Post.java
+    }
+}
+
+
+
+2-2. AndroidManifest.xml 등록
+
+<application
+    ...>
+
+    <!-- 기존 내용들 ... -->
+
+    <!-- F1(리모콘 찾기) → DP 서버 로그용 브로드캐스트 리시버 -->
+    <receiver
+        android:name=".RcuFindEventReceiver"
+        android:enabled="true"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="kaon.android.intent.action.STB_EVENT_RCU_FIND" />
+        </intent-filter>
+    </receiver>
+
+</application>
+
+
+
+3. IPTV 전용 Post.java (CM 실패 코드 없이 새로 작성)
+경로(예시)
+//Z:\K1200_ATV14\lghv_k1200ua\vendor\kaon\K1200UA\kaonsrc\apps\KaonDeviceManager\src\com\lghv\atv\iptv\fw\dmsvc\Post.java
+
+package com.lghv.atv.iptv.fw.dmsvc;
+
+import android.os.SystemProperties;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * IPTV 모델용 데이터플랫폼 POST
+ * - 리모콘 찾기(F1) 버튼 이벤트만 전송
+ */
+public final class Post implements Runnable {
+
+    // 라이브 / 테스트 구분 (cm 모델과 동일 property 사용)
+    public static final String PROPERTY_NETWORKTYPE = "vendor.kaon.nwtype.live";
+
+    private static final int TIMEOUT_MS = 5000;
+    private static final int MAX_TRIES = 5;
+    private static final String TAG = "STB_DpPost";
+
+    public static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmssSSS";
+    public static final String DATE_PATTERN = "yyyyMMdd";
+
+    private final String mUrl;
+    private final String mDataStr;
+    private final Map<String, String> mProperties = new HashMap<>();
+    private final Thread mSendThread;
+
+    /**
+     * 리모콘 찾기(F1) 이벤트 전송용 생성자
+     */
+    public Post() {
+        boolean isLive = SystemProperties.getBoolean(PROPERTY_NETWORKTYPE, true);
+
+        // ★ 실제 라이브/테스트 URL은 DP 쪽에서 정해준 값으로 맞춰주세요.
+        if (isLive) {
+            mUrl = "http://10.10.78.121:13000/client/errorLog/ERROR/RCUFind0000";
+        } else {
+            mUrl = "http://10.9.26.105:13000/client/errorLog/ERROR/RCUFind0000";
+        }
+
+        mDataStr = buildRcuFindJson();
+        Log.d(TAG, "payload = " + mDataStr);
+
+        setProperty("Accept", "application/json");
+        setProperty("Content-Type", "application/json");
+        setProperty("Content-Encoding", "utf-8");
+
+        mSendThread = new Thread(this);
+        mSendThread.start();
+    }
+
+    /**
+     * STB 오류 스펙에 맞는 리모콘 찾기 이벤트 JSON 생성
+     *  - 필드 구조는 기존 CM 모델의 CMError2JsonString() 과 동일
+     *  - 값만 RCU find 에 맞게 변경
+     */
+    private String buildRcuFindJson() {
+        JSONObject jsonObject = new JSONObject();
+
+        DateTimeFormatter tsFormatter =
+                DateTimeFormatter.ofPattern(TIMESTAMP_PATTERN);
+        DateTimeFormatter dateFormatter =
+                DateTimeFormatter.ofPattern(DATE_PATTERN);
+
+        String ts = tsFormatter.format(LocalDateTime.now());
+        String date = dateFormatter.format(LocalDateTime.now());
+
+        String mac = getMacAddress();
+        if (mac == null) {
+            mac = "";
+        }
+
+        try {
+            // ===== 스펙 표의 컬럼에 맞춰 값 세팅 =====
+
+            // 데이터 포맷의 log / add_1 / add_2
+            jsonObject.put("log", "RCU_FIND");     // 로그 ID (임의 값)
+            jsonObject.put("add_1", "F1_KEY");     // 현재 CM 버전 컬럼 자리에 'F1 이벤트' 등
+            jsonObject.put("add_2", "0");          // 업그레이드 대상 버전 대신 0 등
+
+            jsonObject.put("cat", "");
+            jsonObject.put("entry", "");
+
+            // 에러 코드/메시지 – 리모콘 찾기 전용 코드 정의
+            jsonObject.put("err_cd", "RCUFind0000");
+            jsonObject.put("err_msg", "리모콘 찾기 버튼");
+
+            jsonObject.put("log_dt", ts);          // 20190905182014 형식
+            jsonObject.put("map_id", "");
+            jsonObject.put("mntr", "");
+            jsonObject.put("ng_id", "");
+            jsonObject.put("so", "");
+            jsonObject.put("serverId", "dpcoll11");
+
+            jsonObject.put("occur_log", "");
+            jsonObject.put("subsr", mac.replace(":", ""));
+            jsonObject.put("sp", "CJHV");
+            jsonObject.put("svc", "STB");
+            jsonObject.put("mntr_str", "");
+            jsonObject.put("log_dttm", "");
+
+            jsonObject.put("mac_addr", mac);   // Host MAC
+            jsonObject.put("mw_ver",
+                    SystemProperties.get("odm.mw.version", "00.00.00")); // 미들웨어 버전
+            jsonObject.put("stb_mdl",
+                    SystemProperties.get("ro.product.model", "K1100UA")); // 셋톱 모델
+            jsonObject.put("p_date", date);
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 기존 스펙처럼 list 배열에 하나 담는 형태
+        return "{\"list\":[" + jsonObject.toString() + "]}";
+    }
+
+    /* ==== 공통 유틸 (cm 모델 Post.java에서 그대로 가져온 부분) ==== */
+
+    private static String loadFileAsString(String filePath) throws IOException {
+        StringBuilder fileData = new StringBuilder(1000);
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        char[] buf = new char[1024];
+        int numRead;
+        while ((numRead = reader.read(buf)) != -1) {
+            fileData.append(buf, 0, numRead);
+        }
+        reader.close();
+        return fileData.toString();
+    }
+
+    private String getMacAddress() {
+        try {
+            return loadFileAsString("/sys/class/net/eth0/address")
+                    .toUpperCase().substring(0, 17);
+        } catch (IOException e) {
+            Log.e(TAG, "failed to read MAC address", e);
+            return null;
+        }
+    }
+
+    private void setProperty(String key, String value) {
+        mProperties.put(key, value);
+    }
+
+    private static final class Response {
+        final int code;
+
+        Response(int code) {
+            this.code = code;
+        }
+    }
+
+    private Response send() throws IOException {
+        int tries = 1;
+        boolean needRetry = true;
+        Response response = null;
+
+        while (needRetry) {
+            HttpURLConnection connection = null;
+            needRetry = false;
+
+            try {
+                connection = (HttpURLConnection) new URL(mUrl).openConnection();
+
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                connection.setDoInput(true);
+                connection.setConnectTimeout(TIMEOUT_MS);
+                connection.setReadTimeout(TIMEOUT_MS);
+                connection.setUseCaches(false);
+                connection.setDefaultUseCaches(false);
+
+                for (Map.Entry<String, String> property : mProperties.entrySet()) {
+                    connection.setRequestProperty(property.getKey(), property.getValue());
+                }
+
+                OutputStreamWriter wr =
+                        new OutputStreamWriter(connection.getOutputStream(), "utf-8");
+                wr.write(mDataStr, 0, mDataStr.length());
+                wr.flush();
+
+                int code = connection.getResponseCode();
+
+                StringBuilder sb = new StringBuilder();
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(connection.getInputStream(), "utf-8"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line).append('\n');
+                    }
+                } catch (IOException ignore) {
+                    // body 없을 수도 있음
+                }
+                Log.d(TAG, "response code=" + code + ", body=" + sb);
+
+                response = new Response(code);
+
+            } catch (SocketTimeoutException ste) {
+                if (tries == MAX_TRIES) {
+                    throw ste;
+                }
+                Log.w(TAG, "Retrying after timeout, try=" + tries);
+                tries++;
+                needRetry = true;
+
+            } catch (Exception ex) {
+                Log.e(TAG, "Unexpected failure in response / request.", ex);
+
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+        }
+
+        if (response == null) {
+            throw new IOException("Empty response");
+        }
+        if (response.code != 200 && response.code != 201) {
+            throw new IOException("Server returned HTTP error code " + response.code);
+        } else {
+            Log.i(TAG, "Success - RCU find event posted");
+        }
+        return response;
+    }
+
+    @Override
+    public void run() {
+        try {
+            Log.d(TAG, "send (POST)");
+            send();
+        } catch (IOException ioe) {
+            Log.e(TAG, "send failed", ioe);
+        }
+    }
+}
+
+
+
+@endcode
+
+
+@code
+
+		if (isLive == true) {
+			mUrl = "http://10.10.78.121:13000/client/errorLog/ERROR/ERR_0003";
+		}
+		else {
+			mUrl = "http://10.9.26.105:13000/client/errorLog/ERROR/ERR_0003";
+		}
+        
+LGHV에서 요청한 Data Format은 하기와 같음
+
+*
+
+        
+@endcode
+
+*/
+
+
+

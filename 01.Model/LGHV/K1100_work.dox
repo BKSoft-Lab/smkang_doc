@@ -1,0 +1,289 @@
+/*!
+@page k1100_work K1100
+
+https://confluence.kaonmedia.com/pages/viewpage.action?pageId=115412767
+
+# 히든메뉴
+녹녹녹녹녹파
+
+# app 빌드
+
+cd vendor/kaon
+
+git clone git@kkms.kaonmedia.com:hcn/apps.git -b LGHV_CM apps​
+
+vi vendor/kaon/Android.mk 
+# Apps 
+include $(LOCAL_PATH)/apps/Android.mk 
+# Porting Layer API HAL 
+# include $(LOCAL_PATH)/hals/Android.mk 
+# For prebuilt 
+#include $(LOCAL_PATH)/prebuilts/Android.mk 
+
+source build/envsetup.sh 
+#lunch 
+lunch K1100UA-userdebug
+mmm vendor/kaon/apps​/KaonManagerService/
+
+# 빌드 방법
+
+@code 
+
+소스 폴더 clean
+ 
+khs@kaon-m323:~/work/atv12$ bash b.sh h c
+ 
+khs@kaon-m323:~/work/atv12$ bash b.sh s c
+
+
+AOSP-STT5.221215.001_PDK-STT5.220617.001
+ 
+//git clone ssh://git@gitlab.altimedia.com:2288/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12.git -b AOSP-STT5.221215.001_PDK-STT5.220617.001
+
+git clone ssh://git@gitlab.altimedia.com:2288/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12.git -b LGHV_CM
+ 
+cd kaon_bcm_androidtv12/vendor
+ 
+git clone ssh://git@gitlab.altimedia.com:2288/atv/lghv-androidtv/lghv_x1100ua_libtaurus_release.git -b k1100ua_a12_master
+ 
+mv lghv_x1100ua_libtaurus_release/ taurus
+ 
+cd taurus
+ 
+git clone ssh://git@gitlab.altimedia.com:2288/atv/lghv-androidtv/lghv_epg.git -b seamless_cc
+ 
+mv lghv_epg/ epg-app 
+ 
+ 
+ 
+ 
+rm bindist -rf
+ 
+./bcm.bdst.knl.sh -d K1100UA_K1100UA -k K1100UA -c 
+ 
+./bcm.bdst.nxl.sh -d K1100UA_K1100UA -m K1100UA -c -x -s
+ 
+./bcm.ref.sh -d K1100UA_K1100UA -u -o -c
+
+
+
+user
+rm bindist -rf
+./bcm.bdst.knl.sh -d K1100UA_K1100UA -k K1100UA -c
+./bcm.bdst.nxl.sh -d K1100UA_K1100UA -m K1100UA -c -x -s
+./bcm.ref.sh -d K1100UA_K1100UA -c -o -u
+제외  mv out/target/product/K1100UA/ ../K1100UA-user
+​
+debug
+rm bindist -rf
+./bcm.bdst.knl.sh -d K1100UA_K1100UA -k K1100UA -c
+./bcm.bdst.nxl.sh -d K1100UA_K1100UA -m K1100UA -c -x -s
+./bcm.ref.sh -d K1100UA_K1100UA -c -o
+./bcm.ref.sh -d K1100UA_K1100UA -o​
+
+
+
+git clone git@kkms.kaonmedia.com:hcn/kstb1157_hals.git -b LGHV_CM hals
+
+git clone git@kkms.kaonmedia.com:hcn/apps.git -b master apps​ 
+LGHV_CM
+
+HELLO
+com.cisco.epg.cjh.android
+
+
+채널 재핑시 
+현재채널, 위채널 2개, 아래채널 1개 총 4개채널 locking
+
+05-15 10:32:53.223  3589  7829 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 2
+05-15 10:32:53.224  3589  7829 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ed0, tunerId = 2
+12번 05-15 10:32:53.224  3589  7829 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 2, requestId = 160] frequency = 663000000, symbolRate = 5361000, mode = 4, frontend = 0x1ed0, tunerId = 2, requestId = 160
+05-15 10:32:53.280  3589  7822 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 2
+05-15 10:32:53.280  3589  7822 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ed8, tunerId = 3
+05-15 10:32:53.280  3589  7822 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 3, requestId = 161] frequency = 621000000, symbolRate = 5361000, mode = 4, frontend = 0x1ed8, tunerId = 3, requestId = 161
+05-15 10:32:53.337  3589  7825 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 2
+05-15 10:32:53.337  3589  7825 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ee0, tunerId = 4
+05-15 10:32:53.337  3589  7825 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 4, requestId = 162] frequency = 615000000, symbolRate = 5361000, mode = 4, frontend = 0x1ee0, tunerId = 4, requestId = 162
+
+11번 재핑 8VSB - 8VSB 정보는 안찍음 / QAM 채널정보만 찍음
+10번 621000000 tunerId = 2
+12번 663000000 tunerId = 3
+13번 615000000 tunerId = 4
+
+05-15 10:37:19.764  3589  7822 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 2
+05-15 10:37:19.765  3589  7822 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ed0, tunerId = 2
+05-15 10:37:19.765  3589  7822 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 2, requestId = 183] frequency = 555000000, symbolRate = 5361000, mode = 4, frontend = 0x1ed0, tunerId = 2, requestId = 183
+05-15 10:37:20.145  3589  7829 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 4
+05-15 10:37:20.146  3589  7829 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ed8, tunerId = 3
+05-15 10:37:20.146  3589  7829 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 3, requestId = 184] frequency = 621000000, symbolRate = 5361000, mode = 4, frontend = 0x1ed8, tunerId = 3, requestId = 184
+05-15 10:37:20.200  3589  5356 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 4
+05-15 10:37:20.201  3589  5356 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ee0, tunerId = 4
+05-15 10:37:20.201  3589  5356 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 4, requestId = 185] frequency = 651000000, symbolRate = 5361000, mode = 4, frontend = 0x1ee0, tunerId = 4, requestId = 185
+05-15 10:37:20.256  3589  7825 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 2
+05-15 10:37:20.257  3589  7825 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ee8, tunerId = 5
+05-15 10:37:20.257  3589  7825 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 5, requestId = 186] frequency = 741000000, symbolRate = 5361000, mode = 4, frontend = 0x1ee8, tunerId = 5, requestId = 186
+
+재핑 21번 555000000 tunerId = 2
+22번 621000000 tunerId = 3
+20번 651000000 tunerId = 4
+23번 741000000 tunerId = 5
+
+05-15 10:51:41.414  3589  7822 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 2
+05-15 10:51:41.415  3589  7822 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ed0, tunerId = 2
+05-15 10:51:41.415  3589  7822 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 2, requestId = 232] frequency = 663000000, symbolRate = 5361000, mode = 4, frontend = 0x1ed0, tunerId = 2, requestId = 232
+05-15 10:51:41.881  3589  7829 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 2
+05-15 10:51:41.882  3589  7829 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ed8, tunerId = 3
+05-15 10:51:41.882  3589  7829 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 3, requestId = 233] frequency = 615000000, symbolRate = 5361000, mode = 4, frontend = 0x1ed8, tunerId = 3, requestId = 233
+05-15 10:51:41.938  3589  5356 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 4, mDeliveryType 2
+05-15 10:51:42.127  3589  7825 D tuner   : Tuner.cpp(199) <startTune> newDeliveryType 2, mDeliveryType 2
+05-15 10:51:42.128  3589  7825 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][428]tuner->frontend = 0x1ee0, tunerId = 4
+05-15 10:51:42.128  3589  7825 I PL_TUNER_CAB: [pl_tuner_cab.c][pl_cab_startTune][473]cab settings : [tunerId = 4, requestId = 235] frequency = 561000000, symbolRate = 5361000, mode = 4, frontend = 0x1ee0, tunerId = 4, requestId = 235
+
+12번 재핑
+12번 663000000 tunerId = 2
+13번 615000000 tunerId = 3
+14번 561000000 tunerId = 4
+
+0번 765000000
+24번 741000000
+
+logcat | egrep "newDeliveryType|pl_cab_startTune"
+
+logcat | egrep "\[tunerId"
+
+console:/proc/brcm $ cat frontend
+frontend  0: 00000000e0cd1826:00000000733cea91, acquired y
+ Cable/QAM
+    freq=243000000 hz, modulation=Qam-1073741824, annex=▒
+    lockStatus=locked, snr=29dB (est), fecCorrected=-559031686, fecUncorrected=-559031686
+ ATSC/VSB
+    freq=243000000hz, modulation=8
+    lockStatus=locked, snr=31dB (est), fecCorrected=0, fecUncorrected=0
+frontend  1: 000000005c7ded13:00000000bef9b923, acquired y
+ Cable/QAM
+    freq=237000000 hz, modulation=Qam-1073741824, annex=▒
+    lockStatus=locked, snr=29dB (est), fecCorrected=-559031686, fecUncorrected=-559031686
+ ATSC/VSB
+    freq=237000000hz, modulation=8
+    lockStatus=locked, snr=32dB (est), fecCorrected=0, fecUncorrected=0
+frontend  2: 000000008f49b8bc:0000000051361174, acquired y
+ Cable/QAM
+    freq=663000000 hz, modulation=Qam-256, annex=B
+    lockStatus=locked, snr=37dB (est), fecCorrected=0, fecUncorrected=0
+frontend  3: 00000000b79ad688:0000000051361174, acquired y
+ Cable/QAM
+    freq=621000000 hz, modulation=Qam-256, annex=B
+    lockStatus=locked, snr=36dB (est), fecCorrected=0, fecUncorrected=0
+frontend  4: 00000000c90b5602:0000000051361174, acquired y
+ Cable/QAM
+    freq=615000000 hz, modulation=Qam-256, annex=B
+    lockStatus=locked, snr=36dB (est), fecCorrected=0, fecUncorrected=0
+frontend  5: 00000000fea7bca4:0000000051361174, acquired y
+ Cable/QAM
+    freq=735000000 hz, modulation=Qam-256, annex=B
+    lockStatus=locked, snr=37dB (est), fecCorrected=0, fecUncorrected=0
+device 00000000733cea91 (0x3306)
+device 0000000051361174 (0x0)
+  frontend 000000008f49b8bc -> IB4 -> PB0 -> PB2 (TX0)
+  frontend 00000000b79ad688 -> IB5 -> PB1 -> PB3 (TX0)
+  frontend 00000000c90b5602 -> IB6 -> PB2 -> PB4 (TX0)
+  frontend 00000000fea7bca4 -> IB7 -> PB3 -> PB5 (TX0)
+device 00000000bef9b923 (0x3306)
+Interrupts: PARSER_LENGTH_ERROR 00000000, PARSER_TRANSPORT_ERROR 00000000, PARSER_PARSERS_INBUFF_OVFL_ERROR 00000000
+console:/proc/brcm $
+
+@endcode
+
+# Jenkins
+
+@code
+
+https://confluence.kaonmedia.com/pages/viewpage.action?pageId=133344798
+
+SSH : ssh a3team@172.16.5.201
+ 비밀번호 : kaon1234!@
+jenkins : http://172.16.5.201:8080
+http://172.16.5.201:8080/job/LGHV-K1100UA/ 
+http://172.16.5.201:8080/job/LGHV-K1100UA-ALASKA/
+계정 : a3team / kaon1234
+
+
+a3team@buildserver:~$ cd /mnt/sda/a3team/jenkins/
+a3team@buildserver:/mnt/sda/a3team/jenkins$ sh start.sh
+
+
+
+@endcode
+
+# FW 2025092500_user의 가용공간
+
+@code
+ super (3,454,009,344 bytes)
+ ┌───────────────────────────────────────────────┐
+ │        Group A (1,688,354,160)                │
+ │                                               │
+ │   ┌───────────────────────────────────────┐   │
+ │   │ system_a (1,536,844,176)              │   │
+ │   ├───────────────────────────────────────┤   │
+ │   │ vendor_a (120,799,356)                │   │
+ │   └───────────────────────────────────────┘   │
+ │   합계 (1,657,643,532)                         │
+ │   남은 공간 (free): 30,710,628                  │
+ └───────────────────────────────────────────────┘
+ ┌───────────────────────────────────────────────┐
+ │        Group B (1,688,354,160)                │
+ └───────────────────────────────────────────────┘
+  
+- Android 9 (Pie) 이하 — 고정 파티션 구조
+물리 디스크
+┌───────────────────────────┐
+│ boot                      │
+├───────────────────────────┤
+│ recovery                  │
+├───────────────────────────┤
+│ system   (고정 크기)        │
+├───────────────────────────┤
+│ vendor   (고정 크기)        │
+├───────────────────────────┤
+│ product  (고정 크기, 선택)   │
+├───────────────────────────┤
+│ cache                     │
+├───────────────────────────┤
+│ userdata                  │
+└───────────────────────────┘
+
+Android 10 (Q) 이상 — super (Dynamic Partitions) 구조
+물리 디스크
+┌───────────────────────────┐
+│ boot                      │
+├───────────────────────────┤
+│ recovery                  │
+├───────────────────────────┤
+│ super   (컨테이너)          │  ← 3~4GB 크기 (예시)
+│   ┌─────────────────────┐ │
+│   │ group_a             │ │
+│   │  ├ system_a         │ │
+│   │  ├ vendor_a         │ │
+│   │  └ product_a        │ │
+│   │                     │ │
+│   │ group_b             │ │
+│   │  ├ system_b         │ │
+│   │  ├ vendor_b         │ │
+│   │  └ product_b        │ │
+│   └─────────────────────┘ │
+├───────────────────────────┤
+│ cache                     │
+├───────────────────────────┤
+│ userdata                  │
+└───────────────────────────┘ 
+ 
+핵심 차이 요약
+구분        Android 9 이하	                  Android 10 이상
+파티션 크기   system/vendor 고정              super 내부에서 동적 할당
+OTA 방식    파티션 크기 부족 시 실패/재파티셔닝 필요  동적 조정 가능, OTA 안정성 ↑
+A/B 지원	   물리적으로 _a, _b 파티션 각각 존재     super 내부 group_a/b로 논리 분리
+공간 활용	   낭비 발생 가능                     효율적 사용 
+ 
+@encode
+
+*/

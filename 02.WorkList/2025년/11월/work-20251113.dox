@@ -1,0 +1,22 @@
+/*!
+@page work_20251113	2025.11.13
+
+---
+
+# custom IR
+
+@code
+
+Z:\K1200_ATV14\lghv_k1200ua\common\common14-5.15\common\common_drivers\drivers\input\ir\meson_ir_main.c
+Z:\K1200_ATV14\lghv_k1200ua\common\common14-5.15\common\common_drivers\arch\arm64\boot\dts\amlogic\meson-ir-map.dtsi
+ 
+logcat -b kernel | egrep "meson-ir|custom_id"
+echo 50 > /sys/devices/platform/fe084040.ir/custom_id
+cat /sys/devices/platform/fe084040.ir/custom_id
+cat /vendor/etc/init/hiddenmenu.rc
+setprop persist.vendor.ir.custom_id 50
+
+@endcode
+
+
+*/

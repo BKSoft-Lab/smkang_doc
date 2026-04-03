@@ -1,0 +1,25 @@
+/*!
+@page work_20241023	2024.10.23
+
+# SKB수원
+---
+## rebootCmForRebootStb() 호출 위치 이동
+
+> 작업내역
+
+@code
+
+ShutdownThread에서 rebootCmForRebootStb() 를 호출하다 보니, 
+콘솔에서 reboot 명령어를 입력하거나, signal 발생등 으로 인한 리부트시 CM이 리부트 되지 않는 경우가 발생한다.
+이를 보완하기 위해
+밑단에서 호출하도록 수정
+
+@endcode
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/2625ee86e25c4d8f093d5a10d621b3a426bdd399
+
+---
+<br>
+---
+
+*/

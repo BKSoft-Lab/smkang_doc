@@ -1,0 +1,4 @@
+var searchData=
+[
+  ['높임_0',['youtube 음량 높임',['../skb_issue.html#autotoc_md28',1,'']]]
+];

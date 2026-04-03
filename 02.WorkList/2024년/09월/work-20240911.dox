@@ -1,0 +1,114 @@
+/*!
+@page work_20240911	2024.09.11~12
+
+# SKB수원
+---
+
+
+
+> Test DSG mode in the nonvol setting in estb console by "mode 1"
+
+@code
+
+From: support@broadcom.com <support@broadcom.com> 
+Sent: Wednesday, September 11, 2024 3:28 PM
+To: 이양석[LEE YANG SUK ] <ys.lee@kaongroup.com>
+Cc: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>; 이상훈[LEE SANGHOON] <lsh@kaongroup.com>; 이양석[LEE YANG SUK ] <ys.lee@kaongroup.com>; 김경달[Kim Kyungdal] <kendall.kim@kaonbroadband.com>; 한동우[HAN DONG WOO] <tony.han@kaongroup.com>; 김연호[YEON HO KIM] <yhkim@kaongroup.com>
+Subject: {Case#CS00012367687} ##-  Updated: The issue of CM online not working in an environment that only supports DSG Basic mode.
+
+-begin-
+Update By: Andrew Lee(Broadcom Corporation)
+Update Time: 10-September-2024 23:27:37
+
+Latest Response: 
+Hi Yangsuk,
+ 
+Can you discuss fixing a mode with non-vol is acceptable?
+if the plant supports DSG basic mode only, they can set the DSG mode in the nonvol setting in estb console by "mode 1". (DsgCommandTable.cpp (StbHostApps\DsgCC\DsgCC)). 
+Then I suppose no DSG mode switching happens again.
+ 
+Thanks!
+
+==================================================
+
+CM> cd /non/estb
+CM/NonVol/ESTB NonVol> ecm_mode 2
+CM/NonVol/ESTB NonVol> network_type 2    (2=2way mode / 1=RF Overlay mode)
+CM/NonVol/ESTB NonVol> write
+ 
+이런식으로 cm에서 사용하는 command 입니다.
+ 
+==================================================
+
+아래와 같이 테스트 해보았지만 변화 없음.
+
+CM> cd /non/estb
+CM/NonVol/ESTB NonVol> ecm_mode 1
+CM/NonVol/ESTB NonVol> network_type 2 
+CM/NonVol/ESTB NonVol> write 
+
+@endcode
+
+
+> CEC 메시지 중 "Image View On" 검토
+
+@code
+
+CEC 메시지 중 "Image View On" 외에도 디스플레이 장치를 켜는 또 다른 중요한 메시지는 **"Active Source"**입니다. 이 메시지도 디스플레이 장치를 켜는 역할을 할 수 있습니다.
+
+1. Active Source
+기능: 이 메시지는 HDMI를 통해 연결된 소스 장치가 현재 활성화된 상태임을 알리는 역할을 합니다. 디스플레이 장치(TV나 모니터)가 꺼져 있더라도, "Active Source" 메시지를 보내면 많은 TV가 자동으로 켜져서 해당 소스를 표시하게 됩니다.
+
+사용 예: 예를 들어, Blu-ray 플레이어나 셋톱박스가 켜질 때, 소스 장치가 "Active Source" 메시지를 전송하면 디스플레이 장치는 이를 인식하고 자동으로 켜질 수 있습니다.
+
+2. Text View On
+기능: 이 메시지는 "Image View On"과 유사하지만, 텍스트 정보(예: 전자 프로그램 가이드)와 같은 화면을 표시하려 할 때 사용됩니다. 이 메시지도 디스플레이 장치를 켜는 데 사용할 수 있습니다.
+
+차이점: "Image View On"은 일반적인 비디오 출력에 사용되며, "Text View On"은 화면에 텍스트 정보를 표시하려 할 때 주로 사용됩니다.
+
+요약:
+"Active Source": 소스 장치가 활성화될 때 디스플레이 장치를 켜는 데 자주 사용됨.
+"Text View On": 텍스트 정보를 표시할 때 디스플레이 장치를 켜는 메시지.
+따라서 디스플레이 장치를 자동으로 켜기 위해서는 **"Active Source"**나 "Text View On" 메시지를 사용할 수 있으며, "Image View On"은 비디오 출력을 위해 주로 사용됩니다.
+
+@endcode
+
+> HDMI AvMute 시나리오 분석
+
+@code
+보낸 사람: YJ Choi <yj.choi@broadcom.com>
+날짜: 2024년 9월 12일 오후 12시 19분 52초 GMT+9
+받는 사람: "김원균[KIM WONKYUN]" <wk.kim@kaongroup.com>
+제목: RE: ◆외부메일◆ RE: [SKB UC500] B tv Cable VoC 개선 회의 (24년 9월 10일 오후 3시)
+
+PM님에게만…. ㅡㅡ;
+===================================================================================
+==================
+-hHDMI->AvMuteState  = false in BHDM_P_Hotplug_isr by 'DEVICE REMOVED'
+-SetAvMute(true) is called by NEXUS_HdmiOutput_PreFormatChange_priv
+-NEXUS hotplug callback is processed, rxState is set to NEXUS_HdmiOutputState_eDisconnected
+-NEXUS_HdmiOutput_PostFormatChange_priv do nothing
+-By hotplug (device connected), BHDM_EnableDisplay uses hHDMI->AvMuteState which is true
+-BHDM_CHECK_RC(rc, BHDM_SetAvMute(hHDMI, hHDMI->AvMuteState)) ;
+=================
+ 
+보통 hotplug나 display format change때 NEXUS_HdmiOutput_PreFormatChange_priv->NEXUS_HdmiOutput_PostFormatChange_priv이 호출되는데 
+NEXUS_HdmiOutput_PreFormatChange_priv일때 display change에 의한 과도한 화면을 방지하고자 AV mute를 셋팅하고
+NEXUS_HdmiOutput_PostFormatChange_priv에서 AV mute를 풉니다.
+근데 Standby로 들어 가고 나올때 timing적인 이슈로 NEXUS_HdmiOutput_PreFormatChange_priv->(disconnect 발생)->NEXUS_HdmiOutput_PostFormatChange_priv이 호출되기는 하나 
+NEXUS_HdmiOutput_PostFormatChange_priv에서 HDMi power 상태 체크해서 power가 없으면 AV mute 를 풀지 않아서 생긴 문제로 보입니다.
+암튼 현재는 HDMI disconnect가 발생하면 AV mute 푼 상태로 유지 하는걸로 수정 되었습니다.
+언제부터 발생했는지는 확인 안됩니다. 제 테스트에서도 문제는 발생하진 않았습니다. TV 마다 달라서 timing 적으로 발생하는것 같습니다.
+ 
+버그라고 얘기하시면 안 될것 같습니다. 위의 내용 참고하셔서 적당히 코멘트 해 주세요.
+===================================================================================
+ 
+Thanks.
+YJ.Choi
+
+@endcode
+
+---
+<br>
+---
+*/

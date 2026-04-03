@@ -1,0 +1,403 @@
+/*!
+@page skb_build	Build
+
+# Build Script
+
+./bcm.bdst.knl.sh -d K1100UA_bkouc500 -k bkouc500 -c
+
+./bcm.bdst.nxl.sh -d K1100UA_bkouc500 -m bkouc500 -c -x -s
+
+./bcm.ref.sh -d K1100UA_bkouc500 -u -o -c
+
+
+@code
+
+
+./bcm.bdst.nxl.sh -d K1100UA_bkouc500 -c
+Have you updated the ioctl file by "bcm.bdst.nxl.sh (-x : export the nexus ioctl modules into device tree)"?
+As you commented, you tested the oom patches without booting failure.
+<ioctl update>
+Please do "bcm.bdst.nxl.sh -d [your project] -x"
+<build with new ioctl>
+Then, please do "bcm.ref.sh -d [your project]"
+<previous comments> 
+ 
+
+ 
+
+
+ 
+$ ./kaon.hals.sh 
+
+히든메뉴 외 apps 컴파일방법 
+1.  
+vi vendor/kaon/Android.mk 
+# Apps 
+include $(LOCAL_PATH)/apps/Android.mk 
+# Porting Layer API HAL 
+# include $(LOCAL_PATH)/hals/Android.mk 
+# For prebuilt 
+#include $(LOCAL_PATH)/prebuilts/Android.mk 
+1-1. KaonHiddenMenu 디렉토리 삭제 또는 다른곳으로 이동 
+2.  
+source build/envsetup.sh 
+3. 
+lunch K1100UA_bkouc500-userdebug 
+4.  
+mmm vendor/kaon/apps/KaonManagerService/
+mmm vendor/kaon/apps/KaonCmAutoUpgrade/
+mmm vendor/kaon/apps/KaonTftpService/
+5. \vendor\kaon\prebuilts\bkouc500\KaonManagerService 의 apk 다른 폴더에 복사해 놓기 
+5-1. KaonHiddenMenu 디렉토리 원복 
+6.  vendor/kaon/Android.mk  원복 
+7. ./bcm.ref.sh -d K1100UA_bkouc500 -o > 빌드 실패 
+8. git stash 
+9. apk 원래 폴더에 덮어쓰기 
+10. /bcm.ref.sh -d K1100UA_bkouc500 -o 
+mmm vendor/kaon/apps/KaonCmAutoUpgrade/ 
+
+히든메뉴 빌드방법 
+1. 다운로드 
+$ cd ./vendor/kaon/apps 
+$ git clone git@kkms.kaonmedia.com:hcn/apps.git 
+
+2. build 
+$ cd (source root) 
+$ ./bcm.ref.sh -d K1100UA_bkouc500 
+
+3. 결과물 
+./out/target/product/K1100UA/system/priv-app/HiddenMenu/HiddenMenu.apk 
+./out/target/product/K1100UA/system/lib/libhiddenmenu.so 
+./out/target/product/K1100UA/system/lib/libhiddenmenu_jni.so 
+
+4. prebuilt에 적용 
+cp -f ./out/target/product/K1100UA/system/priv-app/HiddenMenu/HiddenMenu.apk ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenu/ 
+cp -f ./out/target/product/K1100UA/system/lib/libhiddenmenu.so ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenuService/ 
+cp -f ./out/target/product/K1100UA/system/lib/libhiddenmenu_jni.so ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenu_JNI/ 
+
+
+
+
+안녕하세요 김효승입니다.    
+     
+1. DEV    
+device/broadcom/K1100UA/subvar/bkouc500.mk     
+line 65    
+SKB_EPG_MODE := DEV    
+     
+./bcm.ref.sh -d K1100UA_bkouc500 -c -o    
+     
+2. SAT    
+device/broadcom/K1100UA/subvar/bkouc500.mk     
+line 65    
+SKB_EPG_MODE := SAT    
+     
+./bcm.ref.sh -d K1100UA_bkouc500 -c –o  
+     
+3. LIVE    
+device/broadcom/K1100UA/subvar/bkouc500.mk     
+line 65    
+SKB_EPG_MODE := LIVE    
+     
+./bcm.ref.sh -d K1100UA_bkouc500 -c -o -u user  
+     
+     
+# OTA IMAGE    
+vendor/kaon/tools/version.sh    
+line 115     
+FIRMWARE_VERSION=$(printf"%s%02d%s" "${LASTEST_COMMIT_DATE}" "${LASTEST_COMMIT_CNTS}" "${IS_DIRTY}");  
+변경 후 빌드    
+Ex) FIRMWARE_VERSION=”2023062099”;    
+     
+각 모드 빌드 시 Clean build 해주세요 
+
+1. 다운로드
+$ cd ./vendor/kaon
+$ git clone git@kkms.kaonmedia.com:hcn/apps.git
+
+2. build
+$ cd (source root)
+$ ./bcm.ref.sh -d K1100UA_bkouc500
+
+3. 결과물
+./out/target/product/K1100UA/system/priv-app/HiddenMenu/HiddenMenu.apk
+./out/target/product/K1100UA/system/lib/libhiddenmenu.so
+./out/target/product/K1100UA/system/lib/libhiddenmenu_jni.so
+
+4. prebuilt에 적용
+cp -f ./out/target/product/K1100UA/system/priv-app/HiddenMenu/HiddenMenu.apk ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenu/
+cp -f ./out/target/product/K1100UA/system/lib/libhiddenmenu.so ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenuService/
+cp -f ./out/target/product/K1100UA/system/lib/libhiddenmenu_jni.so ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenu_JNI/
+
+
+
+
+
+[‎2024-‎06-‎25 오전11:09]  김원균[KIM WONKYUN]:  
+./bcm.bdst.nxl.sh -d K1100UA_bkouc500 -x
+Hi, Kim WonKyun,
+Have you updated the ioctl file by "bcm.bdst.nxl.sh (-x : export the nexus ioctl modules into device tree)"?
+As you commented, you tested the oom patches without booting failure.
+<ioctl update>
+Please do "bcm.bdst.nxl.sh -d [your project] -x"
+<build with new ioctl>
+Then, please do "bcm.ref.sh -d [your project]"
+<previous comments> 
+ 
+[‎2024-‎06-‎25 오전11:18]  김원균[KIM WONKYUN]:  
+If there are nexus API changes, you have to do "ioctl exporting" by -x option, then rebuild it. ioctl_xxx files will be updated in your platform folder.
+<Example of updating ioctl with inuvik platform>
+# ./bcm.bdst.nxl.sh -d inuvik -x
+$ find device/broadcom/inuvik -name "ioctl_*" 
+device/broadcom/inuvik/sepolicy/treble/cli/ioctl_macros
+device/broadcom/inuvik/sepolicy/treble/cli/ioctl_defines
+device/broadcom/inuvik/sepolicy/treble/enc/ioctl_macros
+device/broadcom/inuvik/sepolicy/treble/enc/ioctl_defines
+device/broadcom/inuvik/sepolicy/treble/nvk/ioctl_macros
+device/broadcom/inuvik/sepolicy/treble/nvk/ioctl_defines 
+
+
+@endcode
+
+
+---
+
+---
+<br>
+
+
+
+
+
+
+SKB BKO-UC500​
+
+​@code
+git clone ssh://git@gitlab.altimedia.com:2288/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12.git -b SKB_BKO-UC500
+git clone ssh://git@gitlab.altimedia.com:2288/atv/skb-androidtv/kaon_brcm_bkouc500/skb_kaon_taurus_res.git -b master taurus​
+git checkout master
+git clone git@kkms.kaonmedia.com:hcn/kstb1157_hals.git -b BKO-UC500 hals
+git clone git@kkms.kaonmedia.com:hcn/apps.git apps
+​
+​
+gitlab-recovery-codes.txt
+58c3103446ffe0ce
+bfaef26939fe81c1
+7f45c34649643b2e
+6cc7e47643ef9c77
+01db6aa008c8016b
+73dfc6fff3184481
+2c0c6335ef628fa0
+8719542ae8bd2031
+f76568810e818aa1
+98fc663ab802d1ab​
+​
+​
+빌드서버 접속 sgkang / kaon1234​​
+samba 접속
+\\172.16.7.72
+sgkang / kaon1234​
+sgkang 폴더 이동
+​
+public key 생성
+cd .ssh/
+ssh-keygen -t rsa
+cat id_rsa.pub
+​
+GitLab에 키 등록
+Edit Profile > SSH Keys > Key에 Public key 내용 복사하여 붙여넣고
+Add key
+​
+bkouc500.mk
+bkouc500.mk
+​
+PLAPI 컴파일방법
+​
+1. vendor/kaon/Android.mk  수정
+2. source build/envsetup.sh
+3. lunch K1100UA_bkouc500-userdebug
+4. mmm vendor/kaon/
+​​
+​
+
+repository : https://gitlab.altimedia.com/atv/skb-androidtv/kaon_brcm_bkouc500/skb_kaon_taurus_res​
+​
+• CM Main Git
+repository : https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12
+branch : KSTB1157_CM_test
+   AOSP-STT5.221215.001_PDK-STT5.220617.001
+git clone ssh://git@gitlab.altimedia.com:2288/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12.git
+​
+• SKB taurus(M/W) Git > CM Main의 vender/ 폴더에서 clone​
+repository : https://gitlab.altimedia.com/atv/skb-androidtv/kaon_brcm_bkouc500/skb_kaon_taurus_res
+branch : master
+git clone ssh://git@gitlab.altimedia.com:2288/atv/skb-androidtv/kaon_brcm_bkouc500/skb_kaon_taurus_res.git taurus
+​
+# git clone ssh://git@gitlab.altimedia.com:2288/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12.git
+# cd kaon_bcm_androidtv12
+# git checkout AOSP-STT5.221215.001_PDK-STT5.220617.001
+# cd vendor
+# git clone ssh://git@gitlab.altimedia.com:2288/atv/skb-androidtv/kaon_brcm_bkouc500/skb_kaon_taurus_res.git taurus
+# cd taurus
+# git checkout master
+# cd ../../
+​
+Clean Build
+
+# ./bcm.ref.sh -d K1100UA_bkouc500 -c
+
+ 
+
+OTA package
+
+​./bcm.ref.sh -d K1100UA_bkouc500 -o
+
+ 
+
+User mode Build (default userdebug)
+
+./bcm.ref.sh -d K1100UA_bkouc500 -u user
+
+ ​
+
+vendor/taurus/external/sepolicy/BRCM/taurusserver.te:263:ERROR 'unknown type kaon_xcas_file'
+에러시
+​
+vendor/taurus/external/sepolicy/BRCM/taurusserver.te 해당위치 주석처리
+#CAS
+# allow np_taurusserver kaon_xcas_file:dir { create search getattr read open write add_name remove_name setattr };
+# allow np_taurusserver kaon_xcas_file:file { create getattr read open write unlink setattr };​
+​
+Kaon 내부 GitLab 계정 생성 및 프로젝트 접속 권한
+
+http://kkms.kaonmedia.com/gitlab/
+
+​Git repository : http://kkms.kaonmedia.com/gitlab/hcn
+
+ 
+
+Name : sungmin.kang
+
+Username : sungmin.kang
+
+Email : sungmin.kang@kaongroup.com
+
+Password : k56325@kaon
+
+ 
+
+​Kaon App
+
+http://kkms.kaonmedia.com/gitlab/hcn/apps
+
+​
+Information
+This is application source repository for HCN KSTB1157.
+​
+KaonManagerService
+1. Build
+$ mmm vendor/kaon/apps/KaonManagerService/
+2. Output APK
+$ ls vendor/kaon/prebuilts/KaonManagerService/KaonManagerService.apk
+​
+PlayAutoInstallConfig
+1. Build
+$ mmm vendor/kaon/apps/PlayAutoInstallConfig/
+​
+Output APK
+$ ls vendor/kaon/prebuilts/PlayAutoInstallConfig/PlayAutoInstallConfig.apk
+$ ls vendor/kaon/prebuilts/PlayAutoInstallConfig-test/PlayAutoInstallConfig-test.apk​
+ 
+
+Kaon PLAPI
+
+http://kkms.kaonmedia.com/gitlab/hcn/kstb1157_hals
+
+​
+
+​git clone​ git@kkms.kaonmedia.com:hcn/apps.git apps
+
+​
+
+Download by manual
+$ cd (source root)
+$ mkdir -p vendor/kaon
+$ cd vendor/kaon
+$ git clone git@kkms.kaonmedia.com:hcn/kstb1157_hals.git hals
+$ cd hals​
+$ ​git checkout BKO-UC500
+$ cd -
+​
+kaon_bcm_androidtv12 디렉토리에서
+$ ln -snf vendor/kaon/hals/kaon.hals.sh .
+하시고 
+$ vi vendor/kaon/Android.mk
+여신다음
+include $(LOCAL_PATH)/hals/Android.mk 주석 해제
+#include $(LOCAL_PATH)/prebuilts/Android.mk 주석처리​
+$ ./kaon.hals.sh​
+하면 hals이 빌드됩니다.
+​
+hals 빌드 후 
+vendor/kaon/Android.mk 파일 원복하시고 
+ota 이미지 빌드하시면 빌드된 hals이 포함되어 이미지가 만들어집니다.
+​
+$ vi vendor/kaon/Android.mk
+LOCAL_PATH := $(call my-dir)
+# Apps
+# include $(LOCAL_PATH)/apps/Android.mk
+# Porting Layer API HAL
+include $(LOCAL_PATH)/hals/Android.mk
+# For prebuilt
+#include $(LOCAL_PATH)/prebuilts/Android.mk
+​
+* hals 빌드 시 
+include $(LOCAL_PATH)/hals/Android.mk 주석 해제
+#include $(LOCAL_PATH)/prebuilts/Android.mk 주석처리
+빌드 후 반대로 주석처리
+​
+$ ./kaon.hals.sh
+​
+
+메인 소스에 적용되어 있는 것은
+
+vendor/kaon/prebuilt 하위 폴더에 apk 및 lib 형식으로 들어가 있으며 소스 내용을 오픈하지 않기 위함입니다.
+
+ 
+
+수정이 필요할 경우 위 두개의 repository에 있는 소스를 컴파일하여 결과물을 vendor/kaon/prebuilt 폴더에 적용하는 방식으로 되어 있습니다.
+
+​​
+​
+./out/soong/.intermediates/vendor/kaon/prebuilts/bkouc500/plapi/1.0/kaon.hardware.plapi@1.0_genc++_headers/gen/kaon/hardware/plapi/1.0/IPLAPIService.h
+​
+\\172.16.7.72\sgkang\SKB\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\kaon\inc\definitions.h
+#define PROP_PERSIST_CM_NETWORK_TYPE "persist.odm.cm.network_type"
+​
+\\172.16.7.72\sgkang\SKB\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\service\pl_cable.cpp
+PL_CAB_NETWORK_Type_e PLAPIService::pl_cab_getNetworkType_internal()
+{
+   PL_CAB_NETWORK_Type_e type = ePL_CAB_NETWORK_DSG_TWO_WAY;
+   type = (PL_CAB_NETWORK_Type_e)property_get_int32(PROP_PERSIST_CM_NETWORK_TYPE, ePL_CAB_NETWORK_DSG_TWO_WAY);
+   return type;
+}
+​
+hals/altimedia/inc/cable/pl_cable.h
+typedef enum
+{
+   ePL_CAB_NETWORK_NONE = 0, /**< DSG NONE */
+   ePL_CAB_NETWORK_RFOVERLAY, /**< RF Overlay, DSG ONE WAY */
+   ePL_CAB_NETWORK_DSG_TWO_WAY /**< DSG TWO WAY */
+} PL_CAB_NETWORK_Type_e;
+​
+​
+[‎2023-‎05-‎15 오후 5:29]  전민정[Jeon Min Jeong]: 
+
+프레임워크 쪽 수정한다음에 컴파일할때..
+./bcm.ref.sh -d K1100UA_bkouc500 -S bootloader,kernel,middleware
+
+로 하면.. 5분정도 걸립니다.   참고요~
+
+@endcode
+
+*/

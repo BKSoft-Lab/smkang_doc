@@ -1,0 +1,398 @@
+/*!
+@page hcn_work	HCN
+
+# work 1
+
+@code
+
+
+Nxlive 실행하면 segmentation fault 발생 ioctl_define 이 바뀌어서 생긴문제로 보임 아래 반드시실행후 다시 build 할것 
+./bcm.bdst.nxl.sh -d K1100UA_KSTB1157 -m KSTB1157 -c -x 
+
+[ 통합빌드관련 아래문서 참조 ] 
+PAI 컴파일방법 
+make TARGET_BUILD_APPS='PlayAutoInstallConfig-_variantname_' TARGET_BUILD_VARIANT=userdebug 
+make TARGET_BUILD_APPS='PlayAutoInstallConfig-kaon' TARGET_BUILD_VARIANT=userdebug 
+
+
+
+PLAPI 컴파일방법 
+1. vendor/kaon/Android.mk  수정 
+2. source build/envsetup.sh 
+3. lunch K1100UA_KSTB1157-userdebug 
+4. mmm vendor/kaon/ 
+
+
+
+[ Clean build ] 
+-전체 
+./bcm.ref.sh -d K1100UA_KSTB1157 -c -o 
+
+-개별 
+./bcm.bdst.bld.sh -d K1100UA_KSTB1157 -b KSTB1157 -c 
+./bcm.bdst.knl.sh -d K1100UA_KSTB1157 -k KSTB1157 -c  
+./bcm.bdst.nxl.sh -d K1100UA_KSTB1157 -m KSTB1157 -c 
+./bcm.bdst.nxl.sh -d K1100UA_KSTB1157 -m KSTB1157 -c -x 
+
+[ Build ] 
+-전체  
+./bcm.ref.sh -d K1100UA_KSTB1157 -c 
+
+-개별 
+./bcm.bdst.bld.sh -d K1100UA_KSTB1157 -b KSTB1157 
+./bcm.bdst.knl.sh -d K1100UA_KSTB1157 -k KSTB1157 
+./bcm.bdst.nxl.sh -d K1100UA_KSTB1157 -m KSTB1157   
+
+[ Android build ] 
+. build/envsetup.sh (?) 
+source build/envsetup.sh 
+lunch K1100UA_KSTB1157-userdebug 
+make -j 
+
+[OTA Package] 
+source build/envsetup.sh 
+lunch K1100UA_KSTB1157-userdebug 
+make -j otapackage 
+Or 
+./bcm.ref.sh -d K1100UA_KSTB1157 -o 
+
+[ otapackage update ] 
+1. STB recovery 진입 
+  1) console:/ $ reboot recovery 
+  2) BOX 전원 버튼을 누른 상태에서 전원 인가 후 Recovery 진입 대기 
+2. out/target/product/K1100UA/K1100UA-ota-eng.kaon-m325.zip 파일을 FAT32 USB stick에 복사 
+3. USB stick을 STB에 연결 
+4. recovery 에서 'Apply update from USB' 메뉴 선택 후 'K1100UA-ota-eng.kaon-m325.zip' 파일 선택 
+
+[ Flash the images using fastboot ] 
+1. 'Ctrl+c'를 누른 상태에서 전원을 껏다 켜고 console 에 'BOLT>' 표시될 때까지 기다림 
+2. BOLT 에서 fastboot 모드 실행 
+ 1) CM Ethernet 사용 시 
+   BOLT> ifconfig eth0 -auto; boot -elf -noclose -bsu flash0.bsu_a: && android fastboot -transport=tcp -device=flash0 
+ 2) USB2Ethernet dongle 사용 시 
+   BOLT> ifconfig eth1 -auto; boot -elf -noclose -bsu flash0.bsu_a: && android fastboot -transport=tcp -device=flash0 
+ 3) USB device 사용 시 
+   BOLT> boot -elf -noclose -bsu flash0.bsu_a: && android fastboot -transport=usb -device=flash0 
+3. Cmd 에서 fastboot 실행 
+   - IP 주소는 USB dongle 
+   - 경로는 빌드 서버의 이미지 위치 
+   C:\> fastboot -s tcp:192.168.11.3 flash super Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\super.img 
+   C:\> fastboot -s tcp:192.168.11.3 --slot all flash boot_a Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\boot.img 
+   C:\> fastboot -s tcp:192.168.11.3 --slot all flash boot_b Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\boot.img 
+   C:\> fastboot -s tcp:192.168.11.3 flash cache Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\cache.img 
+   C:\> fastboot -s tcp:192.168.11.3 --slot all flash dtbo_a Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\dtbo.K1100UA.img 
+   C:\> fastboot -s tcp:192.168.11.3 --slot all flash dtbo_b Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\dtbo.K1100UA.img 
+   C:\> fastboot -s tcp:192.168.11.3 flash userdata Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\userdata.img 
+   C:\> fastboot -s tcp:192.168.11.3 --slot all flash vbmeta_a Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\vbmeta.img 
+   C:\> fastboot -s tcp:192.168.11.3 --slot all flash vbmeta_b Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\vbmeta.img 
+   C:\> fastboot -s tcp:192.168.11.3 --slot all flash vendor_boot_a Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\vendor_boot.img 
+   C:\> fastboot -s tcp:192.168.11.3 --slot all flash vendor_boot_b Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\vendor_boot.img 
+   C:\> fastboot -s tcp:192.168.11.3 erase misc 
+   C:\> fastboot -s tcp:192.168.11.3 reboot 
+
+[ BOLT에서 멈추는 방법 ] 
+'Ctrl+c'를 누른 상태에서 전원을 껏다 켜고 console 에 'BOLT>' 표시될 때까지 기다림 
+
+
+
+[HCN] 개발환경 
+key[red]x5, key[*] : 시스템 정보 
+key[yellow]x5, key[*] : 시스템 정보​
+key[red]x5, key[yellow] : 히든메뉴
+​ 
+리모콘 디페어링 : key[ok] + key[red] 5초 
+​ 
+git clone ssh://git@gitlab.altimedia.com:2288/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12.git -b HCN_KSTB1157 app_build 
+​git clone ssh://git@gitlab.altimedia.com:2288/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/hcn_taurus_lib.git taurus​
+git clone git@kkms.kaonmedia.com:hcn/kstb1157_hals.git -b master hals​
+git clone git@kkms.kaonmedia.com:hcn/apps.git -b master apps​​
+​
+$ cd (source root) 
+$ git clone ssh://git@gitlab.altimedia.com:2288/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12.git -b HCN_KSTB1157
+ 
+$ mkdir -p vendor/kaon
+$ cd vendor/kaon
+$ git clone git@kkms.kaonmedia.com:hcn/kstb1157_hals.git -b master hals 
+$ cd hals​
+$ cd - 
+$ ln -snf vendor/kaon/hals/kaon.hals.sh .​​
+​ 
+git clone git@kkms.kaonmedia.com:hcn/apps.git -b master apps​ 
+ 
+Nxlive 실행하면 segmentation fault 발생 ioctl_define 이 바뀌어서 생긴문제로 보임 아래 반드시실행후 다시 build 할것 
+./bcm.bdst.nxl.sh -d K1100UA_KSTB1157 -m KSTB1157 -c -x 
+​ 
+vi vendor/kaon/Android.mk 
+./kaon.hals.sh​
+vi vendor/kaon/Android.mk​
+./bcm.ref.sh -d K1100UA_KSTB1157 -o​​
+​ 
+[ 통합빌드관련 아래문서 참조 ] 
+PAI 컴파일방법 
+make TARGET_BUILD_APPS='PlayAutoInstallConfig-_variantname_' TARGET_BUILD_VARIANT=userdebug 
+make TARGET_BUILD_APPS='PlayAutoInstallConfig-kaon' TARGET_BUILD_VARIANT=userdebug 
+​ 
+./bcm.ref.sh -d K1100UA_KSTB1157 -o​
+​ 
+PLAPI 컴파일방법 
+1. vendor/kaon/Android.mk  수정 
+2. source build/envsetup.sh 
+3. lunch K1100UA_KSTB1157-userdebug 
+4. mmm vendor/kaon/ 
+​ 
+apps 컴파일방법
+1. vendor/kaon/Android.mk  수정
+# Apps
+include $(LOCAL_PATH)/apps/Android.mk
+# Porting Layer API HAL
+# include $(LOCAL_PATH)/hals/Android.mk
+# For prebuilt
+#include $(LOCAL_PATH)/prebuilts/Android.mk 2. source build/envsetup.sh 
+3. lunch K1100UA_KSTB1157-userdebug 
+4. mmm vendor/kaon/apps/KaonCmAutoUpgrade/ 
+​ 
+[ Clean build ] 
+-전체 
+./bcm.ref.sh -d K1100UA_KSTB1157 -c -o 
+​ 
+-개별 
+./bcm.bdst.bld.sh -d K1100UA_KSTB1157 -b KSTB1157 -c 
+./bcm.bdst.knl.sh -d K1100UA_KSTB1157 -k KSTB1157 -c  
+./bcm.bdst.nxl.sh -d K1100UA_KSTB1157 -m KSTB1157 -c 
+./bcm.bdst.nxl.sh -d K1100UA_KSTB1157 -m KSTB1157 -c -x 
+​ 
+[ Build ] 
+-전체  
+./bcm.ref.sh -d K1100UA_KSTB1157 -c 
+​ 
+-개별 
+./bcm.bdst.bld.sh -d K1100UA_KSTB1157 -b KSTB1157 
+./bcm.bdst.knl.sh -d K1100UA_KSTB1157 -k KSTB1157 
+./bcm.bdst.nxl.sh -d K1100UA_KSTB1157 -m KSTB1157   
+​ 
+[ Android build ] 
+. build/envsetup.sh (?) 
+source build/envsetup.sh 
+lunch K1100UA_KSTB1157-userdebug 
+make -j 
+​ 
+[OTA Package] 
+source build/envsetup.sh 
+lunch K1100UA_KSTB1157-userdebug 
+make -j otapackage 
+Or 
+./bcm.ref.sh -d K1100UA_KSTB1157 -o 
+​ 
+snmp_get 1.3.6.1.2.1.2.2.1.6.2 
+​ 
+[ otapackage update ] 
+1. STB recovery 진입 
+ 1) console:/ $ reboot recovery 
+ 2) BOX 전원 버튼을 누른 상태에서 전원 인가 후 Recovery 진입 대기 
+2. out/target/product/K1100UA/K1100UA-ota-eng.kaon-m325.zip 파일을 FAT32 USB stick에 복사 
+3. USB stick을 STB에 연결 
+4. recovery 에서 'Apply update from USB' 메뉴 선택 후 'K1100UA-ota-eng.kaon-m325.zip' 파일 선택 
+​ 
+[ Flash the images using fastboot ] 
+1. 'Ctrl+c'를 누른 상태에서 전원을 껏다 켜고 console 에 'BOLT>' 표시될 때까지 기다림 
+2. BOLT 에서 fastboot 모드 실행 
+1) CM Ethernet 사용 시 
+  BOLT> ifconfig eth0 -auto; boot -elf -noclose -bsu flash0.bsu_a: && android fastboot -transport=tcp -device=flash0 
+2) USB2Ethernet dongle 사용 시ㅑㄹ채 
+  BOLT> ifconfig eth1 -auto; boot -elf -noclose -bsu flash0.bsu_a: && android fastboot -transport=tcp -device=flash0 
+3) USB device 사용 시 
+  BOLT> boot -elf -noclose -bsu flash0.bsu_a: && android fastboot -transport=usb -device=flash0 
+3. Cmd 에서 fastboot 실행 
+  - IP 주소는 USB dongle 
+  - 경로는 빌드 서버의 이미지 위치 
+  C:\> fastboot -s tcp:192.168.11.3 flash super Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\super.ab.img 
+  C:\> fastboot -s tcp:192.168.11.3 --slot all flash boot_a Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\boot.img 
+  C:\> fastboot -s tcp:192.168.11.3 --slot all flash boot_b Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\boot.img 
+  C:\> fastboot -s tcp:192.168.11.3 flash cache Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\cache.img 
+  C:\> fastboot -s tcp:192.168.11.3 --slot all flash dtbo_a Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\dtbo.K1100UA.img 
+  C:\> fastboot -s tcp:192.168.11.3 --slot all flash dtbo_b Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\dtbo.K1100UA.img 
+  C:\> fastboot -s tcp:192.168.11.3 flash userdata Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\userdata.img 
+  C:\> fastboot -s tcp:192.168.11.3 --slot all flash vbmeta_a Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\vbmeta.img 
+  C:\> fastboot -s tcp:192.168.11.3 --slot all flash vbmeta_b Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\vbmeta.img 
+  C:\> fastboot -s tcp:192.168.11.3 --slot all flash vendor_boot_a Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\vendor_boot.img 
+  C:\> fastboot -s tcp:192.168.11.3 --slot all flash vendor_boot_b Z:\kaon_bcm_androidtv12\out\target\product\K1100UA\vendor_boot.img 
+  C:\> fastboot -s tcp:192.168.11.3 erase misc 
+  C:\> fastboot -s tcp:192.168.11.3 reboot 
+​ 
+[ BOLT에서 멈추는 방법 ] 
+'Ctrl+c'를 누른 상태에서 전원을 껏다 켜고 console 에 'BOLT>' 표시될 때까지 기다림 
+​​
+@endcode
+
+# 관련 정리
+@code
+ 리모컨 특수 키
+ a.  히든메뉴 : 빨 5 + 노 1
+ b.  해상도 변경 :  OK + 나가기 버튼 동시 10초
+ c.  시스템 정보 확인   빨 5 + 초 (*) 1  
+      메뉴 5 → 4 바커채널 설정 (  초기부팅 채널 )
+      메뉴 7 → 2  리모컨 수동 업데이트
+d. BT 페어링/언페어링
+     페어링 : 홈+ OK 5초 이상
+     언페어링 : 홈 + 빨 5초이상  
+
+ Recovery 모드 들어가기
+a.  부팅 후 셋탑의 전원 버튼 10초 이상 누르기
+b.  시리얼 cmd : reboot recovery
+
+Network Type  개념 및  변경방법
+a.  default   2-way (  Docsis 로부터 받음  )
+b.  1-way( RF Overlay )  Docsis 옆에 LAN선으로  network 설정인 경우
+c.  히든 메뉴  5. STB 동작 설정 → 5.1 ETHERNET BYPASS 설정 →  5.1.1 설정 안함 ( 2-way ) ,   5.1.2 설정 사용 ( 1-way )
+d. 시리얼 cmd : 
+     su
+    getprop persist.odm.cm.network_type    //값 확인
+    setprop persist.odm.cm.network_type 1   // 1 - ( 1way) , 2 - (2way )
+    명령 후 reboot   ( 정상적으로 부팅 잘 안되는 경우 있음 이때는 한번 더 콜드 부팅 )
+
+ USB 파일에 로그 잡기
+a.   altimedia에서 지원하는 로그   ( kaon-plapi 로그 안 나옴.)
+    USB 저장장치/logcapture_altimedia 
+    빈파일로 생 성후 셋탑에 넣고 부팅하면,    logcat_일자_시간_000.log  형태로 파일 생성됨.
+b. 가온에서 지원하는 로그  (  BTS Warring 발생으로 제거 상태 임  나중에 필요하면,   app 소스 git 에서 'kaon_logcatpture 기능 추가'  코드 확인 후 적용하면 됨   )
+    USB 저장장치/kaon_logcapture
+    빈 파일을 생성 후 셋탑에 넣고 부팅하면,    kaon_logcat_일자_시간.log  형태로 파일 생성됨.
+    빈 파일이 아닌  아래 예) 처럼 넣고 저장하면  logcat filter 옵션이 적용 된다.
+     logcat_filter=-s StorageManagerService:* -s KaonLog:*  
+
+USB 로  adb 접속하기
+a. 시리얼 또는  shell  cmd : reboot usbrole  
+b.  토글 명령임.  /storage 디렉토리에 USB 메모리 인식을 안한다면..  adb 모드,  인식하면 저장장치 모드 임.  user, userdebug 모두 동작
+
+ remount 방법  ( userdebug 버전에서 adb로만 가능 )
+$ adb root
+$ adb disable-verity
+$ adb reboot
+$ adb wait-for-device
+$ adb root
+$ adb remount
+
+
+fastboot 로 펌웨어 업데이트 하기   ( K1100UA,   SKB 모두 약간식 파티션이 다르므로 꼭 담당자에게 확인 해야함 )
+[ OTP lock 된 시료를 낮은 버전의 user 버전으로 패치시 ]
+리커버리 모드 -> fastboot mode -> bootloader reboot 선택후..  화면에 리커버리 모드 화면 뜨면,
+아래 fastboot 명령 수행.    USB LAN 필요함.
+USB to LAN 연결시  디바이스 IP 확인은  공유기에서 정보 확인
+
+[ USB to LAN 연결이 안되면   adb  또는 시리얼에서 USB모드 점검]
+reboot usbrole 명령 참조
+[USB Device모드 일때  fastboot device목록 확인]
+[C:\~]$ fastboot devices
+BS10089793011941     fastboot
+
+[ 브트로더 에서 명령으로  LAN포트 이용 — 권장하지 않음, OTP락이 되어 있으면 안됨 ]
+boot -bsu -noclose -elf flash0.bsu_a
+ifconfig eth0 -addr=192.168.30.105 -mask=255.255.255.0 -gw=192.168.30.1
+android fastboot -transport=tcp -device=flash0
+
+[ 아래는 LAN 연결의 경우이며,    USB 모드인 경우 -s BS10089793011941   ]
+fastboot -s tcp:192.168.30.14 --slot all oem unlock
+fastboot -s tcp:192.168.30.14 --slot all flash boot_a Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\boot.img
+fastboot -s tcp:192.168.30.14 --slot all flash boot_b Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\boot.img
+fastboot -s tcp:192.168.30.14 flash cache Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\cache.img
+fastboot -s tcp:192.168.30.14 --slot all flash dtbo_a Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\dtbo.K1100UA.img
+fastboot -s tcp:192.168.30.14 --slot all flash dtbo_b Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\dtbo.K1100UA.img
+fastboot -s tcp:192.168.30.14 flash userdata Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\userdata.img
+fastboot -s tcp:192.168.30.14 --slot all flash vbmeta_a Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\vbmeta.img
+fastboot -s tcp:192.168.30.14 --slot all flash vbmeta_b Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\vbmeta.img
+fastboot -s tcp:192.168.30.14 --slot all flash vendor_boot_a Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\vendor_boot.img
+fastboot -s tcp:192.168.30.14 --slot all flash vendor_boot_b Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\vendor_boot.img
+fastboot -s tcp:192.168.30.14 flash super Z:\kaon_bcm_androidtv12\out_debug\target\product\K1100UA\super.img
+fastboot -s tcp:192.168.30.14 erase misc
+fastboot -s tcp:192.168.30.14 reboot 
+
+
+
+ 네트웍 관련 control 은 어디서~ 
+vendor/kaon/hals/plapi/1.0/service/NetworkMonitor.cpp   pl_frontpanel.cpp
+vendor/kaon/prebuilts/scripts/networkmonitor
+CM 과의 내부통신 관련 :  vendor/kaon/prebuilts/scripts/cmconnectioncheck
+참고:  networkmonitor,cmconnectioncheck   스크립트에서 찍은 로그의 TAG 는 'echo' 임
+
+네트웍 관련  점검시 CM 은 정상인지 확인 꼭 필요함.     IP를 받을 수 있게 설정을 CM 이  해주기 때문에 CM의 IP는 정상적인지 부터 확인해야함.
+이전 이슈중에    HCN에서 같은 스위치(공유기)에  Hellotv STB ( HUX-UC3300 모델)  과  HCN ( KSTB1157 ) 1way 설정 상태를  연결하여 시작하면
+부팅을 못하거나 AV블랙이 나오는 경우가 있었음.    CM이 비정상동작을 한 case로,   CM 1.3.1 버전으로 업데이트 해줌.
+이런 경우 비정상 동작시의  CM 로그를  박윤미M 보내서 원인 분석 요청 하면 됨.
+
+볼륨 설정 관련은 어디서~
+TVChannel 재생,   VOD 재생 –  MW 단에서 직접 호출하여 세팅
+유트브 등 APK 에서 재생할때는 -  android system
+
+a.  서라운드 사운드 설정( 구글설정→기기환경설정→화면 및 소리 → 고급 소리 설정 )  시 TV 자체 볼륨을 사용하기에 조절 안 함.  단  mute 는 관여 함.
+b.  TVChannel, VOD 볼륨 레벨을 전체적으로 내려 달라한다면.  MW(알티)단에 이야기해서  조절 해야 함..   알티는  어떤값이나 계산식을 요구하므로   확인후 전달해야 함.
+     조절된 적용 값은 cat /proc/brcm/audio_volume    정보로 확인 가능
+c.  youtueb, apk 에서 사용되는 볼륨 전체를 조절 해달라고 한다면,     frameworks/av/services/audiopolicy/config/default_volume_tables.xml  수정
+    평균 소리 크기를 측정하는 기기를 이용해서 측정, 세팅 해야 함. ( SKB 적용 기준,  HCN은 설정 안 했음 )
+d. PCM / 서라운드 사운드 설정 구분 지정은   BcmCustomizer/../HdmiAudioPlugService.java   참조
+                                                                         git log -p frameworks/base/services/core/java/com/android/server/audio/AudioService.java  참조
+e. BT 연결되어 소리가 이어폰/스피커에서 나오게 되면,  TV 의 HDMI 볼륨은 mute시켜야 함.   이 관련 제어는   BcmAudioCapture/../BcmAudioCaptureService.java 참조
+
+ 드라이버 정보 확인
+cat /proc/brcm/frontend             ## 튠 정보
+cat /proc/brcm/hdmi_output      ## HDMI 정보
+브로드컴에서 남기는 정보는 /proc/brcm  폴더에 있으니 참고.
+
+ 브로드컴 드라이버 로그 활성화  A ( 부팅  이후 특정 동작 확인시 로그 봐야 할 때 )
+userdebug  mode,  추가 빌드 필요 하지 않음.   serial/shell  root 권한.   모듈 별로 로그 설정 함.
+
+예) qam 관련 로그 추가 시
+echo "bads_docsis msg" > /proc/brcm/debug
+echo "nexus_docsis_priv msg" > /proc/brcm/debug
+echo 'nexus_docsis msg' > /proc/brcm/debug
+cat /proc/brcm/debug | egrep -i 'docsis'  << 여기서 'wrn' 이 'msg'로 바뀐것 확인가능
+logcat -s nx-klog:*
+
+
+ 브로드컴 드라이버 로그 활성화  B ( 부팅 후  바로 나오는  로그 확인 해야 할 때 )
+코드에 삽입, 빌드 해야 함. 
+vendor/broadcom/refsw/nexus/base/src/nexus_base.c  의  NEXUS_Base_SetModuleDebugLevel()  에   아래 코드 추가  후 build
+예) qam 관련 로그 추가 시
+NEXUS_P_Base_SetModuleDebugLevel("bads_docsis,nexus_docsis_priv,nexus_docsis", BDBG_eMsg); 또는
+BDBG_SetModuleLevel("bads_docsis",BDBG_eMsg);
+BDBG_SetModuleLevel("nexus_docsis_priv",BDBG_eMsg);
+BDBG_SetModuleLevel("nexus_docsis",BDBG_eMsg);                >>>  추가하여 컴파일하기  둘 중 하나만 해도 되겠지만 혹시 몰라 두개 다 넣음..
+
+
+MW 단에서는 브로드컴쪽 문제일경우  가온 문제라고 함   MW 단에서 드라이버를 바로 사용하기에 직접 소통 하면 좋지만 소통하지 않음.
+문제가 발생하면  브로드컴 드라이버 로그 'nx-klog'  TAG 참조.
+로그에 정보가 부족한 경우 11,12 참조하여 로그 활성화,  추가 정보 직접 추가 해서  확인 후 CSP에 문의 해야 함.
+
+frontend tune모듈이  docsis,  와 VSB8 이 있는 것으로 파악됨
+정규방송 - VSB8,   일반 drm 채널은 qam 모듈임.  그외 모듈은 사용 안하는 것 같음.
+VSB8 –LG3360 로..   vendor/broadcom/refsw/nexus/extensions/frontend/lg3306/src/lg3306_main.c  쪽에서 로그 추적해야 할 것으로 파악했음.
+QAM-docsis 로.. vendor/broadcom/refsw/nexus/modules/frontend/docsis/src/nexus_docsis_priv.c  쪽에서 로그 추적해야 함.  
+부팅 초기에 MW단에서 frontend 6개를 선점해서 사용함.  ( MW-  libpl.so )  
+
+참고,  만약 채널 스캔 기능을 추가 요청이 온다면???
+           frontend리소스를 모두  MW (altimeida)에서 점유하고 있기에   알티에서 구현 해야함.    HCN은  히든메뉴 구성을 알티에서 했음.
+plapi 명렁어 참고할 것들  ( 기본은 명령어 help 활용 )
+a. plapiapp-system pl_frontpanel displayindicator 1 0   
+     network LED상태변경 Blank2 로 설정,    이전 설정이 on 이었다면, LED blank를 하면서 ifdown 도 해줌 (   hals/plapi/1.0/service/pl_frontpanel.cpp  참조 )
+b. plapiapp-system pl_frontpanel displayindicator 1 3   
+     network LED상태변경 Blank2 로 설정,   이전 설정이 off 이었다면, LED를  이설정을 하면 ifup 도 해줌 (   hals/plapi/1.0/service/pl_frontpanel.cpp  참조 )
+c.  plapiapp-system pl_hcn notifycmupgrade 0 
+     MW단( Altimedia ) 에서 OTA 업데이트 후 호출해주는 plapi 명령어
+     OTA업데이트 후 AV 블랙 이슈 등을 테스트 할 때 활용하면 좋음.
+     CM 은 업데이트 명령을 받으면  tftp에 받을 파일이 있는지 확인 후,  있다면 받고 cm 리붓 진행 됨.  없다면  cm 리붓이 진행됨.
+@endcode
+
+# Jenkins
+
+@code
+
+https://confluence.kaonmedia.com/pages/viewpage.action?pageId=133344798
+
+SSH : khs@172.16.5.75
+ 비밀번호 : k
+jenkins : http://172.16.5.75:8080
+http://172.16.5.75:8080/job/HCN-KSTB1157/
+계정 : a3team / kaon1234
+
+@endcode
+
+*/

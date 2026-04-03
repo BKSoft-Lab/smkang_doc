@@ -1,0 +1,36 @@
+/*!
+@page work_20250328	2025.03.28
+
+---
+
+# lock / unlock 로그추가
+
+X:\LGHV\kaon_bcm_androidtv12\vendor\broadcom\refsw\nexus\modules\frontend\docsis\src\nexus_docsis_priv.c
+
+X:\LGHV\kaon_bcm_androidtv12\vendor\broadcom\refsw\magnum\portinginterface\dcm\bdcm_ads.c
+
+
+
+typedef enum {
+	BRPC_Qam_Lock = 0x8000,
+	BRPC_Fec_Lock = 0x4000,
+       BRPC_Acq_Done = 0x2000,         /* 1=indicate this is a lock_result of a ADS_Acquire. 0=unsolicited lock change notification */
+       BRPC_Unused   = 0x1000
+/*  BRPC_Freq_250khz = 0x0xxx   b11-b0=tuning freq in 250khz unit. Max freq=4095*250k=1,023,750000hz */
+} BRPC_Param_ADS_LockStatus_Notification;
+ 
+	    case BRPC_Notification_Event_LockStatusChanged:
+	        lockStatus = (event & BRPC_Qam_Lock) && (event & BRPC_Fec_Lock);
+
+@code
+@endcode
+
+*/
+
+
+
+
+
+
+
+

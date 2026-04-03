@@ -1,0 +1,509 @@
+/*!
+@page work_20250422	2025.04.22
+
+---
+# HCN SPL 2025-04-01
+
+> [FSC-20250421T071208Z-001.zip](../data/202504/hcn-spl202504/SC-20250421T071208Z-001.zip)
+
+@code
+├─external
+│  ├─dng_sdk
+│  │      0001-Fail-fast-in-dng-sdk-if-an-invalid-tag-count-is-seen.bulletin.patch
+│  └─skia
+│          0001--bmp-Fix-swizzler-initialization.bulletin.patch
+├─frameworks
+│  ├─base
+│  │      0001-Verify-that-the-caller-has-permissions-for-the-icons-it-provided.bulletin.patch
+│  │      0003-Check-cross-user-permissions-for-a-given-UID.bulletin.patch
+│  │      0005-Fix-settings-activity-showing-background-bp-when-createConfirmDe.bulletin.patch
+│  │      0006-Get-calling-package-name-using-a-reliable-API.bulletin.patch
+│  │      0007-Remove-notification-content-from-icon-a11y.bulletin.patch
+│  │      0008-Revise-the-checking-logic-of-checkPackage.bulletin.patch
+│  │      0009-Do-not-allow-non-system-apps-to-provide-unverified-attributions.bulletin.patch
+│  │      0010-Check-underlying-intent-as-well-as-intent-selector.bulletin.patch
+│  │      0011-Prevent-media-button-receivers-targeting-activities.bulletin.patch
+│  │      0012-Disable-Developer-options-by-default-for-managed-profiles-.bulletin.patch
+│  │      0013-Check-sound-Uri-permission-when-creating-a-notification-channel.bulletin.patch
+│  │      0014-Avoid-app-pinning-requests-if-the-Task-is-already-locked.bulletin.patch
+│  └─native
+│          0001-Ensure-objects-remain-valid-after-calling-policy.bulletin.patch
+│          0002-Send-dim-layer-in-input-list.bulletin.patch
+├─packages
+│  ├─apps
+│  │  ├─DocumentsUI
+│  │  │      0001-Restrict-initial-location-for-ACTION_OPEN_DOCUMENT-_TREE.bulletin.patch
+│  │  │      0002-Fix-for-SAF-loophole-in-the-lastAccessedStack-.bulletin.patch
+│  │  └─Settings
+│  │          0001-Set-class-name-when-createConfirmDeviceCredentialIntent-API-is.bulletin.patch
+│  │          0002-Add-default-Sound-Picker-package-name.bulletin.patch
+│  │          0003-Check-the-permission-of-the-callingUid-instead-of-the-calling-pa.bulletin.patch
+│  │          0004-Remove-incorrect-call-to-Window-addFlags-with-a-system-flag.bulletin.patch
+│  ├─modules
+│  │  └─Permission
+│  │          0001-Role-re-evaluation-should-respect-ask-every-time-choice-by-user.bulletin.patch
+│  ├─providers
+│  │  └─MediaProvider
+│  │          0001-Expand-the-size-of-zero_addr-to-the-maximum-size-of-a-single-req.bulletin.patch
+│  └─services
+│      ├─Telecomm
+│      │      0001-Unbind-CS-if-connection-is-not-created-within-15-seconds-.bulletin.patch
+│      │      0002-Ensure-connection-is-unbound-on-call-redirection-timeout-.bulletin.patch
+│      │      0003-Ensure-ScheduledExecutor-is-not-shutdown-before-scheduling-timeo.bulletin.patch
+│      └─Telephony
+│              0001-Prevent-overlays-on-Telephony-settings-screen-.bulletin.patch
+├─system
+│  └─bt
+│          0001-Fix-type-confusion-in-avdt_msg.cc.bulletin.patch
+└─vendor
+    └─unbundled_google
+        └─packages
+            └─SettingsGoogle
+                    0001-Add-new-string-for-Sound-picker-package-name.bulletin.patch
+@endcode
+
+@code
+
+external/dng_sdk/0001-Fail-fast-in-dng-sdk-if-an-invalid-tag-count-is-seen.bulletin.patch
+patch -p1 < 0001-Fail-fast-in-dng-sdk-if-an-invalid-tag-count-is-seen.bulletin.patch
+git add source/dng_ifd.cpp
+git commit -m "0001-Fail-fast-in-dng-sdk-if-an-invalid-tag-count-is-seen.bulletin.patch"
+rm 0001-Fail-fast-in-dng-sdk-if-an-invalid-tag-count-is-seen.bulletin.patch
+
+external/skia/0001--bmp-Fix-swizzler-initialization.bulletin.patch
+patch -p1 < 0001--bmp-Fix-swizzler-initialization.bulletin.patch
+git add resources/images/bmp-size-32x32-8bpp.bmp
+git add src/codec/SkBmpStandardCodec.cpp
+git add tests/CodecTest.cpp
+git commit -m "0001--bmp-Fix-swizzler-initialization.bulletin.patch"
+rm 0001--bmp-Fix-swizzler-initialization.bulletin.patch
+
+
+fail--
+frameworks/base/0001-Verify-that-the-caller-has-permissions-for-the-icons-it-provided.bulletin.patch
+patch -p1 < 0001-Verify-that-the-caller-has-permissions-for-the-icons-it-provided.bulletin.patch
+git add core/java/com/android/internal/app/ChooserActivity.java
+git commit -m "0001-Verify-that-the-caller-has-permissions-for-the-icons-it-provided.bulletin.patch"
+rm 0001-Verify-that-the-caller-has-permissions-for-the-icons-it-provided.bulletin.patch
+---
+
+frameworks/base/0003-Check-cross-user-permissions-for-a-given-UID.bulletin.patch
+patch -p1 < 0003-Check-cross-user-permissions-for-a-given-UID.bulletin.patch
+git add services/core/java/com/android/server/pm/PackageManagerService.java
+git commit -m "0003-Check-cross-user-permissions-for-a-given-UID.bulletin.patch"
+rm 0003-Check-cross-user-permissions-for-a-given-UID.bulletin.patch
+
+frameworks/base/0005-Fix-settings-activity-showing-background-bp-when-createConfirmDe.bulletin.patch
+patch -p1 < 0005-Fix-settings-activity-showing-background-bp-when-createConfirmDe.bulletin.patch
+git add core/java/android/hardware/biometrics/BiometricPrompt.java
+git add core/java/android/hardware/biometrics/PromptInfo.java
+git add packages/SystemUI/src/com/android/systemui/biometrics/AuthContainerView.java
+git add packages/SystemUI/src/com/android/systemui/biometrics/AuthController.java
+git add packages/SystemUI/src/com/android/systemui/biometrics/AuthDialog.java
+git commit -m "0005-Fix-settings-activity-showing-background-bp-when-createConfirmDe.bulletin.patch"
+rm 0005-Fix-settings-activity-showing-background-bp-when-createConfirmDe.bulletin.patch
+
+frameworks/base/0006-Get-calling-package-name-using-a-reliable-API.bulletin.patch
+patch -p1 < 0006-Get-calling-package-name-using-a-reliable-API.bulletin.patch
+git add packages/PackageInstaller/src/com/android/packageinstaller/InstallStart.java
+git commit -m "0006-Get-calling-package-name-using-a-reliable-API.bulletin.patch"
+rm 0006-Get-calling-package-name-using-a-reliable-API.bulletin.patch
+
+frameworks/base/0007-Remove-notification-content-from-icon-a11y.bulletin.patch
+patch -p1 < 0007-Remove-notification-content-from-icon-a11y.bulletin.patch
+git add packages/SystemUI/src/com/android/systemui/statusbar/StatusBarIconView.java
+git commit -m "0007-Remove-notification-content-from-icon-a11y.bulletin.patch"
+rm 0007-Remove-notification-content-from-icon-a11y.bulletin.patch
+
+frameworks/base/0008-Revise-the-checking-logic-of-checkPackage.bulletin.patch
+patch -p1 < 0008-Revise-the-checking-logic-of-checkPackage.bulletin.patch
+git add services/core/java/com/android/server/appop/AppOpsService.java
+git commit -m "0008-Revise-the-checking-logic-of-checkPackage.bulletin.patch"
+rm 0008-Revise-the-checking-logic-of-checkPackage.bulletin.patch
+
+frameworks/base/0009-Do-not-allow-non-system-apps-to-provide-unverified-attributions.bulletin.patch
+patch -p1 < 0009-Do-not-allow-non-system-apps-to-provide-unverified-attributions.bulletin.patch
+git add services/core/java/com/android/server/appop/AppOpsService.java
+git commit -m "0009-Do-not-allow-non-system-apps-to-provide-unverified-attributions.bulletin.patch"
+rm 0009-Do-not-allow-non-system-apps-to-provide-unverified-attributions.bulletin.patch
+
+frameworks/base/0010-Check-underlying-intent-as-well-as-intent-selector.bulletin.patch
+patch -p1 < 0010-Check-underlying-intent-as-well-as-intent-selector.bulletin.patch
+git add core/java/com/android/internal/app/IntentForwarderActivity.java
+git commit -m "0010-Check-underlying-intent-as-well-as-intent-selector.bulletin.patch"
+rm 0010-Check-underlying-intent-as-well-as-intent-selector.bulletin.patch
+
+frameworks/base/0011-Prevent-media-button-receivers-targeting-activities.bulletin.patch
+patch -p1 < 0011-Prevent-media-button-receivers-targeting-activities.bulletin.patch
+git add media/java/android/media/session/MediaSession.java
+git add services/core/java/com/android/server/media/MediaSessionRecord.java
+git commit -m "0011-Prevent-media-button-receivers-targeting-activities.bulletin.patch"
+rm 0011-Prevent-media-button-receivers-targeting-activities.bulletin.patch
+
+frameworks/base/0012-Disable-Developer-options-by-default-for-managed-profiles-.bulletin.patch
+patch -p1 < 0012-Disable-Developer-options-by-default-for-managed-profiles-.bulletin.patch
+git add services/core/java/com/android/server/pm/UserRestrictionsUtils.java
+git add services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java
+git add services/tests/servicestests/src/com/android/server/devicepolicy/DevicePolicyManagerServiceMigrationTest.java
+git commit -m "0012-Disable-Developer-options-by-default-for-managed-profiles-.bulletin.patch"
+rm 0012-Disable-Developer-options-by-default-for-managed-profiles-.bulletin.patch
+
+frameworks/base/0013-Check-sound-Uri-permission-when-creating-a-notification-channel.bulletin.patch
+patch -p1 < 0013-Check-sound-Uri-permission-when-creating-a-notification-channel.bulletin.patch
+git add services/core/java/com/android/server/notification/NotificationManagerService.java
+git add services/core/java/com/android/server/notification/NotificationManagerService.java.orig
+git add services/core/java/com/android/server/notification/PreferencesHelper.java
+git add services/tests/uiservicestests/src/com/android/server/notification/NotificationManagerServiceTest.java
+git add services/tests/uiservicestests/src/com/android/server/notification/NotificationManagerServiceTest.java.orig
+git add services/tests/uiservicestests/src/com/android/server/notification/PreferencesHelperTest.java
+git commit -m "0013-Check-sound-Uri-permission-when-creating-a-notification-channel.bulletin.patch"
+rm 0013-Check-sound-Uri-permission-when-creating-a-notification-channel.bulletin.patch
+
+frameworks/base/0014-Avoid-app-pinning-requests-if-the-Task-is-already-locked.bulletin.patch
+patch -p1 < 0014-Avoid-app-pinning-requests-if-the-Task-is-already-locked.bulletin.patch
+git add services/core/java/com/android/server/wm/LockTaskController.java
+git add services/tests/wmtests/src/com/android/server/wm/LockTaskControllerTest.java
+git commit -m "0014-Avoid-app-pinning-requests-if-the-Task-is-already-locked.bulletin.patch"
+rm 0014-Avoid-app-pinning-requests-if-the-Task-is-already-locked.bulletin.patch
+
+frameworks/native/0001-Ensure-objects-remain-valid-after-calling-policy.bulletin.patch
+patch -p1 < 0001-Ensure-objects-remain-valid-after-calling-policy.bulletin.patch
+git add services/inputflinger/dispatcher/InputDispatcher.cpp
+git add services/inputflinger/dispatcher/InputDispatcher.h
+git commit -m "0001-Ensure-objects-remain-valid-after-calling-policy.bulletin.patch"
+rm 0001-Ensure-objects-remain-valid-after-calling-policy.bulletin.patch
+
+frameworks/native/0002-Send-dim-layer-in-input-list.bulletin.patch
+patch -p1 < 0002-Send-dim-layer-in-input-list.bulletin.patch
+git add services/surfaceflinger/EffectLayer.h
+git commit -m "0002-Send-dim-layer-in-input-list.bulletin.patch"
+rm 0002-Send-dim-layer-in-input-list.bulletin.patch
+
+packages/apps/DocumentsUI/0001-Restrict-initial-location-for-ACTION_OPEN_DOCUMENT-_TREE.bulletin.patch
+patch -p1 < 0001-Restrict-initial-location-for-ACTION_OPEN_DOCUMENT-_TREE.bulletin.patch
+git add src/com/android/documentsui/AbstractActionHandler.java
+git add src/com/android/documentsui/picker/ActionHandler.java
+git add src/com/android/documentsui/util/FileUtils.java
+git commit -m "0001-Restrict-initial-location-for-ACTION_OPEN_DOCUMENT-_TREE.bulletin.patch"
+rm 0001-Restrict-initial-location-for-ACTION_OPEN_DOCUMENT-_TREE.bulletin.patch
+
+packages/apps/DocumentsUI/0002-Fix-for-SAF-loophole-in-the-lastAccessedStack-.bulletin.patch
+patch -p1 < 0002-Fix-for-SAF-loophole-in-the-lastAccessedStack-.bulletin.patch
+git add src/com/android/documentsui/picker/ActionHandler.java
+git commit -m "0002-Fix-for-SAF-loophole-in-the-lastAccessedStack-.bulletin.patch"
+rm 0002-Fix-for-SAF-loophole-in-the-lastAccessedStack-.bulletin.patch
+
+packages/apps/Settings/0001-Set-class-name-when-createConfirmDeviceCredentialIntent-API-is.bulletin.patch
+patch -p1 < 0001-Set-class-name-when-createConfirmDeviceCredentialIntent-API-is.bulletin.patch
+git add src/com/android/settings/password/BiometricFragment.java
+git commit -m "0001-Set-class-name-when-createConfirmDeviceCredentialIntent-API-is.bulletin.patch"
+rm 0001-Set-class-name-when-createConfirmDeviceCredentialIntent-API-is.bulletin.patch
+
+packages/apps/Settings/0002-Add-default-Sound-Picker-package-name.bulletin.patch
+patch -p1 < 0002-Add-default-Sound-Picker-package-name.bulletin.patch
+git add res/values/config.xml
+git add src/com/android/settings/RingtonePreference.java
+git commit -m "0002-Add-default-Sound-Picker-package-name.bulletin.patch"
+rm 0002-Add-default-Sound-Picker-package-name.bulletin.patch
+
+packages/apps/Settings/0003-Check-the-permission-of-the-callingUid-instead-of-the-calling-pa.bulletin.patch
+patch -p1 < 0003-Check-the-permission-of-the-callingUid-instead-of-the-calling-pa.bulletin.patch
+git add src/com/android/settings/applications/AppInfoBase.java
+git commit -m "0003-Check-the-permission-of-the-callingUid-instead-of-the-calling-pa.bulletin.patch"
+rm 0003-Check-the-permission-of-the-callingUid-instead-of-the-calling-pa.bulletin.patch
+
+packages/apps/Settings/0004-Remove-incorrect-call-to-Window-addFlags-with-a-system-flag.bulletin.patch
+patch -p1 < 0004-Remove-incorrect-call-to-Window-addFlags-with-a-system-flag.bulletin.patch
+git add src/com/android/settings/notification/NotificationAccessConfirmationActivity.java
+git commit -m "0004-Remove-incorrect-call-to-Window-addFlags-with-a-system-flag.bulletin.patch"
+rm 0004-Remove-incorrect-call-to-Window-addFlags-with-a-system-flag.bulletin.patch
+
+packages/modules/Permission/0001-Role-re-evaluation-should-respect-ask-every-time-choice-by-user.bulletin.patch
+patch -p1 < 0001-Role-re-evaluation-should-respect-ask-every-time-choice-by-user.bulletin.patch
+git add PermissionController/src/com/android/permissioncontroller/role/model/Permissions.java
+git commit -m "0001-Role-re-evaluation-should-respect-ask-every-time-choice-by-user.bulletin.patch"
+rm 0001-Role-re-evaluation-should-respect-ask-every-time-choice-by-user.bulletin.patch
+
+packages/providers/MediaProvider/0001-Expand-the-size-of-zero_addr-to-the-maximum-size-of-a-single-req.bulletin.patch
+patch -p1 < 0001-Expand-the-size-of-zero_addr-to-the-maximum-size-of-a-single-req.bulletin.patch
+git add jni/FuseDaemon.cpp
+git commit -m "0001-Expand-the-size-of-zero_addr-to-the-maximum-size-of-a-single-req.bulletin.patch"
+rm 0001-Expand-the-size-of-zero_addr-to-the-maximum-size-of-a-single-req.bulletin.patch
+
+packages/services/Telecomm/0001-Unbind-CS-if-connection-is-not-created-within-15-seconds-.bulletin.patch
+patch -p1 < 0001-Unbind-CS-if-connection-is-not-created-within-15-seconds-.bulletin.patch
+git add src/com/android/server/telecom/Call.java
+git add src/com/android/server/telecom/ConnectionServiceWrapper.java
+git add src/com/android/server/telecom/ConnectionServiceWrapper.java.rej
+git add src/com/android/server/telecom/LogUtils.java
+git add tests/src/com/android/server/telecom/tests/BasicCallTests.java
+git add tests/src/com/android/server/telecom/tests/CallsManagerTest.java
+git add tests/src/com/android/server/telecom/tests/ComponentContextFixture.java
+git add tests/src/com/android/server/telecom/tests/TestScheduledExecutorService.java
+git commit -m "0001-Unbind-CS-if-connection-is-not-created-within-15-seconds-.bulletin.patch"
+rm 0001-Unbind-CS-if-connection-is-not-created-within-15-seconds-.bulletin.patch
+
+packages/services/Telecomm/0002-Ensure-connection-is-unbound-on-call-redirection-timeout-.bulletin.patch
+patch -p1 < 0002-Ensure-connection-is-unbound-on-call-redirection-timeout-.bulletin.patch
+git add src/com/android/server/telecom/callredirection/CallRedirectionProcessor.java
+git add tests/src/com/android/server/telecom/tests/CallRedirectionProcessorTest.java
+git commit -m "0002-Ensure-connection-is-unbound-on-call-redirection-timeout-.bulletin.patch"
+rm 0002-Ensure-connection-is-unbound-on-call-redirection-timeout-.bulletin.patch
+
+packages/services/Telecomm/0003-Ensure-ScheduledExecutor-is-not-shutdown-before-scheduling-timeo.bulletin.patch
+patch -p1 < 0003-Ensure-ScheduledExecutor-is-not-shutdown-before-scheduling-timeo.bulletin.patch
+git add src/com/android/server/telecom/ConnectionServiceWrapper.java
+git add src/com/android/server/telecom/ConnectionServiceWrapper.java.orig
+git commit -m "0003-Ensure-ScheduledExecutor-is-not-shutdown-before-scheduling-timeo.bulletin.patch"
+rm 0003-Ensure-ScheduledExecutor-is-not-shutdown-before-scheduling-timeo.bulletin.patch
+
+packages/services/Telephony/0001-Prevent-overlays-on-Telephony-settings-screen-.bulletin.patch
+patch -p1 < 0001-Prevent-overlays-on-Telephony-settings-screen-.bulletin.patch
+git add src/com/android/phone/ADNList.java
+git add src/com/android/phone/CallFeaturesSetting.java
+git add src/com/android/phone/CdmaCallForwardOptions.java
+git add src/com/android/phone/CdmaCallOptions.java
+git add src/com/android/phone/ChangeIccPinScreen.java
+git add src/com/android/phone/EmergencyDialer.java
+git add src/com/android/phone/EnableIccPinScreen.java
+git add src/com/android/phone/GsmUmtsAdditionalCallOptions.java
+git add src/com/android/phone/GsmUmtsCallBarringOptions.java
+git add src/com/android/phone/GsmUmtsCallForwardOptions.java
+git add src/com/android/phone/GsmUmtsCallOptions.java
+git add src/com/android/phone/SimContacts.java
+git add src/com/android/phone/settings/fdn/BaseFdnContactScreen.java
+git add src/com/android/phone/settings/fdn/DeleteFdnContactScreen.java
+git add src/com/android/phone/settings/fdn/EditFdnContactScreen.java
+git add src/com/android/phone/settings/fdn/FdnList.java
+git add src/com/android/phone/settings/fdn/FdnSetting.java
+git add src/com/android/phone/settings/fdn/GetPin2Screen.java
+git commit -m "0001-Prevent-overlays-on-Telephony-settings-screen-.bulletin.patch"
+rm 0001-Prevent-overlays-on-Telephony-settings-screen-.bulletin.patch
+
+system/bt/0001-Fix-type-confusion-in-avdt_msg.cc.bulletin.patch
+patch -p1 < 0001-Fix-type-confusion-in-avdt_msg.cc.bulletin.patch
+git add stack/avdt/avdt_msg.cc
+git commit -m "0001-Fix-type-confusion-in-avdt_msg.cc.bulletin.patch"
+rm 0001-Fix-type-confusion-in-avdt_msg.cc.bulletin.patch
+
+
+
+git add core/java/com/android/internal/app/ChooserActivity.java
+git commit -m "충돌 삭제 0001-Verify-that-the-caller-has-permissions-for-the-icons-it-provided.bulletin.patch"
+
+
+@endcode
+
+@code
+
+vi build/make/core/version_defaults.mk
+PLATFORM_SECURITY_PATCH := 2025-04-01
+git add build/make/core/version_defaults.mk
+git commit -m "PLATFORM_SECURITY_PATCH := 2025-04-01"
+
+@endcode
+
+@code
+
+commit 95d4b9d8e6e506a151547451e6b887f27f7e70a7 (HEAD -> HCN_KSTB1157)
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 13:36:40 2025 +0900
+
+    PLATFORM_SECURITY_PATCH := 2025-04-01
+
+commit 360d6e65a267afaffd3dbf8ca138e7be019150a6
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 13:28:20 2025 +0900
+
+    0001-Fix-type-confusion-in-avdt_msg.cc.bulletin.patch
+
+commit a76317dfac16389f3755112095d1300b43590f1c
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 13:26:14 2025 +0900
+
+    0001-Prevent-overlays-on-Telephony-settings-screen-.bulletin.patch
+
+commit 05148956650ddd8787053eef685b27f97d469a4d
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 13:23:36 2025 +0900
+
+    0003-Ensure-ScheduledExecutor-is-not-shutdown-before-scheduling-timeo.bulletin.patch
+
+commit 297183f7319d3840335151c0981597ab5453bb88
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 13:22:44 2025 +0900
+
+    0002-Ensure-connection-is-unbound-on-call-redirection-timeout-.bulletin.patch
+
+commit 26d67b0a9d252b25df2c988e59b65210f90dbb4c
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 13:22:17 2025 +0900
+
+    0001-Unbind-CS-if-connection-is-not-created-within-15-seconds-.bulletin.patch
+
+commit 6597b70eec794d88a6e88dafb07fb619eb0c05e1
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:34:28 2025 +0900
+
+    0001-Expand-the-size-of-zero_addr-to-the-maximum-size-of-a-single-req.bulletin.patch
+
+commit 0ef58e2c5721e6ad3e3ab481d69ead969b5a76fc
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:33:00 2025 +0900
+
+    0001-Role-re-evaluation-should-respect-ask-every-time-choice-by-user.bulletin.patch
+
+commit 1abd92b9d14862b1296574466ab50aebd20266c6
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:31:16 2025 +0900
+
+    0004-Remove-incorrect-call-to-Window-addFlags-with-a-system-flag.bulletin.patch
+
+
+
+ok
+
+commit bb66c765884deaffd24bad48d5a06e5ed80b8a30
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:29:41 2025 +0900
+
+    0003-Check-the-permission-of-the-callingUid-instead-of-the-calling-pa.bulletin.patch
+
+commit 725cb3b9dd400a635ad1fa89c232eb231fee1b7b
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:28:08 2025 +0900
+
+    0002-Add-default-Sound-Picker-package-name.bulletin.patch
+
+commit 8d329173dd4d560774122121e8a5562a91592cae
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:24:35 2025 +0900
+
+    0001-Set-class-name-when-createConfirmDeviceCredentialIntent-API-is.bulletin.patch
+
+commit 6211054989d6b66c9ffc0ae3c93c7e342571f32d
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:23:54 2025 +0900
+
+    0002-Fix-for-SAF-loophole-in-the-lastAccessedStack-.bulletin.patch
+
+commit a8cabc74df1121ab2eb5a43a5dd1c2d3ca282375
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:23:20 2025 +0900
+
+    0001-Restrict-initial-location-for-ACTION_OPEN_DOCUMENT-_TREE.bulletin.patch
+
+commit 0a36f26f3768bddd3afda5baacda9624bdb85980
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:22:07 2025 +0900
+
+    0002-Send-dim-layer-in-input-list.bulletin.patch
+
+commit 1ed3459c032972887f67d73ac252adebb195274a
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:20:14 2025 +0900
+
+    0001-Ensure-objects-remain-valid-after-calling-policy.bulletin.patch
+
+commit dae2f2bcb4ea3e2789e60e6b301005cf7604caab
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:09:18 2025 +0900
+
+    0014-Avoid-app-pinning-requests-if-the-Task-is-already-locked.bulletin.patch
+
+commit b09b852baaa707c74f6fd1b4fc86686d1aa61ea0
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:08:14 2025 +0900
+
+    0013-Check-sound-Uri-permission-when-creating-a-notification-channel.bulletin.patch
+
+commit 9cb330d4924c759b3178bb3a4ae2b2c3433d2dba
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:06:42 2025 +0900
+
+    0012-Disable-Developer-options-by-default-for-managed-profiles-.bulletin.patch
+
+commit 8e91547f6766e136d91c5effa3a3546cca009c88
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:05:19 2025 +0900
+
+    0011-Prevent-media-button-receivers-targeting-activities.bulletin.patch
+
+commit d756a8e1e037501b120882683ce2a0c3276f0cb5
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:02:46 2025 +0900
+
+    0010-Check-underlying-intent-as-well-as-intent-selector.bulletin.patch
+
+commit 04e19bd25f40aabea0ca5c788fd1796dc1333e82
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:02:08 2025 +0900
+
+    0009-Do-not-allow-non-system-apps-to-provide-unverified-attributions.bulletin.patch
+
+commit d7c3e4db3ee3b18a6e3f4464cac8d5e472909797
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:01:33 2025 +0900
+
+    0008-Revise-the-checking-logic-of-checkPackage.bulletin.patch
+
+commit 85fc06c919da822397187051337f98849565e17c
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:00:52 2025 +0900
+
+    0007-Remove-notification-content-from-icon-a11y.bulletin.patch
+
+commit ee4018a11726dce2799db6b7802ecd21e048f280
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 12:00:07 2025 +0900
+
+    0006-Get-calling-package-name-using-a-reliable-API.bulletin.patch
+
+commit b3e8929917dfdcbe34be841967c057b5340068ff
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 11:59:20 2025 +0900
+
+    0005-Fix-settings-activity-showing-background-bp-when-createConfirmDe.bulletin.patch
+
+commit 928a1c54eebcbc5b13730faaa36ade4975a6b839
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 11:58:06 2025 +0900
+
+    0003-Check-cross-user-permissions-for-a-given-UID.bulletin.patch
+
+
+==========
+commit 4c08274592fdf80a2eb62f3a0059a52b83153dd0
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 11:54:18 2025 +0900
+
+    0001-Verify-that-the-caller-has-permissions-for-the-icons-it-provided.bulletin.patch
+
+==========
+
+commit 22f0b34a478fecaba5ed0c30a9e57b6d1c096c11
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 11:41:49 2025 +0900
+
+    0001--bmp-Fix-swizzler-initialization.bulletin.patch
+
+commit 8b16e690fbb6cc06d1d9b77e56f6bcf95881df69
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 23 11:38:30 2025 +0900
+
+    0001-Fail-fast-in-dng-sdk-if-an-invalid-tag-count-is-seen.bulletin.patch
+
+
+@endcode
+
+
+lgvh 
+console:/ $ dumpsys package com.google.android.gms | grep versionCode
+    versionCode=242632119 minSdk=30 targetSdk=34
+
+
+
+*/
+
+
+

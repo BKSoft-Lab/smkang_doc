@@ -1,0 +1,109 @@
+/*!
+@page work_20251125	2025.11.25
+
+---
+
+# LGHV K1100 DRM키 검증 작업
+
+- [Factory_SW_DRM_20240719QAQA04QA.zip](../data/202511/Factory_SW_DRM_20240719QAQA04QA.zip)
+- [K1100UA_DRM_HWPA_20251111_00000000.bin](../data/202511/K1100UA_DRM_HWPA_20251111_00000000.bin)
+- [K1100UA_Factory_Loader.zip](../data/202511/K1100UA_Factory_Loader.zip)
+- [K1100UA_Normal_Loader.zip](../data/202511/K1100UA_Normal_Loader.zip)
+- [ExoPlayer-demo-2.9.6-05072019.apk](../data/202511/ExoPlayer-demo-2.9.6-05072019.apk)
+- [drm-info-1-1-9-220331.apk](../data/202511/drm-info-1-1-9-220331.apk)
+- [K1100UA_DRM키검증_김희철.pdf](../data/202502/K1100UA_DRM키검증_김희철.pdf)
+
+https://confluence.kaonmedia.com/display/AP3/%5BK1100UA%5D+DRM+Key+Test
+
+- http://172.16.5.75/lghv/k1100ua/html/devops_maintenance_lghv_k1100ua_20241113_1.html
+- http://172.16.5.75/lghv/k1100ua/html/devops_maintenance_lghv_k1100ua_20241118_1.html
+- http://172.16.5.75/lghv/k1100ua/html/devops_maintenance_lghv_k1100ua_20241119_4.html
+
+
+@code
+1. unlock 시료 준비
+2. ap 준비 192.168.11.X 대역으로 설정하여 외부망에 연결 
+3. pc는 준비된 ap에 연결 가온 vpn 에 접속하여 사내망 DB에 접속가능 상태설정
+   KaonManager / KaonFactoryClientTool 설치
+
+히든메뉴 > STB 동작설정 > 5.1 ETHERNET BYPASS 설정 (설정됨)
+
+D:\platform-tools>adb connect 192.168.0.5:5555
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
+connected to 192.168.0.5:5555
+
+D:\platform-tools>adb root
+
+기존 키 백업 차후 키 기록후 비교
+D:\platform-tools>adb pull /dev/hwcfg/drm.bin
+D:\platform-tools>ren drm.bin drm_old.bin
+
+factory툴로 부팅하도록 로더교체
+usb에 K1100UA_Factory_Loader.zip 압축풀어 복사 usb 삽입 부팅
+부팅 시 ctrl+C 연타
+
+BOLT> dir usbdisk0
+BOLT> show devices
+BOLT> flash usbdisk0:K1100UA_BOOTLOADER_DEV_sysinit.bin flash1
+BOLT> flash usbdisk0:android_bsu.elf flash0.BSU1
+BOLT> flash usbdisk0:android_bsu.elf flash0.BSU2
+BOLT> reboot
+
+usb에 Factory_SW_DRM_20240719QAQA04QA.zip 압축풀어 넣고
+K1100UA_DRM_HWPA_20251111_00000000.bin 파일을 DRM_HWPA_00000000.bin 로 이름변경하여 usb에 복사
+usb 연결 후 부팅
+
+pc에서 KaonManager.exe 실행하여 20240719QAQA04Q 검색하여 DB에서 삭제
+pc에서 KaonFactoryClientTool.exe 실행하여 준비
+
+pc KaonFactoryClientTool 에서 모델설정하고 시작 버튼
+stb 팩토리툴에서 테스트 준비완료 되면 RED 버튼을 눌러 serialization 진행
+KaonFactoryClientTool PCB Number에 20240719QAQA04QA 붙여넣고 엔터 (2회)
+serialization 완료 후 재부팅
+
+안드로이드로 부팅복귀
+usb에 K1100UA_Normal_Loader.zip 압축풀어 넣고 usb 연결 후 부팅
+K1100UA_Normal_Loader.zip
+부팅시 ctrl+C
+BOLT> dir usbdisk0
+BOLT> show devices
+BOLT> flash usbdisk0:K1100UA_BOOTLOADER_PROD_1_60_E14_ForNoFusing.BIN flash1
+BOLT> flash usbdisk0:K1100UA_BSU_1_60_E16_ForNoFusing.elf flash0.BSU1
+BOLT> setenv -p FB_DEVICE_TYPE flash0
+BOLT> boot -bsu -noclose -elf flash0.BSU1;android boot -rawfs
+
+D:\platform-tools>adb root
+
+신규키 가져와 기존키과 비교
+D:\platform-tools>adb pull /dev/hwcfg/drm.bin
+D:\platform-tools>ren drm.bin drm_new.bin
+
+PS D:\platform-tools\2025-11-25> Get-FileHash -Path .\drm_old.bin -Algorithm md5
+Algorithm       Hash                              Path
+---------       ----                              ----
+MD5             A21917F32BCA6B0C43901A9CE9F63475  D:\platform-tools\2025-11-25\drm_old.bin
+
+PS D:\platform-tools\2025-11-25> Get-FileHash -Path .\drm_new.bin -Algorithm md5
+Algorithm       Hash                              Path
+---------       ----                              ----
+MD5             F6EB191850D494A0DC20A6409B257FD1  D:\platform-tools\2025-11-25\drm_new.bin
+
+
+Drm info 프로그램 설치 및 실행
+adb install drm-info-1-1-9-220331.apk
+adb shell am start -n com.androidfung.drminfo/com.androidfung.drminfo.TvActivity
+
+ExoPlayer 프로그램 설치 및 실행
+adb install ExoPlayer-demo-2.9.6-05072019.apk
+adb shell am start -n com.google.android.exoplayer2.demo/com.google.android.exoplayer2.demo.SampleChooserActivity
+
+GTS 테스트 진행
+run gts -m GtsGmscoreHostTestCases
+
+@endcode
+
+*/
+
+
+

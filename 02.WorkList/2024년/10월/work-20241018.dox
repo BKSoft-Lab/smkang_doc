@@ -1,0 +1,139 @@
+/*!
+@page work_20241018	2024.10.18
+
+# SKB수원
+---
+## VOC 안정성 2차 5번 셋탑 리부팅 관련한 Broadcom patch
+
+> 요청 사항 Mail
+
+[패치파일 - 0001-hals-hwc2-kick-start-unfinished-composition-cycle-on.patch](../data/20241018/0001-hals-hwc2-kick-start-unfinished-composition-cycle-on.patch)
+
+[패치파일 - hwcomposer_new.cpp](../data/20241018/hwcomposer_new.cpp)
+
+SKB_TEST 폴더에 만 적용 
+
+@code
+
+안녕하세요. 김원균PM입니다.
+
+@강성민매니저님,
+VOC 안정성 2차 5번 셋탑 리부팅 관련해 Broadcom이 패치 2개 제공했습니다 (메일 2개)
+VOC 안정성 3차(오늘 업데이트 예정)에 적용할 펌웨어 생성 요청 드립니다.
+
+감사합니다.
+김원균드림
+
+From: support@broadcom.com <support@broadcom.com> 
+Sent: Thursday, October 17, 2024 7:52 PM
+To: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>
+Cc: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>; 이상훈[LEE SANGHOON] <lsh@kaongroup.com>; 김경달[Kim Kyungdal] <kendall.kim@kaonbroadband.com>; 한동우[HAN DONG WOO] <tony.han@kaongroup.com>; 김연호[YEON HO KIM] <yhkim@kaongroup.com>
+Subject: {Case#CS00012373355} ##-  Updated: STB is rebooted while aging
+
+-begin-
+Update By: Jason Lim (Broadcom Corporation)
+Update Time: 17-October-2024 03:51:54
+
+Latest Response:
+0001-hals-hwc2-kick-start-unfinished-composition-cycle-on.patch has been uploaded.
+Hello, Kim WonKyun,
+ 
+I am not sure that the fix is related to the issue but it's worth trying it out. (kick start unfinished composition cycle on power-on)
+ 
+<vendor/broadcom/bcm_platform>
+0001-hals-hwc2-kick-start-unfinished-composition-cycle-on.patch
+ 
+Thanks,
+Jason Lim
+
+
+--- ISSUE SUMMARY ---
+Project: Kaon T-broad Android TV
+Product: BCM72160 
+Item: Android
+Status: Open-Assigned
+Requester: Kim WonKyun
+Company: Kaon Media 
+Priority: 2 - High
+
+Summary:
+STB is rebooted while aging
+
+Description:  
+(1) Symptom: STB is rebooted while aging with a scenario
+- Aging Scenario : 대기>동작 / 홈메뉴 네비게이션 / PIP홍보채널 진입 /  vod 재생 / 편성표 네비게이션 / 마이 메뉴 네비게이션 / 설정 메뉴 네비게이션 / 오디오 채널 진입 / 검색 실행 / 사방향 실행 / 각종 핫키입력 / 볼륨 업다운
+- Reproduction Rate : 1 time for 1 week
+- log
+10-14 21:26:51.070   713   787 I PackageManager: Update system package com.google.android.gms code path from /data/app/~~84caqMF3fyYOo8cXI2DAtA==/com.google.android.gms-9Gc2aVRQFAcQwhP2hlzQ-g== to /data/app/~~C8x1GdFyG3DwbsiIo33kNg==/com.google.android.gms-hfpBpwvqvYCH1-pxCCL1-A==; Retain data and using new
+10-14 21:27:59.478   713  3618 I ActivityManager: Process com.google.android.tv.remote.service (pid 1241) has died: vis FGS 
+10-14 21:27:59.752   713 22187 I ActivityManager: Process com.android.vending (pid 26826) has died: cch+5 CEM 
+10-14 21:28:00.075   713 30603 I ActivityManager: Process com.google.android.inputmethod.latin (pid 1508) has died: prcp IMPB
+10-14 21:28:00.079   713  5113 I WindowManager: WIN DEATH: Window{1b43c70 u0 InputMethod}
+10-14 22:50:08.895   713   743 E LocalDisplayAdapter: Can't find display mode with id 5408
+10-14 22:50:08.895   713   743 E LocalDisplayAdapter: Invalid display mode ID 5408
+10-14 22:50:16.102   713 31020 I DropBoxManagerService: add tag=system_app_crash isTagEnabled=true flags=0x2
+10-14 22:50:16.116   713 29262 W ActivityTaskManager:   Not force finishing home activity com.alticast.android.tv.local/.MainActivity
+10-14 22:50:16.374   713 29262 W BroadcastQueue: Skipping deliver [foreground] BroadcastRecord{ec95200 u-1 android.intent.action.SCREEN_ON} to ReceiverList{3900be1 5464 com.alticast.android.tv.local/10064/u0 remote:2cce148}: process gone or crashing
+10-14 22:50:18.527   713 31680 I ActivityManager: Process com.alticast.android.tv.local (pid 5464) has died: fg  TOP 
+10-14 22:50:26.254   713   886 I ActivityManager: Dumping to /data/anr/anr_2024-10-14-22-50-26-250
+10-14 22:50:26.367   713 31680 W ActivityManager: Scheduling restart of crashed service com.alticast.android.tv.local/.module.ump.service.IEpgAIDLService in 1000ms for connection
+10-14 22:50:26.378   713 31680 W ActivityTaskManager: Force removing ActivityRecord{bff5c50 u0 com.alticast.android.tv.local/.MainActivity t16}: app died, no saved state
+10-14 22:50:31.578 31068 31068 E AndroidRuntime: FATAL EXCEPTION: main
+10-14 22:50:31.578 31068 31068 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+10-14 22:50:31.670  9958 10086 E AndroidRuntime: FATAL EXCEPTION: GoogleApiHandler
+10-14 22:50:31.670  9958 10086 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+10-14 22:50:38.201 31142 31142 D Zygote32Timing: BeginPreload took to complete: 1036ms
+10-14 22:50:42.907 31126 31235 D BootAnimation: BootAnimationShownTiming start time: 532710082ms
+
+(2) Refered HW/ SW version name: 
+(3) Upgrade 
+BOLT: ?
+kernel/roofs : ?
+toolchain : ?
+Android TV(version & label) : Android 12, AOSP-STT5.221215.001_PDK-STT5.220617.001
+Build Target (e.g. elfin, elfin_nab, elfin_nvi..) : ?
+Android TV 3PIP package (e.g. refsw_release_unified_20180726_3pip_filtered_kaonmedia.tgz, ...): ? 
+(3) Exact steps to reproduce the problem or defect:
+(4) Reproduced issue on Reference platform/SW? 
+(5) Log file attached : STB_rebooted.zip
+(6) Chip Full P/N (with CAS information) : 72160ZBKFEBB00B0T + BCM3383MKFEBG + 59400KMLGB0M
+(7) BP3 part : yes
+
+
+@endcode
+
+## SKB LogSystem(logAgent, QSM) 3.7.9.7 적용
+
+> 요청 사항 Mail
+
+[첨부파일 - skb_logsystem_20241018.zip](../data/20241018/skb_logsystem_20241018.zip)
+
+@code
+
+안녕하세요. SPTEK 전우진입니다.
+
+@김원균 PM님,
+첨부된 파일중에 아래 내용 git 반영 및 추후 릴리즈 될 펌웨어에 포함 부탁드립니다.
+적용 필요 파일	파일 내용	탑재 경로	비고
+native\skb_logsystem	logsystem 실행 바이너리		　3.7.9.7 버전
+
+
+버전 확인 방법 : 
+K1100UA:/ # getprop | grep logsystem.ver
+[sys.skb.logsystem.ver]: [3.7.9.7_CATV]
+
+
+그럼, 수고하십시오.
+감사합니다.
+
+@endcode
+
+Git Commit
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/19c71f759bdd767719a1f1cbb78febd4b5e5367f
+
+---
+<br>
+---
+
+*/

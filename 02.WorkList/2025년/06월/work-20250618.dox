@@ -1,0 +1,247 @@
+/*!
+@page work_20250618	2025.06.18
+
+---
+# LGHV K1100UA SPL 2025-05-01
+
+> [2025-05-SC-20250530T013325Z-1-001.zip](../data/202506/2025-05-SC-20250530T013325Z-1-001.zip)
+
+@code
+├── external
+│   └── freetype
+│       └── 001-DO-NOT-MERGE-Return-if-the-subglyph-count-is-too-large.patch
+├── frameworks
+│   └── base
+│       ├── 001-RESTRICT-AUTOMERGE-Clear-the-BAL-allowlist-duration.patch
+│       ├── 002-RESTRICT-AUTOMERGE-Normalize-home-intent.patch
+│       ├── 003-No-BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS.patch
+│       ├── 004-Allow-core-uids-to-register-receiver-as-android.patch
+│       ├── 005-Remove-invalid-null-check-for-callingPackage.patch
+│       ├── 006-vims-better-handle-assistant-force-stop.patch
+│       ├── 007-Dont-allow-non-system-uids-to-use-android-as-calling-package.patch
+│       └── 008-DO-NOT-MERGE-Impose-a-threshold-on-the-number-of-attributed-op-entries-returned-in-a-binder-call.patch
+├── packages
+│   ├── apps
+│   │   └── Settings
+│   │       └── 001-CDM-Checks-NLS-component-name-instead-of-package-name.patch
+│   └── modules
+│       └── Wifi
+│           └── 001-Add-size-check-for-IP-config.patch
+└── system
+    └── bt
+        ├── 001-should-not-be-subject-to-this-confusion.patch
+        ├── 002-Fix-OOB-read-in-add_attr.patch
+        └── 003-Fix-authentication-bypass-bug-in-SMP.patch
+
+@endcode
+
+@code
+
+
+external/freetype/001-DO-NOT-MERGE-Return-if-the-subglyph-count-is-too-large.patch
+patch -p1 < 001-DO-NOT-MERGE-Return-if-the-subglyph-count-is-too-large.patch
+git add src/truetype/ttgload.c
+git commit -m "001-DO-NOT-MERGE-Return-if-the-subglyph-count-is-too-large.patch"
+
+frameworks/base/001-RESTRICT-AUTOMERGE-Clear-the-BAL-allowlist-duration.patch
+patch -p1 < 001-RESTRICT-AUTOMERGE-Clear-the-BAL-allowlist-duration.patch
+git add services/core/java/com/android/server/am/PendingIntentRecord.java
+git add services/tests/mockingservicestests/src/com/android/server/am/PendingIntentControllerTest.java
+git commit -m "001-RESTRICT-AUTOMERGE-Clear-the-BAL-allowlist-duration.patch"
+
+frameworks/base/002-RESTRICT-AUTOMERGE-Normalize-home-intent.patch
+patch -p1 < 002-RESTRICT-AUTOMERGE-Normalize-home-intent.patch
+git add services/core/java/com/android/server/wm/ActivityRecord.java
+git add services/core/java/com/android/server/wm/ActivityStartInterceptor.java
+git add services/core/java/com/android/server/wm/ActivityStarter.java
+git add services/tests/wmtests/src/com/android/server/wm/ActivityStartInterceptorTest.java
+git commit -m "002-RESTRICT-AUTOMERGE-Normalize-home-intent.patch"
+
+frameworks/base/003-No-BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS.patch
+patch -p1 < 003-No-BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS.patch
+git add services/core/java/com/android/server/speech/RemoteSpeechRecognitionService.java
+git commit -m "003-No-BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS.patch"
+
+frameworks/base/004-Allow-core-uids-to-register-receiver-as-android.patch
+patch -p1 < 004-Allow-core-uids-to-register-receiver-as-android.patch
+git add services/core/java/com/android/server/am/ActivityManagerService.java
+git add services/core/java/com/android/server/am/ActivityManagerService.java.orig
+git commit -m "004-Allow-core-uids-to-register-receiver-as-android.patch"
+
+frameworks/base/005-Remove-invalid-null-check-for-callingPackage.patch
+patch -p1 < 005-Remove-invalid-null-check-for-callingPackage.patch
+git add packages/PackageInstaller/src/com/android/packageinstaller/InstallStart.java
+git commit -m "005-Remove-invalid-null-check-for-callingPackage.patch"
+
+frameworks/base/006-vims-better-handle-assistant-force-stop.patch
+patch -p1 < 006-vims-better-handle-assistant-force-stop.patch
+git add services/voiceinteraction/java/com/android/server/voiceinteraction/VoiceInteractionManagerService.java
+git commit -m "006-vims-better-handle-assistant-force-stop.patch"
+
+frameworks/base/007-Dont-allow-non-system-uids-to-use-android-as-calling-package.patch
+patch -p1 < 007-Dont-allow-non-system-uids-to-use-android-as-calling-package.patch
+git add services/core/java/com/android/server/am/ActivityManagerService.java
+git add services/core/java/com/android/server/am/ActivityManagerService.java.orig
+git commit -m "007-Dont-allow-non-system-uids-to-use-android-as-calling-package.patch"
+
+frameworks/base/008-DO-NOT-MERGE-Impose-a-threshold-on-the-number-of-attributed-op-entries-returned-in-a-binder-call.patch
+patch -p1 < 008-DO-NOT-MERGE-Impose-a-threshold-on-the-number-of-attributed-op-entries-returned-in-a-binder-call.patch
+git add services/core/java/com/android/server/appop/AppOpsService.java
+git commit -m "008-DO-NOT-MERGE-Impose-a-threshold-on-the-number-of-attributed-op-entries-returned-in-a-binder-call.patch"
+
+packages/apps/Settings/001-CDM-Checks-NLS-component-name-instead-of-package-name.patch
+patch -p1 < 001-CDM-Checks-NLS-component-name-instead-of-package-name.patch
+git add src/com/android/settings/notification/NotificationAccessConfirmationActivity.java
+git commit -m "001-CDM-Checks-NLS-component-name-instead-of-package-name.patch"
+
+packages/modules/Wifi/001-Add-size-check-for-IP-config.patch
+patch -p1 < 001-Add-size-check-for-IP-config.patch
+git add service/java/com/android/server/wifi/WifiConfigurationUtil.java
+git add service/tests/wifitests/src/com/android/server/wifi/WifiConfigurationUtilTest.java
+git commit -m "001-Add-size-check-for-IP-config.patch"
+
+system/bt/001-should-not-be-subject-to-this-confusion.patch
+patch -p1 < 001-should-not-be-subject-to-this-confusion.patch
+git add bta/av/bta_av_aact.cc
+git commit -m "001-should-not-be-subject-to-this-confusion.patch"
+
+system/bt/002-Fix-OOB-read-in-add_attr.patch
+patch -p1 < 002-Fix-OOB-read-in-add_attr.patch
+git add stack/sdp/sdp_discovery.cc
+git commit -m "002-Fix-OOB-read-in-add_attr.patch"
+
+system/bt/003-Fix-authentication-bypass-bug-in-SMP.patch
+patch -p1 < 003-Fix-authentication-bypass-bug-in-SMP.patch
+git add stack/smp/smp_act.cc
+git commit -m "003-Fix-authentication-bypass-bug-in-SMP.patch"
+
+@endcode
+
+@code
+
+vi build/make/core/version_defaults.mk
+PLATFORM_SECURITY_PATCH := 2025-05-01
+git add build/make/core/version_defaults.mk
+git commit -m "PLATFORM_SECURITY_PATCH := 2025-05-01"
+
+@endcode
+
+# LGHV K1100UA SPL 2025-06-01
+
+> [2025-06-SC-20250618T051532Z-1-001.zip](../data/202506/2025-06-SC-20250618T051532Z-1-001.zip)
+
+@code
+├── frameworks
+│   ├── av
+│   │   └── 001-clean-up-AMediaCodec_getInput-OutputBuffer-semantics.patch
+│   └── base
+│       ├── 001-Zero-initialize-CursorWindow-buffer.patch
+│       ├── 002-Use-ParceledListSlice-for-ZenModeConfig-and-AutomaticZenRules.patch
+│       ├── 003-Fixing-the-default-values-for-pending-intent-at-LocationPendingIntentTransport.patch
+│       ├── 004-Verify-KeyEvents-in-IME.patch
+│       ├── 005-Unbind-an-A11yService-from-onNullBinding.patch
+│       ├── 006-Guard-against-excessively-long-package-names-and-certificates.patch
+│       └── 007-Restrict-subclass-construction.patch
+├── packages
+│   ├── apps
+│   │   ├── Bluetooth
+│   │   │   └── 001-RESTRICT-AUTOMERGE-parse-userId-from-authority-in-opp-in-the-same-way-as-ContentProvider.patch
+│   │   └── ManagedProvisioning
+│   │       ├── 001-Remove-invalid-URLs-in-terms-activity.patch
+│   │       └── 002-Fix-confused-deputy-vulnerability-in-termsActivity-to-access-terms_disclaimer-Uri-only-if-the-calling-app-has-the-permissions.patch
+│   └── modules
+│       └── Connectivity
+│           └── 001-Add-missing-permission-check-to-offerNetwork.patch
+└── system
+    └── bt
+        └── 001-Backport-regression-fixes-for-288144143.patch
+@endcode
+
+@code
+
+frameworks/av/001-clean-up-AMediaCodec_getInput-OutputBuffer-semantics.patch
+patch -p1 < 001-clean-up-AMediaCodec_getInput-OutputBuffer-semantics.patch
+git add media/ndk/NdkMediaCodec.cpp
+git add media/ndk/include/media/NdkMediaCodec.h
+git commit -m "001-clean-up-AMediaCodec_getInput-OutputBuffer-semantics.patch"
+
+frameworks/base/001-Zero-initialize-CursorWindow-buffer.patch
+patch -p1 < 001-Zero-initialize-CursorWindow-buffer.patch
+git add libs/androidfw/CursorWindow.cpp
+git commit -m "001-Zero-initialize-CursorWindow-buffer.patch"
+
+frameworks/base/002-Use-ParceledListSlice-for-ZenModeConfig-and-AutomaticZenRules.patch
+patch -p1 < 002-Use-ParceledListSlice-for-ZenModeConfig-and-AutomaticZenRules.patch
+git add core/java/android/app/AutomaticZenRule.java
+git add core/java/android/app/INotificationManager.aidl
+git add core/java/android/app/NotificationManager.java
+git add core/java/android/service/notification/ZenModeConfig.java
+git add services/core/java/com/android/server/notification/NotificationManagerService.java
+git add services/core/java/com/android/server/notification/NotificationManagerService.java.orig
+git add services/tests/uiservicestests/src/com/android/server/notification/ZenModeConfigTest.java
+git commit -m "002-Use-ParceledListSlice-for-ZenModeConfig-and-AutomaticZenRules.patch"
+
+frameworks/base/003-Fixing-the-default-values-for-pending-intent-at-LocationPendingIntentTransport.patch
+patch -p1 < 003-Fixing-the-default-values-for-pending-intent-at-LocationPendingIntentTransport.patch
+git add services/core/java/com/android/server/location/provider/LocationProviderManager.java
+git commit -m "003-Fixing-the-default-values-for-pending-intent-at-LocationPendingIntentTransport.patch"
+
+frameworks/base/004-Verify-KeyEvents-in-IME.patch
+patch -p1 < 004-Verify-KeyEvents-in-IME.patch
+git add core/java/android/inputmethodservice/IInputMethodSessionWrapper.java 
+git commit -m "004-Verify-KeyEvents-in-IME.patch"
+
+frameworks/base/005-Unbind-an-A11yService-from-onNullBinding.patch
+patch -p1 < 005-Unbind-an-A11yService-from-onNullBinding.patch
+git add services/accessibility/java/com/android/server/accessibility/AccessibilityServiceConnection.java
+git commit -m "005-Unbind-an-A11yService-from-onNullBinding.patch"
+
+frameworks/base/006-Guard-against-excessively-long-package-names-and-certificates.patch
+patch -p1 < 006-Guard-against-excessively-long-package-names-and-certificates.patch
+git add apex/blobstore/framework/java/android/app/blob/BlobStoreManager.java
+git add apex/blobstore/service/java/com/android/server/blob/BlobStoreSession.java
+git commit -m "006-Guard-against-excessively-long-package-names-and-certificates.patch"
+
+frameworks/base/007-Restrict-subclass-construction.patch
+patch -p1 < 007-Restrict-subclass-construction.patch
+git add core/java/android/content/pm/PackageParser.java
+git commit -m "007-Restrict-subclass-construction.patch"
+
+packages/apps/Bluetooth/001-RESTRICT-AUTOMERGE-parse-userId-from-authority-in-opp-in-the-same-way-as-ContentProvider.patch
+patch -p1 < 001-RESTRICT-AUTOMERGE-parse-userId-from-authority-in-opp-in-the-same-way-as-ContentProvider.patch
+git add src/com/android/bluetooth/opp/BluetoothOppSendFileInfo.java
+git commit -m "001-RESTRICT-AUTOMERGE-parse-userId-from-authority-in-opp-in-the-same-way-as-ContentProvider.patch"
+
+packages/apps/ManagedProvisioning/001-Remove-invalid-URLs-in-terms-activity.patch
+patch -p1 < 001-Remove-invalid-URLs-in-terms-activity.patch
+git add src/com/android/managedprovisioning/common/HtmlToSpannedParser.java
+git commit -m "001-Remove-invalid-URLs-in-terms-activity.patch"
+
+packages/apps/ManagedProvisioning/002-Fix-confused-deputy-vulnerability-in-termsActivity-to-access-terms_disclaimer-Uri-only-if-the-calling-app-has-the-permissions.patch
+patch -p1 < 002-Fix-confused-deputy-vulnerability-in-termsActivity-to-access-terms_disclaimer-Uri-only-if-the-calling-app-has-the-permissions.patch
+git add src/com/android/managedprovisioning/parser/DisclaimersParser.java
+git commit -m "002-Fix-confused-deputy-vulnerability-in-termsActivity-to-access-terms_disclaimer-Uri-only-if-the-calling-app-has-the-permissions.patch"
+
+packages/modules/Connectivity/001-Add-missing-permission-check-to-offerNetwork.patch
+patch -p1 < 001-Add-missing-permission-check-to-offerNetwork.patch
+git add service/src/com/android/server/ConnectivityService.java
+git commit -m "001-Add-missing-permission-check-to-offerNetwork.patch"
+
+system/bt/001-Backport-regression-fixes-for-288144143.patch
+patch -p1 < 001-Backport-regression-fixes-for-288144143.patch
+git add stack/btm/btm_ble.cc
+git add stack/l2cap/l2c_ble.cc
+git commit -m "001-Backport-regression-fixes-for-288144143.patch"
+
+@endcode
+
+@code
+
+vi build/make/core/version_defaults.mk
+PLATFORM_SECURITY_PATCH := 2025-06-01
+git add build/make/core/version_defaults.mk
+git commit -m "PLATFORM_SECURITY_PATCH := 2025-06-01"
+
+@endcode
+
+*/

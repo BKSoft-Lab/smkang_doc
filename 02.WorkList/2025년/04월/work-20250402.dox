@@ -1,0 +1,145 @@
+/*!
+@page work_20250402	2025.04.02
+
+---
+
+# K1100 -  히든메뉴 HDCP 설정 변경정보는 저장여부 확인
+
+@code
+안녕하세요.
+
+강성민 매니저님,
+
+히든에서 테스트를 위한? HDCP 설정 변경정보는 저장이 안되는것으로 되어 있을 것 같은데요.
+다른 모델과 비교해서 확인해서 공유해 주시기 바랍니다.
+
+수고하세요.
+
+From: 임동은 <kgb84@naver.com> 
+Sent: Wednesday, April 2, 2025 8:30 AM
+To: 최성훈[CHOI SUNGHOON] <tony.choi@kaongroup.com>
+Subject: [기술중립성 - Issue #12860] [공유] 호남 한국아델리움 런닝머신과 UDH2(가온)간 연결하면 화면이 깜빡임 로그 공유
+
+임동은이(가) 일감 #12860을(를) 수정하였습니다. 
+________________________________________
+•	담당자을(를) 김건중에서 최성훈(으)로 변경되었습니다.
+@ 최성훈님
+히든메뉴내에서 HDCP On --> Off할 경우에 조치되는 것 같습니다. 그런데 HDCP OFF하고 셋톱 리부팅하면 다시 HDCP ON으로 되는 것 같습니다. 확인 부탁드립니다.
+________________________________________
+Issue #12860: [공유] 호남 한국아델리움 런닝머신과 UDH2(가온)간 연결하면 화면이 깜빡임 로그 공유 진행중 
+•	저자: 임동은
+•	상태: 진행
+•	우선순위: 보통
+•	담당자: 최성훈
+•	시작시간: 2025-03-17
+@ 최성훈님,
+UHD2(K1100UA) 런닝머신의 모니터 연결시 화면 줄가고 깜박임 현상
+
+@endcode	
+
+# 테스트
+@code
+
+plapi 로그레벨 변경
+
+console:/ $ plapi setloglevel 6
+console:/ $ plapiapp-system plapi setloglevel 6
+kaon.hardware.plapi@1.0-plapiapp
+plapi_cover: command=plapi
+plapi_setLogLevel_cover: command=setloglevel
+calling plapi_setLogLevel(logLevel=6)
+called plapi_setLogLevel()=0
+
+finished.
+
+console:/ $ plapiapp-system plapi getloglevel
+kaon.hardware.plapi@1.0-plapiapp
+plapi_cover: command=plapi
+plapi_getLogLevel_cover: command=getloglevel
+calling plapi_getLogLevel(logLevel=0xfff10af8)
+called plapi_getLogLevel()=0
+logLevel=6
+
+finished.
+
+logcat 시작
+130|console:/ $ logcat | grep hdcp
+
+HDCP 설정 disable
+04-02 10:19:32.287  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: HDCP disabled
+04-02 10:19:32.341  3231  3231 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=0): SetDisplaySettings()=0
+04-02 10:19:32.424  3231  3231 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=0): SetDisplaySettings()=0
+04-02 10:19:32.424  3231  3231 I kaon-plapi: service: enableHdcp(hdcp=0): 0
+04-02 10:19:32.424  3231  3231 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=0)=0
+04-02 10:19:32.461  3231  3274 D kaon-plapi: V service: PLAPIService: onNexusCallback: HDCP: hdcpState=0, hdcpError=1
+04-02 10:19:32.613  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: Deferring StartHdcp until hdcpDelayAfterEnableDisplay
+04-02 10:19:32.617  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: Deferring StartHdcp until hdcpDelayAfterEnableDisplay
+04-02 10:19:32.722  3231  3274 D kaon-plapi: V service: PLAPIService: onNexusCallback: HDCP: hdcpState=1, hdcpError=0
+
+HDCP 설정 downgrade
+04-02 10:19:37.641  3231  3231 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=1): SetDisplaySettings()=0
+04-02 10:19:37.708  3231  3231 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=1): SetDisplaySettings()=0
+04-02 10:19:37.708  3231  3231 I kaon-plapi: service: enableHdcp(hdcp=1): 0
+04-02 10:19:37.708  3231  3231 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=1)=0
+04-02 10:19:37.771  3231  3274 D kaon-plapi: V service: PLAPIService: onNexusCallback: HDCP: hdcpState=0, hdcpError=1
+04-02 10:19:37.835  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: Deferring StartHdcp until displayEnabled
+04-02 10:19:37.839  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: Deferring StartHdcp until displayEnabled
+04-02 10:19:37.965  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: Deferring StartHdcp until hdcpDelayAfterEnableDisplay
+04-02 10:19:38.035  3231  3274 D kaon-plapi: V service: PLAPIService: onNexusCallback: HDCP: hdcpState=1, hdcpError=0
+
+
+04-02 10:19:39.191  3015  3061 I nexus   : nxserverlib: starting HDCP authentication: 1.x because of hdcp callback, pending_start, cnt 2
+
+
+HDCP 설정 auto
+04-02 10:19:45.841  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: HDCP disabled
+04-02 10:19:45.891  3231  3312 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=2): SetDisplaySettings()=0
+04-02 10:19:45.957  3231  3312 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=2): SetDisplaySettings()=0
+04-02 10:19:45.957  3231  3312 I kaon-plapi: service: enableHdcp(hdcp=2): 0
+04-02 10:19:45.957  3231  3312 D kaon-plapi: V service: pl_cj_setHdcp(hdcp=2)=0
+04-02 10:19:46.087  3231  3274 D kaon-plapi: V service: PLAPIService: onNexusCallback: HDCP: hdcpState=1, hdcpError=0
+04-02 10:19:46.092  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: Deferring StartHdcp until displayEnabled
+04-02 10:19:46.164  3033  3033 I NEXUS-LOG: nexus_hdmi_output_hdcp: Deferring StartHdcp until hdcpDelayAfterEnableDisplay
+04-02 10:19:46.416  3231  3274 D kaon-plapi: V service: PLAPIService: onNexusCallback: HDCP: hdcpState=1, hdcpError=0
+04-02 10:19:47.416  3015  3061 I nexus   : nxserverlib: starting HDCP authentication: auto first pass (2.2 CST 1 or 1.x) because of hdcp callback, follow, cnt 1
+
+
+
+
+
+git commit -m "updated CM Firmware 1.1.6"
+
+
+나의 말:
+IPTV STB의 hdcp on/off 기능을 확인하기 위한 방법
+
+
+1|console:/ $ getprop | grep hdcp
+[persist.sys.hdcp_checking]: [always]
+[ro.vendor.nx.server.hdcp1x_keys]: [/dev/hwcfg/drm_hdcp1x.bin]
+[ro.vendor.nx.server.hdcp2x_keys]: [/dev/hwcfg/drm.bin]
+[vendor.nx.hdcp.force]: [1]
+
+console:/ $ getprop | grep hdcp
+[persist.sys.hdcp_checking]: [drm-only]
+[ro.vendor.nx.server.hdcp1x_keys]: [/dev/hwcfg/drm_hdcp1x.bin]
+[ro.vendor.nx.server.hdcp2x_keys]: [/dev/hwcfg/drm.bin]
+[vendor.nx.hdcp.force]: [1]
+
+console:/ $ getprop | grep hdcp
+[persist.sys.hdcp_checking]: [never]
+[ro.vendor.nx.server.hdcp1x_keys]: [/dev/hwcfg/drm_hdcp1x.bin]
+[ro.vendor.nx.server.hdcp2x_keys]: [/dev/hwcfg/drm.bin]
+[vendor.nx.hdcp.force]: [1]
+
+
+417654 2025-03-06 17:26:37,393 - INFO - --------- beginning of crash
+@endcode
+
+
+
+
+*/
+
+
+

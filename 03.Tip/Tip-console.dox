@@ -1,0 +1,311 @@
+/*!
+@page tip_console 콘솔입력
+
+
+
+adb shell
+su
+
+K1100UA:/ # ls /storage
+749A-0B6D  emulated  self  taurusDb
+
+logcat -v time -d > /storage/749A-0B6D/logcat_1.log
+logcat -v time -d > /storage/749A-0B6D/logcat_4.log
+
+cp system@app@DisneyPlus@DisneyPlus.apk@classes.vdex /storage/901F-4CDF/
+cp system@app@COUPANG@COUPANG.apk@classes.vdex /storage/901F-4CDF/
+cp system@app@TVING@TVING.apk@classes.vdex /storage/901F-4CDF/
+cp system@app@BookClub@BookClub.apk@classes.vdex /storage/901F-4CDF/
+cp system@app@YBM@YBM.apk@classes.vdex /storage/901F-4CDF/
+
+screencap -p /mnt/media_rw/749A-0B6D/snd_setting.png
+
+
+# 설치된  app 확인  
+@code
+pm list package -l | grep -E "kr.co.tvpoint.tbroad|com.castis.vod_service|com.wowtv.mme” 
+package:com.wowtv.mme 
+package:com.castis.vod_service 
+package:kr.co.tvpoint.tbroad 
+@endcode
+
+# hdmi 정보 
+@code
+cat /proc/brcm/hdmi_output    
+
+console:/ $ settings list global | grep hdmi 
+hdmi_control_auto_device_off_enabled=1 
+hdmi_control_auto_wakeup_enabled=1 
+hdmi_control_enabled=1 
+
+settings put global hdmi_control_auto_device_off_enabled 1 
+settings put global hdmi_control_auto_wakeup_enabled 1 
+  
+frameworks/base/packages/SettingsProvider/res/values/defaults.xml
+    <!-- Default for setting for Settings.Global.HDMI_CONTROL_ENABLED -->
+	<bool name="def_hdmiControlEnabled">false</bool>
+
+@endcode
+
+# macadress
+console:/ # cat /sys/class/net/eth0/address
+24:e4:ce:82:b5:ca
+
+
+# 화면캡쳐 
+@code
+screencap -p /mnt/media_rw/749A-0B6D/snd_setting.png 
+@endcode
+
+# 프로세스 비활성화/활성화/확인
+@code
+비활성화
+pm disable-user --user 0 com.cjhv.customizer 
+프로세스 확인
+pidof com.cjhv.customizer
+활성화
+pm enable --user 0 com.cjhv.customizer
+@endcode
+
+# 슬립모드로 재부팅 
+@code
+reboot quiescent
+@endcode
+
+# grep
+@code
+grep -r '특정내용' --include='*.sh'
+@endcode
+
+# usb 모드변경 
+@code
+reboot usbrole
+@endcode
+
+# gtvs 버전확인
+@code
+console:/ $ dumpsys package com.google.android.gms | grep versionCode
+    versionCode=244035110 minSdk=30 targetSdk=34
+@endcode
+
+# 구글설정앱 실행
+@code
+adb shell am start -n com.android.tv.settings/com.android.tv.settings.MainSettings 
+@endcode
+
+# brcm 정보 
+@code
+cat /proc/brcm/video_decoder ## 디코더 상태
+cat /proc/brcm/frontend        ## 튠 정보 
+cat /proc/brcm/hdmi_output     ## HDMI 정보 
+@endcode
+
+# 키 입력
+@code
+adb shell input keyevent 201
+
+input keyevent 201
+@endcode
+
+보이지 않는 특수문자 문제로 인해 파일명이 다르게 인식됨.
+ls -l | cat -A 명령을 사용하여 확인.
+mv를 이용해 정상적인 파일명으로 변경 후 다시 빌드.
+
+# 키 메크로 실행 / cpu 점유율 확인
+https://injunech.tistory.com/379
+@code
+아래코드를 복사하여 콘솔에 붙여넣기
+while 
+do 
+input keyevent 3
+sleep 2
+input keyevent 23
+sleep 2
+input keyevent 20
+sleep 2
+input keyevent 19
+sleep 2
+input keyevent 111
+sleep 2
+day=`date "+%Y-%m-%d %H:%M:%S"` 
+top=`dumpsys cpuinfo | grep TOTAL: | grep -v grep` 
+printf "%s %s\n" "$day" "$top" 
+sleep 3 
+done; 
+
+@endcode
+
+#remount 방법
+
+@code
+- "adb disable-verity" 를 할 경우 /mnt/scratch 파티션 이 생성되어 FW upgrade 가 실패하는 경우가 발생하니 테스트 후에는 꼭 "adb enable-verity" 를 실행해야 합니다.
+
+- userdebug 버전에서 adb로만 가능
+$ adb root
+$ adb disable-verity
+$ adb reboot
+$ adb wait-for-device
+$ adb root
+$ adb remount
+@endcode
+
+#app install
+
+@code
+user_debug 에서만 ??
+adb install -r KaonManagerService.apk
+adb uninstall com.kaon.lowbettery
+@endcode
+
+# 설치된  app 확인  
+@code
+pm list package -l | grep -E "kr.co.tvpoint.tbroad|com.castis.vod_service|com.wowtv.mme” 
+package:com.wowtv.mme 
+package:com.castis.vod_service 
+package:kr.co.tvpoint.tbroad 
+@endcode
+
+#app 실행 및 메시지 전송
+@code
+adb shell am start -n com.kaon.lowbettery/.MainActivity
+adb shell am startservice -n com.kaon.lowbettery/.KeyEventService
+adb shell am broadcast -a "com.kaonmedia.kaonmanagerservice" --ez "test" true
+@endcode
+
+#networkmonitor 관련
+@code
+reboot 추가시
+networkmonitor.te 
+allow networkmonitor powerctl_prop:property_service set;
+
+cat /proc/uptime  추가시
+networkmonitor.te 
+allow networkmonitor proc_uptime:file r_file_perms;
+@endcode
+
+#app 실행 및 메시지 전송
+@code
+adb shell am start -n com.kaon.lowbettery/.MainActivity
+adb shell am startservice -n com.kaon.lowbettery/.KeyEventService
+adb shell am broadcast -a "com.kaonmedia.kaonmanagerservice" --ez "test" true
+@endcode
+
+#tuner 상태확인
+@code
+console:/ $ cat /proc/brcm/frontend
+frontend  0: 00000000b97880da:000000008be96c41, acquired y
+ Cable/QAM
+    freq=0 hz, modulation=Qam-1073741824, annex=▒
+    lockStatus=unlocked, snr=0dB (est), fecCorrected=-559031686, fecUncorrected=-559031686
+ ATSC/VSB
+    freq=0hz, modulation=8
+    lockStatus=unlocked, snr=0dB (est), fecCorrected=0, fecUncorrected=0
+frontend  1: 000000005e286eaf:000000006e5707bf, acquired y
+ Cable/QAM
+    freq=0 hz, modulation=Qam-1073741824, annex=▒
+    lockStatus=unlocked, snr=0dB (est), fecCorrected=-559031686, fecUncorrected=-559031686
+ ATSC/VSB
+    freq=0hz, modulation=8
+    lockStatus=unlocked, snr=0dB (est), fecCorrected=0, fecUncorrected=0
+frontend  2: 000000001374cd09:00000000037bfb04, acquired y
+ Cable/QAM
+    freq=729000000 hz, modulation=Qam-256, annex=B
+    lockStatus=locked, snr=38dB (est), fecCorrected=0, fecUncorrected=0
+frontend  3: 000000001d3de590:00000000037bfb04, acquired y
+ Cable/QAM
+    freq=717000000 hz, modulation=Qam-256, annex=B
+    lockStatus=locked, snr=38dB (est), fecCorrected=0, fecUncorrected=0
+frontend  4: 00000000e67a8381:00000000037bfb04, acquired y
+ Cable/QAM
+    freq=123000000 hz, modulation=Qam-256, annex=B
+    lockStatus=locked, snr=35dB (est), fecCorrected=0, fecUncorrected=0
+frontend  5: 00000000b1137d9b:00000000037bfb04, acquired y
+ Cable/QAM
+    freq=819000000 hz, modulation=Qam-256, annex=B
+    lockStatus=locked, snr=35dB (est), fecCorrected=0, fecUncorrected=0
+device 000000008be96c41 (0x3306)
+device 00000000037bfb04 (0x0)
+  frontend 000000001374cd09 -> IB4 -> PB0 -> PB2 (TX0)
+  frontend 000000001d3de590 -> IB5 -> PB1 -> PB3 (TX0)
+  frontend 00000000e67a8381 -> IB6 -> PB2 -> PB4 (TX0)
+  frontend 00000000b1137d9b -> IB7 -> PB3 -> PB5 (TX0)
+device 000000006e5707bf (0x3306)
+Interrupts: PARSER_LENGTH_ERROR 00000000, PARSER_TRANSPORT_ERROR 00000000, PARSER_PARSERS_INBUFF_OVFL_ERROR 00000000
+@endcode
+
+#package가 가지고 있는 intent 확인
+@code
+dumpsys package com.kaonmedia.kaonmanagerservice | grep intent  
+@endcode
+
+#kaonmanagerservice에 CUSTOM_BUTTON keycode 201 수동으로 보내기
+@code
+adb shell am broadcast -a broadcast.intent.action.CUSTOM_BUTTON -e keycode 201 -e longpress false -n com.kaonmedia.kaonmanagerservice/.CustomButtonReceiver
+@endcode
+
+# 키코드 
+frameworks/native/include/android/keycodes.h
+frameworks/base/core/java/android/view/KeyEvent.java 
+
+|각인		|IR		|IR-KEYCODE				|BT		|BT-KEYCODE			|
+|:-:	|:-:	|:-:					|:-:	|:-:				|
+|전원		|26		|KEYCODE_POWER			|		|					|
+|선호채널	|194	|KEYCODE_BUTTON_7		|		|					|
+|다시보기	|190	|KEYCODE_BUTTON_3		|		|					|
+|채널안내	|200	|KEYCODE_BUTTON_13		|		|					|
+|키즈		|192	|KEYCODE_BUTTON_5		|		|					|
+|무료영화	|89		|KEYCODE_BUTTON_2		|		|					|
+|시니어	|193	|KEYCODE_BUTTON_6		|		|					|
+|날씨		|198	|KEYCODE_BUTTON_11		|		|					|
+|음성검색	|196	|KEYCODE_BUTTON_9		|202	|KEYCODE_BUTTON_15	|
+|문자검색	|195	|KEYCODE_BUTTON_8		|		|					|
+|구글		|201	|KEYCODE_BUTTON_14		|219	|KEYCODE_ASSIST		|
+|메뉴		|3		|KEYCODE_HOME			|		|					|
+|핫이벤트	|199	|KEYCODE_BUTTON_12		|		|					|
+|최신영화	|191	|KEYCODE_BUTTON_4		|		|					|
+|볼륨업	|24		|KEYCODE_VOLUME_UP		|		|					|
+|볼륨다운	|25		|KEYCODE_VOLUME_DOWN	|		|					|
+|좌		|21		|KEYCODE_DPAD_LEFT		|		|					|
+|우		|22		|KEYCODE_DPAD_RIGHT		|		|					|
+|상		|19		|KEYCODE_DPAD_UP		|		|					|
+|하		|20		|KEYCODE_DPAD_DOWN		|		|					|
+|확인		|23		|KEYCODE_DPAD_CENTER	|		|					|
+|채널업	|166	|KEYCODE_CHANNEL_UP		|		|					|
+|채널다운	|167	|KEYCODE_CHANNEL_DOWN	|		|					|
+|이전		|4		|KEYCODE_BACK			|		|					|
+|음소거	|164	|KEYCODE_VOLUME_MUTE	|		|					|
+|나가기	|111	|KEYCODE_ESCAPE			|		|					|
+|RED	|183	|KEYCODE_PROG_RED		|		|					|
+|YELLOW	|185	|KEYCODE_PROG_YELLOW	|		|					|
+|GREEN	|184	|KEYCODE_PROG_GREEN		|		|					|
+|BLUE	|186	|KEYCODE_PROG_BLUE		|		|					|
+|1		|8		|KEYCODE_1				|		|					|
+|2		|9		|KEYCODE_2				|		|					|
+|3		|10		|KEYCODE_3				|		|					|
+|4		|11		|KEYCODE_4				|		|					|
+|5		|12		|KEYCODE_5				|		|					|
+|6		|13		|KEYCODE_6				|		|					|
+|7		|14		|KEYCODE_7				|		|					|
+|8		|15		|KEYCODE_8				|		|					|
+|9		|16		|KEYCODE_9				|		|					|
+|0		|7		|KEYCODE_0				|		|					|
+|*		|17		|KEYCODE_STAR			|		|					|
+|←		|67		|KEYCODE_DEL			|		|					|
+
+<br>
+
+npm run dev
+
+
+## 1. 개요
+
+| 항목 | 내용 |
+|------|------|
+| 프로젝트명 | settop-autotest |
+| 위치 | `D:\auto_test\settop-autotest` |
+| 목적 | 기존 Windows Forms 기반 셋탑(STB) 자동 테스트 도구의 UI·워크플로를 **웹 기술 + Electron 데스크톱**으로 재구성하고, 영상 입력·캡처·녹화 등 핵심 사용자 기능을 구현 |
+| 버전 표기 | 앱 UI 상 `2026.01.05 (Electron UI)` (소스 내 상수) |
+
+---
+
+*/

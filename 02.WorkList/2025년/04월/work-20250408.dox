@@ -1,0 +1,270 @@
+/*!
+@page work_20250408	2025.04.08
+
+---
+
+# 
+
+@code
+강성민[Kang Sung Min]아래 레드마인 새로 생겼는데 FTP 진입 막으면 되는지 가온 JIRA에 소스 베이스로 업데이트 해주세요.
+ 
+
+https://10.10.113.79:18090/issues/12861
+
+@최성훈님 ('25.3.28일, 이메일 : 가온셋탑 회수시료 14대에 대한 세부정보 공유 드립니다.)
+
+기본적으로 운영을 잘 해야겠지만,
+아래와 같은 상황이 발생할 경우에 예외 처리가 필요할 것 같습니다.
+
+내부적으로 검토하셔서 회신 바랍니다.
+
+수고하세요.
+
+---------------------- '25. 3.28(회신) ---------------------------
+임동은님, 김건중님,
+
+본사에서 환경 셋업한뒤 테스트한 결과 다음과 같은 조건에서 해당업데이트 진행이 되는걸로 추정됩니다.
+
+LGHV CMTS ftp서버에 CFG파일과 1.1.0.bin 이 존재할 경우
+그리고 FW CM 업데이트 과정에서 내부SNMP 통신 에러가 발생할 경우 – 일반적인 에러에서는 발생 안함
+A. CM업데이트 모드중 SNMP통신 에러가 발생하는 Edge case에 발생 가능성 있음
+i. 강제로 SNMP 통신 실패 가정하고 해당 루틴으로 진입하게 만들어서 테스트하여 문제 증상 확인
+B. 부천방송에서 테스트시에도 SNMP통신 실패 가정하고 테스트 했으나 CM v1.1.0은 업데이트 안되었음
+i. 담당자가 재현 가능하게 설정했다지만 동일하게 설정이 안되어 이슈 재현 안된것으로 보임 – 부천방송 환경은 임의로 조작 어려워서 한계
+ii. CFG에 맞는 CM v1.1.0 파일이 정확한곳에 없었거나 FTP주소 맞지 않는 가능성으로 재현 안되었을수 있음
+LGHV 각 SO FTP에 조건에 맞는 CFG와 파일이 없으면 이슈가 발생되지 않고,
+파일이 존재하더라도 특정 케이스라 이슈가 발생할 가능성은 낮아 보입니다.
+@endcode	
+
+# 
+@code
+
+
+@endcode
+
+# 테스트
+@code
+X:\LGHV\kaon_bcm_androidtv12\packages\modules\NetworkStack\src\android\net\dhcp\DhcpClient.java    
+	private static final String TAG = "DhcpClient";
+	
+X:\LGHV\kaon_bcm_androidtv12\frameworks\base\core\java\android\util\NtpTrustedTime.java	
+	private static final String TAG = "NtpTrustedTime";
+	
+X:\LGHV\kaon_bcm_androidtv12\packages\modules\Connectivity\service\src\com\android\server\ConnectivityService.java
+
+logcat | egrep "using timeout of|smkang|NtpTrustedTime|DhcpClient"
+		
+		logcat | egrep "smkang|NtpTrustedTime|DhcpClient"
+		
+logcat | egrep "using timeout of|ConnectivityService|NtpTrustedTime|DhcpClient"
+
+
+항목	내용
+config_ntpPollingIntervalShorter	최소 재시도 주기 설정값, 정확한 타이밍 보장 X
+로그에서 간격이 105초인 이유	시스템 딜레이, AlarmManager/Handler 지연, Doze 모드 등
+해결 방법	실시간성이 중요한 경우 AlarmManager 정확 모드 사용 or 로그 통해 지연 분석 필요
+
+
+
+Android NTP 시간 동기화 흐름도
+┌────────────────────────┐
+│    System Boot         │
+└────────────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│ NetworkTimeUpdateService  │
+│  (or TimeDetectorService) │
+└──────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────┐
+│ getNtpConnectionInfo()      │
+│  - NTP 서버 리스트 로딩         │
+│  - timeoutMillis 확인        │
+└─────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────┐
+│ forceRefresh() 호출          │
+│  - 각 서버에 NTP 요청 시도       │
+│  - 성공 시 mTimeResult 저장    │
+└─────────────────────────────┘
+         │
+         ├── 성공 → 다음 요청은 config_ntpPollingInterval 후
+         │
+         └── 실패
+               ↓
+       ┌─────────────────────────                 ───┐
+       │ 재시도 간격 = config_ntpPollingIntervalShorter │
+       │ ex: 60초 (60000ms)                          │
+       └────────────                 ────────────────┘
+                ▼
+   ┌──────────────────────────    ──┐
+   │ postDelayed(forceRefresh, 60초) │ ← Handler or AlarmManager
+   └───────────────────────────    ─┘
+            ▼
+   ┌──────────────────────────────────────┐
+   │ 실제로는 정확히 60초 후가 아닐 수 있음        │
+   │ - 시스템 부하                           │
+   │ - Doze 모드 (절전)                     │
+   │ - AlarmManager inexact scheduling    │
+   └──────────────────────────────────────┘
+
+
+04-08 17:01:12.574  3602  4150 D DhcpClient: DhcpInitState -57386CMD_KICK 0 0 null
+04-08 17:01:12.581  3602  4150 D DhcpClient: Broadcasting DHCPDISCOVER
+04-08 17:01:12.645  3602  4150 D DhcpClient: Received packet: 74:3a:ef:48:5b:68 OFFER, ip /10.217.1.101, mask /255.255.254.0, DNS servers: /8.8.8.8 /8.8.4.4 , gateways [/10.217.0.1], lease time 605055, domain null
+04-08 17:01:12.649  3602  4150 D DhcpClient: mDnsServers have 2 DNS
+04-08 17:01:12.653  3602  4150 D DhcpClient: new mDnsServers [0] : /8.8.8.8
+04-08 17:01:12.657  3602  4150 D DhcpClient: new mDnsServers [1] : /8.8.4.4
+04-08 17:01:12.657  3602  4150 D DhcpClient: new mDnsServers [2] : /8.8.8.8
+04-08 17:01:12.662  3602  4150 D DhcpClient: new mDnsServers [3] : /8.8.4.4
+04-08 17:01:12.662  3602  4150 D DhcpClient: Received packet: 74:3a:ef:48:5b:68 OFFER, ip /10.217.1.101, mask /255.255.254.0, DNS servers: /8.8.8.8 /8.8.4.4 /8.8.8.8 /8.8.4.4 , gateways [/10.217.0.1], lease time 605055, domain null
+04-08 17:01:12.665  3602  4150 D DhcpClient: DhcpInitState -1CMD_RECEIVED_PACKET 0 0 74:3a:ef:48:5b:68 OFFER, ip /10.217.1.101, mask /255.255.254.0, DNS servers: /8.8.8.8 /8.8.4.4 /8.8.8.8 /8.8.4.4 , gateways [/10.217.0.1], lease time 605055, domain null
+04-08 17:01:12.667  3602  4150 D DhcpClient: Got pending lease: android.net.networkstack.DhcpResults@3cd10d7 DHCP server /10.217.0.1 Vendor info null lease 605055 seconds Servername
+04-08 17:01:12.668  3602  4150 D DhcpClient: Entering state DhcpRequestingState
+04-08 17:01:12.672  3602  4150 D DhcpClient: DhcpRequestingState 0CMD_KICK 0 0 null
+04-08 17:01:12.673  3602  4150 D DhcpClient: Broadcasting DHCPREQUEST ciaddr=0.0.0.0 request=10.217.1.101 serverid=10.217.0.1
+04-08 17:01:12.699  3602  4150 D DhcpClient: Received packet: 74:3a:ef:48:5b:68 ACK: your new IP /10.217.1.101, netmask /255.255.254.0, gateways [/10.217.0.1] DNS servers: /8.8.8.8 /8.8.4.4 , lease time 605400
+04-08 17:01:12.699  3602  4150 D DhcpClient: mDnsServers have 2 DNS
+04-08 17:01:12.699  3602  4150 D DhcpClient: new mDnsServers [0] : /8.8.8.8
+04-08 17:01:12.699  3602  4150 D DhcpClient: new mDnsServers [1] : /8.8.4.4
+04-08 17:01:12.699  3602  4150 D DhcpClient: new mDnsServers [2] : /8.8.8.8
+04-08 17:01:12.699  3602  4150 D DhcpClient: new mDnsServers [3] : /8.8.4.4
+04-08 17:01:12.699  3602  4150 D DhcpClient: Received packet: 74:3a:ef:48:5b:68 ACK: your new IP /10.217.1.101, netmask /255.255.254.0, gateways [/10.217.0.1] DNS servers: /8.8.8.8 /8.8.4.4 /8.8.8.8 /8.8.4.4 , lease time 605400
+04-08 17:01:12.706  3602  4150 D DhcpClient: DhcpRequestingState -6CMD_RECEIVED_PACKET 0 0 74:3a:ef:48:5b:68 ACK: your new IP /10.217.1.101, netmask /255.255.254.0, gateways [/10.217.0.1] DNS servers: /8.8.8.8 /8.8.4.4 /8.8.8.8 /8.8.4.4 , lease time 605400
+04-08 17:01:12.707  3602  4150 D DhcpClient: Confirmed lease: android.net.networkstack.DhcpResults@67b1230 DHCP server /10.217.0.1 Vendor info null lease 605400 seconds Servername
+04-08 17:01:12.709  3602  4150 D DhcpClient: Entering state ConfiguringInterfaceState
+04-08 17:01:12.782  3602  4150 D DhcpClient: ConfiguringInterfaceState -31EVENT_LINKADDRESS_CONFIGURED 0 0 null
+04-08 17:01:12.783  3602  4150 D DhcpClient: Entering state DhcpBoundState
+04-08 17:01:12.796  3602  4150 D DhcpClient: Scheduling renewal in 302699s
+04-08 17:01:12.796  3602  4150 D DhcpClient: Scheduling rebind in 529724s
+04-08 17:01:12.796  3602  4150 D DhcpClient: Scheduling expiry in 605399s
+04-08 17:01:12.904  3602  3787 E ConnectivityService: smkang dnsCount: 2
+04-08 17:01:12.904  3602  3787 E ConnectivityService: smkang DNS servers for network [/8.8.8.8, /8.8.4.4]
+04-08 17:01:13.184  3602  3910 D NtpTrustedTime: getNtpConnectionInfo: servers.add kr.pool.ntp.org
+04-08 17:01:13.185  3602  3910 D NtpTrustedTime: getNtpConnectionInfo: servers.add pool.ntp.org
+04-08 17:01:13.185  3602  3910 D NtpTrustedTime: getNtpConnectionInfo: servers.add time.android.com
+04-08 17:01:13.191  3602  3910 D NtpTrustedTime: forceRefresh() from cache miss
+04-08 17:01:13.194  3602  3910 D NtpTrustedTime: forceRefresh(): serverName kr.pool.ntp.org
+04-08 17:01:13.236  3192  5571 I resolv  : get_timeout: using timeout of 5000 msec, nameserverCount is 2 ns is 0
+04-08 17:01:13.260  3192  5574 I resolv  : get_timeout: using timeout of 5000 msec, nameserverCount is 2 ns is 0
+04-08 17:01:13.279  3192  5572 I resolv  : get_timeout: using timeout of 5000 msec, nameserverCount is 2 ns is 0
+04-08 17:01:13.404  3602  3910 D NtpTrustedTime: forceRefresh(): client.requestTime() return true
+[   70.935025] audit: rate limit exceeded
+
+
+
+[   79.614745] binder_alloc: 4093: binder_alloc_buf size 1056768 failed, no address space
+[   79.636033] binder_alloc: allocated: 1504 (num: 1 largest: 1504), free: 1038880 (num: 1 largest: 1038880)
+
+
+
+	
+
+	
+console:/ # getprop net.dns1
+
+console:/ # dumpsys connectivity | grep -A10 "NetworkAgentInfo"
+  NetworkAgentInfo{network{100}  handle{432902426637}  ni{Ethernet CONNECTED extra: 74:3a:ef:48:5b:68} Score(70 ; KeepConnected : 0 ; Policies : EVER_VALIDATED&IS_UNMETERED&IS_VALIDATED)  everValidated lastValidated  
+  lp{{InterfaceName: eth0 LinkAddresses: [ 10.217.1.101/23 ] DnsAddresses: [ /8.8.8.8,/8.8.4.4 ] UsePrivateDns: true ValidatedPrivateDnsAddresses: [8.8.8.8,8.8.4.4] 
+  Domains: null MTU: 0 ServerAddress: /10.217.0.1 TcpBufferSizes: 16384,8388608,8388608,16384,8388608,8388608 Routes: [ ff00::/8 -> :: eth0 mtu 0,fe80::/64 -> :: 
+  eth0 mtu 0,10.217.0.0/23 -> 0.0.0.0 eth0 mtu 0,0.0.0.0/0 -> 10.217.0.1 eth0 mtu 0 ]}}  
+  nc{[ Transports: ETHERNET Capabilities: NOT_METERED&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED&NOT_VCN_MANAGED LinkUpBandwidth>=100000Kbps LinkDnBandwidth>=100000Kbps]}}
+    Requests: REQUEST:28 LISTEN:14 BACKGROUND_REQUEST:0 total:42
+      NetworkRequest [ REQUEST id=1, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&NOT_VCN_MANAGED RequestorUid: 1000 RequestorPkg: android] ]
+      NetworkRequest [ LISTEN id=5, [ Capabilities: FOREGROUND RequestorUid: 1000 RequestorPkg: android] ]
+      NetworkRequest [ REQUEST id=7, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 1000 RequestorUid: 1000 RequestorPkg: android] ]
+      NetworkRequest [ LISTEN id=8, [ Capabilities: FOREGROUND RequestorUid: 1000 RequestorPkg: android] ]
+      NetworkRequest [ LISTEN id=9, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN&FOREGROUND&NOT_VCN_MANAGED Uid: 1000 RequestorUid: 1000 RequestorPkg: android] ]
+      NetworkRequest [ LISTEN id=10, [ RequestorUid: 1000 RequestorPkg: android] ]
+      NetworkRequest [ LISTEN id=11, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN&NOT_VCN_MANAGED Uid: 1000 RequestorUid: 1000 RequestorPkg: android] ]
+      NetworkRequest [ REQUEST id=14, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10065 RequestorUid: 1000 RequestorPkg: android] ]
+      NetworkRequest [ REQUEST id=16, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10061 RequestorUid: 1000 RequestorPkg: android] ]
+	
+	
+	
+	
+	
+@endcode
+
+
+
+@code
+
+packages/modules/NetworkStack/src/android/net/dhcp/DhcpClient.java
+ 중복 방지 + 조건부 추가 개선 코드
+java
+복사
+편집
+protected void handlePacket(byte[] recvbuf, int length) {
+    try {
+        final DhcpPacket packet = DhcpPacket.decodeFullPacket(recvbuf, length,
+                DhcpPacket.ENCAP_L2, getOptionsToSkip());
+
+        if (DBG) Log.d(TAG, "Received packet: " + packet);
+
+        // Google DNS IP 주소들
+        Inet4Address dns1 = (Inet4Address) Inet4Address.getByAddress(new byte[]{8, 8, 8, 8});
+        Inet4Address dns2 = (Inet4Address) Inet4Address.getByAddress(new byte[]{8, 8, 4, 4});
+
+        // 현재 DNS 리스트에서 중복 여부 확인
+        boolean hasDns1 = packet.mDnsServers.contains(dns1);
+        boolean hasDns2 = packet.mDnsServers.contains(dns2);
+
+        int dnsCount = packet.mDnsServers.size();
+        if (DBG) Log.d(TAG, "mDnsServers count: " + dnsCount);
+
+        if (!hasDns1) {
+            packet.mDnsServers.add(dns1);
+            if (DBG) Log.d(TAG, "Added Google DNS: 8.8.8.8");
+        }
+
+        if (!hasDns2) {
+            packet.mDnsServers.add(dns2);
+            if (DBG) Log.d(TAG, "Added Google DNS: 8.8.4.4");
+        }
+
+        // 최종 DNS 리스트 로깅
+        for (int i = 0; i < packet.mDnsServers.size(); i++) {
+            if (DBG) Log.d(TAG, "Final mDnsServers [" + i + "] : " + packet.mDnsServers.get(i));
+        }
+
+        sendMessage(CMD_RECEIVED_PACKET, packet);
+
+        if (LGHV_DHCP_SUPPORT) {
+            sendMessage(CMD_RECEIVED_PACKET_LGHV, packet);
+        }
+
+    } catch (IOException e) {
+        Log.e(TAG, "Read error", e);
+    } catch (DhcpPacket.ParseException e) {
+        Log.e(TAG, "Can't parse packet: " + e.getMessage());
+        if (PACKET_DBG) {
+            Log.d(TAG, HexDump.dumpHexString(recvbuf, 0, length));
+        }
+        if (e.errorCode == DhcpErrorEvent.DHCP_NO_COOKIE) {
+            final int snetTagId = 0x534e4554;
+            final String bugId = "31850211";
+            final int uid = -1;
+            final String data = DhcpPacket.ParseException.class.getName();
+            EventLog.writeEvent(snetTagId, bugId, uid, data);
+        }
+        mMetricsLog.log(mIfaceName, new DhcpErrorEvent(e.errorCode));
+        mMetrics.addDhcpErrorCode(e.errorCode);
+    }
+@endcode
+
+
+
+
+
+
+
+
+
+*/
+
+
+

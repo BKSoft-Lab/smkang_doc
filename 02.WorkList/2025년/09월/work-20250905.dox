@@ -1,0 +1,34 @@
+/*!
+@page work_20250905	2025.09.05
+
+---
+
+# LGHV
+> [K0644-381] [울산방송]Android recovery 에서 리모컨이 안먹는 이슈
+
+
+Z:\LGHV\kaon_bcm_androidtv12\device\broadcom\common\rcs\init.recovery.rc 수정
+8회에서 재현
+@code
+on post-fs
+    # 최대 2초 동안 /dev/input/event* 등장 대기 (250ms × 8회)
+    exec u:r:recovery:s0 -- /sbin/sh -c '\
+      for i in 1 2 3 4 5 6 7 8; do \
+        if [ -e /dev/input ] && [ "$(ls -1 /dev/input/event* 2>/dev/null | wc -l)" -ge 1 ]; then \
+          echo "[init.recovery] input devices detected at attempt $i" | tee /dev/kmsg > /dev/tty0; \
+          exit 0; \
+        fi; \
+        echo "[init.recovery] waiting for input devices... attempt $i" | tee /dev/kmsg > /dev/tty0; \
+        sleep 0.25; \
+      done; \
+      echo "[init.recovery] timeout, no input devices found" | tee /dev/kmsg > /dev/tty0; \
+      exit 0'
+
+@endcode
+
+
+
+*/
+
+
+

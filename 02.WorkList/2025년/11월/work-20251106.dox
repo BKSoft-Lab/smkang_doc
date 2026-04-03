@@ -1,0 +1,504 @@
+/*!
+@page work_20251106	2025.11.06
+
+---
+
+# !!
+
+> !!
+
+@code
+
+bootloader/uboot-repo/bl33/v2019: 0001-ohm-enable-hdmi-only-config-1-5.patch
+common/common14-5.15/common/common_drivers: 0001-ohm-enable-hdmi-only-config-5-5.patch
+
+
+device/amlogic/ohm: 0001-ohm-enable-hdmi-only-config-2-5.patch 
+device/amlogic/ohm_wv4: 0001-ohm-enable-hdmi-only-config-3-5.patch
+vendor/amlogic/common: 0001-ohm-enable-hdmi-only-config-4-5.patch
+
+device/amlogic/ohm/0001-ohm-enable-hdmi-only-config-2-5.patch
+device/amlogic/ohm_wv4/0001-ohm-enable-hdmi-only-config-3-5.patch
+hardware/amlogic/0001-mesondisplay-fix-not-display-when-boot-with-cvbs-con.patch
+vendor/amlogic/common/0001-ohm-enable-hdmi-only-config-4-5.patch
+
+
+1. boot up STB without HDMI, then
+console:/ $ cat /sys/class/display/mode
+1080p60hz
+console:/ $ wm size
+cmd: Can't find service: window
+20|console:/ $ wm density
+cmd: Can't find service: window
+20|console:/ $
+
+
+2. boot up STB with HDMI, after booting up and show home page, plugout hdmi, then
+console:/ $ cat /sys/class/display/mode
+dummy_l
+console:/ $ wm size
+Physical size: 1920x1080
+console:/ $
+console:/ $ wm density
+Physical density: 320
+console:/ $
+
+
+1, check bist patten is normal or not?
+echo bistauto > /sys/class/amhdmitx/amhdmitx0/debug 
+
+echo bistoff > /sys/class/amhdmitx/amhdmitx0/debug
+
+2, Provide /data/test.png
+screencap -p /data/test.png > 응답없음
+
+3, Provide the following info and files
+console:/ # cat /sys/class/display/vinfo
+current vinfo:
+    name:                  1080p60hz
+    mode:                  0
+    frac:                  0
+    width:                 1920
+    height:                1080
+    field_height:          1080
+    aspect_ratio_num:      16
+    aspect_ratio_den:      9
+    screen_real_width:     480
+    screen_real_height:    270
+    sync_duration_num:     59940
+    sync_duration_den:     1000
+    brr_duration:          0
+    (meas_frame_rate:      0.000)
+    std_duration:          0
+    vfreq_max:             0
+    vfreq_min:             0
+    htotal:                2200
+    vtotal:                1125
+    video_clk:             148352
+    fr_adj_type:           4
+    viu_color_fmt:         2
+    viu_mux:               0x2
+    cur_enc_ppc:           0
+    3d_info:               0
+    cs:                    2
+    cd:                    4
+    vpp_post_out_color_fmt:0
+
+master_display_info:
+    present_flag          0
+    features              0x0
+    primaries             0x0, 0x0
+                          0x0, 0x0
+                          0x0, 0x0
+    white_point           0x0, 0x0
+    luminance             0, 0
+
+hdr_static_info:
+    hdr_support           0
+    lumi_max              0
+    lumi_avg              0
+    lumi_min              0
+hdr_dynamic_info:
+    metadata_version:  0
+    support_flags:     0
+    optional_fields:
+    metadata_version:  0
+    support_flags:     0
+    optional_fields:
+    metadata_version:  0
+    support_flags:     0
+    optional_fields:
+    metadata_version:  0
+    support_flags:     0
+    optional_fields:
+hdr10+:
+    ieeeoui: 0
+    application_version: 0
+
+console:/ # cat /sys/class/display/mode
+1080p60hz
+
+console:/ # dumpsys SurfaceFlinger > /data/sf
+console:/ # cat /data/sf                                                      
+*** SERVICE 'SurfaceFlinger' DUMP TIMEOUT (10000ms) EXPIRED ***
+
+
+*** SERVICE 'SurfaceFlinger' DUMP TIMEOUT (10000ms) EXPIRED ***
+
+console:/ #
+
+console:/ # cat /sys/class/drm/card0/osd0/fbdump > /data/osd0.raw
+
+4, Is it covered by other layers？ > No
+
+5, Confirm if the TV is in normal condition and if it is covered by the TV screensaver？ > No
+
+
+
+Sungmin.kang 강성민 
+
+
+
+console:/ # dumpsys SurfaceFlinger > /data/sf
+console:/ # cat /data/sf                                                      
+*** SERVICE 'SurfaceFlinger' DUMP TIMEOUT (10000ms) EXPIRED ***
+
+
+*** SERVICE 'SurfaceFlinger' DUMP TIMEOUT (10000ms) EXPIRED ***
+
+console:/ #
+
+It seems bloc
+
+debuggerd -b 7422
+debuggerd -b 7394
+
+console:/ # ps -A | grep surfaceflinger
+
+console:/ # ps -A | grep composer
+
+echo 7 > /proc/sysrq-trigger
+echo w > /proc/sysrq-trigger
+dmesg
+ 
+
+
+
+console:/ # dumpsys SurfaceFlinger > /data/sf
+console:/ # cat  /data/sf
+
+*** SERVICE 'SurfaceFlinger' DUMP TIMEOUT (10000ms) EXPIRED ***
+
+
+*** SERVICE 'SurfaceFlinger' DUMP TIMEOUT (10000ms) EXPIRED ***
+
+console:/ #
+console:/ #
+console:/ #
+console:/ # ps -A | grep surfaceflinger
+system        7422     1      83584  26312 binder_thread_read  0 S surfaceflinger
+console:/ # ps -A | grep composer
+system        7394     1      51336  12940 binder_thread_read  0 S android.hardware.graphics.composer@3.2-service.droidlogic
+root          7399     2          0      0 video_composer_thread 0 S [video_composer.]
+root          7400     2          0      0 video_composer_thread 0 S [video_composer.]
+console:/ #
+console:/ #
+console:/ # debuggerd -b 7422
+
+----- pid 7422 at 2025-11-06 18:12:42.531312538+0900 -----
+Cmd line: /system/bin/surfaceflinger
+ABI: 'arm'
+
+"surfaceflinger" sysTid=7422
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0003fab3  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #03 pc 00040965  /system/lib/libbinder.so (android::IPCThreadState::waitForResponse(android::Parcel*, int*)+92) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #04 pc 000406df  /system/lib/libbinder.so (android::IPCThreadState::transact(int, unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+134) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #05 pc 00050e2f  /system/lib/libbinder.so (android::BpBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+118) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #06 pc 0000aa67  /system/lib/libbinder_ndk.so (AIBinder_transact+450) (BuildId: 7fe6b4f8622a61f6a86570653f411a95)
+    #07 pc 00017e87  /system/lib/android.hardware.graphics.composer3-V2-ndk.so (aidl::android::hardware::graphics::composer3::BpComposerClient::executeCommands(std::__1::vector<aidl::android::hardware::graphics::composer3::DisplayCommand, std::__1::allocator<aidl::android::hardware::graphics::composer3::DisplayCommand> > const&, std::__1::vector<aidl::android::hardware::graphics::composer3::CommandResultPayload, std::__1::allocator<aidl::android::hardware::graphics::composer3::CommandResultPayload> >*)+230) (BuildId: f6dd65355ef475d2b4e2a275085112b0)
+    #08 pc 0008e1d9  /system/bin/surfaceflinger (android::Hwc2::AidlComposer::execute(unsigned long long)+416) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #09 pc 00091401  /system/bin/surfaceflinger (android::Hwc2::AidlComposer::presentDisplay(unsigned long long, int*)+276) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #10 pc 0009f89f  /system/bin/surfaceflinger (android::HWC2::impl::Display::present(android::sp<android::Fence>*)+38) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #11 pc 000a697f  /system/bin/surfaceflinger (android::impl::HWComposer::presentAndGetReleaseFences(android::HalDisplayId, std::__1::optional<std::__1::chrono::time_point<std::__1::chrono::steady_clock, std::__1::chrono::duration<long long, std::__1::ratio<1ll, 1000000000ll> > > >)+586) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #12 pc 0014e973  /system/bin/surfaceflinger (android::compositionengine::impl::Display::presentAndGetFrameFences()+222) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #13 pc 00157c4b  /system/bin/surfaceflinger (android::compositionengine::impl::Output::postFramebuffer()+106) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #14 pc 001534fb  /system/bin/surfaceflinger (android::compositionengine::impl::Output::present(android::compositionengine::CompositionRefreshArgs const&)+338) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #15 pc 0014d53b  /system/bin/surfaceflinger (android::compositionengine::impl::CompositionEngine::present(android::compositionengine::CompositionRefreshArgs&)+118) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #16 pc 0011b6a3  /system/bin/surfaceflinger (android::SurfaceFlinger::composite(android::TimePoint, android::VsyncId)+1466) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #17 pc 00100585  /system/bin/surfaceflinger (android::scheduler::Scheduler::onFrameSignal(android::ICompositor&, android::VsyncId, android::TimePoint)+72) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #18 pc 000f4129  /system/bin/surfaceflinger (android::impl::MessageQueue::Handler::handleMessage(android::Message const&)+56) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #19 pc 00010483  /system/lib/libutils.so (android::Looper::pollInner(int)+418) (BuildId: 3a5e8e87595bdc03e4e7d198dce7883e)
+    #20 pc 00010285  /system/lib/libutils.so (android::Looper::pollOnce(int, int*, int*, void**)+64) (BuildId: 3a5e8e87595bdc03e4e7d198dce7883e)
+    #21 pc 000f46c5  /system/bin/surfaceflinger (android::impl::MessageQueue::waitMessage()+56) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #22 pc 00100537  /system/bin/surfaceflinger (android::scheduler::Scheduler::run()+10) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #23 pc 0014d0cd  /system/bin/surfaceflinger (main+1244) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #24 pc 0003474d  /apex/com.android.runtime/lib/bionic/libc.so (__libc_init+60) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"binder:7422_1" sysTid=7425
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0003fab3  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #03 pc 0003fcfd  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+8) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #04 pc 0004046b  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+70) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #05 pc 00047151  /system/lib/libbinder.so (android::PoolThread::threadLoop()+12) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #06 pc 0000d7dd  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+164) (BuildId: 3a5e8e87595bdc03e4e7d198dce7883e)
+    #07 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #08 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"binder:7422_2" sysTid=7426
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0003fab3  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #03 pc 0003fcfd  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+8) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #04 pc 0004046b  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+70) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #05 pc 00047151  /system/lib/libbinder.so (android::PoolThread::threadLoop()+12) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #06 pc 0000d7dd  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+164) (BuildId: 3a5e8e87595bdc03e4e7d198dce7883e)
+    #07 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #08 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"surfaceflinger" sysTid=7427
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0008513d  /apex/com.android.runtime/lib/bionic/libc.so (pthread_cond_wait+32) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 0003d369  /system/lib/libc++.so (std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)+8) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #04 pc 00144321  /system/bin/surfaceflinger (android::TransactionTracing::loop()+208) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #05 pc 00146c17  /system/bin/surfaceflinger (void* std::__1::__thread_proxy<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, void (android::TransactionTracing::*)(), android::TransactionTracing*> >(void*)+38) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #06 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #07 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"RenderEngine" sysTid=7428
+    #00 pc 00036540  /apex/com.android.runtime/l01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 00044fd9  /apex/com.android.runtime/lib/bionic/libc.so (sem_wait+90) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 00460e37  /vendor/lib/egl/libGLES_mali.so (BuildId: 441d88f0528dfe5a)
+
+"mali-cmar-backe" sysTid=7435
+    #00 pc 00077728  /apex/com.android.runtime/lib/bionic/libc.so (__ppoll+16) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 00043d29  /apex/com.android.runtime/lib/bionic/libc.so (poll+52) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 00461025  /vendor/lib/egl/libGLES_mali.so (BuildId: 441d88f0528dfe5a)
+
+"HwcAsyncWorker" sysTid=7437
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0008513d  /apex/com.android.runtime/lib/bionic/libc.so (pthread_cond_wait+32) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 0003d369  /system/lib/libc++.so (std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)+8) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #04 pc 0016ea55  /system/bin/surfaceflinger (android::compositionengine::impl::HwcAsyncWorker::run()+80) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #05 pc 0016ed57  /system/bin/surfaceflinger (void* std::__1::__thread_proxy<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, void (android::compositionengine::impl::HwcAsyncWorker::*)(), android::compositionengine::impl::HwcAsyncWorker*> >(void*)+38) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #06 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #07 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"TimerDispatch" sysTid=7439
+    #00 pc 0007761c  /apex/com.android.runtime/lib/bionic/libc.so (__epoll_pwait+20) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 00047909  /apex/com.android.runtime/lib/bionic/libc.so (epoll_wait+16) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 004691cd  /system/bin/surfaceflinger (void* std::__1::__thread_proxy<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, android::scheduler::Timer::Timer()::$_0> >(void*) (.__uniq.8260319546734640385309753961653397993)+316) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #03 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #04 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"app" sysTid=7440
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0008513d  /apex/com.android.runtime/lib/bionic/libc.so (pthread_cond_wait+32) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 0003d369  /system/lib/libc++.so (std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)+8) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #04 pc 000eeeaf  /system/bin/surfaceflinger (void* std::__1::__thread_proxy<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, android::impl::EventThread::EventThread(char const*, std: >(void*) (.__uniq.22835156453571511455795338659787558893)+3458) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #05 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #06 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"RegSampIdle" sysTid=7443
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 00044fd9  /apex/com.android.runtime/lib/bionic/libc.so (sem_wait+90) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 000f03b5  /system/bin/surfaceflinger (android::scheduler::OneShotTimer::loop()+444) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #04 pc 000f0573  /system/bin/surfaceflinger (void* std::__1::__thread_proxy<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, void (android::scheduler::OneShotTimer::*)(), android::scheduler::OneShotTimer*> >(void*)+38) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #05 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #06 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"surfaceflinger" sysTid=7444
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 00044fd9  /apex/com.android.runtime/lib/bionic/libc.so (sem_wait+90) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 000f03b5  /system/bin/surfaceflinger (android::scheduler::OneShotTimer::loop()+444) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #04 pc 000f0573  /system/bin/surfaceflinger (void* std::__1::__thread_proxy<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, void (android::scheduler::OneShotTimer::*)(), android::scheduler::OneShotTimer*> >(void*)+38) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #05 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #06 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"binder:7422_3" sysTid=7447
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0008513d  /apex/com.android.runtime/lib/bionic/libc.so (pthread_cond_wait+32) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 0003d369  /system/lib/libc++.so (std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)+8) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #04 pc 0003f13d  /system/lib/libc++.so (std::__1::__assoc_sub_state::copy()+52) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #05 pc 0003f315  /system/lib/libc++.so (std::__1::future<void>::get()+10) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #06 pc 00124829  /system/bin/surfaceflinger (android::SurfaceFlinger::doDump(int, android::Vector<android::String16> const&, bool)+464) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #07 pc 00133659  /system/bin/surfaceflinger (non-virtual thunk to android::SurfaceFlingerId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0008513d  /apex/com.android.runtime/lib/bionic/libc.so (pthread_cond_wait+32) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 0003d369  /system/lib/libc++.so (std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)+8) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #04 pc 0003f1df  /system/lib/libc++.so (std::__1::__assoc_sub_state::__sub_wait(std::__1::unique_lock<std::__1::mutex>&)+26) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #05 pc 00123797  /system/bin/surfaceflinger (android::SurfaceFlinger::createLayer(android::surfaceflinger::LayerCreationArgs&, android::gui::CreateSurfaceResult&)+430) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #06 pc 0008819d  /system/bin/surfaceflinger (android::Client::createSurface(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int, android::sp<android::IBinder> const&, android::gui::LayerMetadata const&, android::gui::CreateSurfaceResult*)+356) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #07 pc 0018f4e7  /system/bin/surfaceflinger (android::gui::BnSurfaceComposerClient::onTransact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+1334) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #08 pc 0004ed2b  /system/lib/libbinder.so (android::BBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+202) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #09 pc 0004003f  /system/lib/libbinder.so (android::IPCThreadState::executeCommand(int)+590) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #10 pc 0003fd57  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+98) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #11 pc 0004046b  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+70) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #12 pc 00047151  /system/lib/libbinder.so (android::PoolThread::threadLoop()+12) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #13 pc 0000d7dd  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+164) (BuildId: 3a5e8e87595bdc03e4e7d198dce7883e)
+    #14 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #15 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"binder:7422_5" sysTid=7707
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0008513d  /apex/com.android.runtime/lib/bionic/libc.so (pthread_cond_wait+32) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 0003d369  /system/lib/libc++.so (std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)+8) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #04 pc 0003f13d  /system/lib/libc++.so (std::__1::__assoc_sub_state::copy()+52) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #05 pc 0003f315  /system/lib/libc++.so (std::__1::future<void>::get()+10) (BuildId: 0e7ff878fe49e6a55c5f86f783503839)
+    #06 pc 00124829  /system/bin/surfaceflinger (android::SurfaceFlinger::doDump(int, android::Vector<android::String16> const&, bool)+464) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #07 pc 00133659  /system/bin/surfaceflinger (non-virtual thunk to android::SurfaceFlinger::dumpAll(int, android::Vector<android::String16> const&, bool)+4) (BuildId: 5bef415afa55e6d7c19e954a38ae3abe)
+    #08 pc 0046aa59  /system/bin/surfaceflinger (android::Pr
+console:/ #
+console:/ #
+console:/ # debuggerd -b 7394
+
+
+----- pid 7394 at 2025-11-06 18:12:50.032953833+0900 -----
+Cmd line: /vendor/bin/hw/android.hardware.graphics.composer@3.2-service.droidlogic
+ABI: 'arm'
+
+"binder:7394_2" sysTid=7394
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0003fab3  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #03 pc 0003fcfd  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+8) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #04 pc 0004046b  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+70) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #05 pc 0000fc9b  /vendor/bin/hw/android.hardware.graphics.composer@3.2-service.droidlogic (main+414) (BuildId: 8a56e5faf9739d00d27cb6877713f0af)
+    #06 pc 0003474d  /apex/com.android.runtime/lib/bionic/libc.so (__libc_init+60) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"HwBinder:7394_1" sysTid=7398
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 00066021  /apex/com.android.vndk.v34/lib/libhidlbase.so (android::hardware::IPCThreadState::talkWithDriver(bool)+168) (BuildId: 912e1793490882490eb68c0ce1996cde)
+    #03 pc 00066125  /apex/com.android.vndk.v34/lib/libhidlbase.so (android::hardware::IPCThreadState::getAndExecuteCommand()+20) (BuildId: 912e1793490882490eb68c0ce1996cde)
+    #04 pc 00066f51  /apex/com.android.vndk.v34/lib/libhidlbase.so (android::hardware::IPCThreadState::joinThreadPool(bool)+120) (BuildId: 912e1793490882490eb68c0ce1996cde)
+    #05 pc 0006e4f5  /apex/com.android.vndk.v34/lib/libhidlbase.so (android::hardware::PoolThread::threadLoop()+12) (BuildId: 912e1793490882490eb68c0ce1996cde)
+    #06 pc 0000d7dd  /apex/com.android.vndk.v34/lib/libutils.so (android::Thread::_threadLoop(void*)+164) (BuildId: da953c087dba6702555f2e7a16e48c34)
+    #07 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #08 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"android.hardwar" sysTid=7401
+    #00 pc 00077728  /apex/com.android.runtime/lib/bionic/libc.so (__ppoll+16) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 00043d29  /apex/com.android.runtime/lib/bionic/libc.so (poll+52) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 000c14f9  /vendor/lib/hw/hwcomposer.amlogic.so (HwDisplayEventListener::ueventThread(void*)+64) (BuildId: 64d59311734159bcfb132ace080f4d3a)
+    #03 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #04 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"android.hardwar" sysTid=7402
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0000747b  /vendor/lib/libdrm.so (drmWaitVBlank+74) (BuildId: 5ee4d074cfff758a2a74f35f3f9bca79)
+    #03 pc 000b826d  /vendor/lib/hw/hwcomposer.amlogic.so (DrmCrtc::waitVBlank(long long&)+48) (BuildId: 64d59311734159bcfb132ace080f4d3a)
+    #04 pc 000979cb  /vendor/lib/hw/hwcomposer.amlogic.so (HwcVsync::waitHwVsync(long long&)+66) (BuildId: 64d59311734159bcfb132ace080f4d3a)
+    #05 pc 00097259  /vendor/lib/hw/hwcomposer.amlogic.so (HwcVsync::vsyncThread(void*)+232) (BuildId: 64d59311734159bcfb132ace080f4d3a)
+    #06 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #07 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"android.hardwar" sysTid=7403
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0008513d  /apex/com.android.runtime/lib/bionic/libc.so (pthread_cond_wait+32) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 0003d369  /apex/com.android.vndk.v34/lib/libc++.so (std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)+8) (BuildId: 67a8dc0833a48df90f3e394346219f58)
+    #04 pc 00097219  /vendor/lib/hw/hwcomposer.amlogic.so (HwcVsync::vsyncThread(void*)+168) (BuildId: 64d59311734159bcfb132ace080f4d3a)
+    #05 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #06 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"android.hardwar" sysTid=7404
+    #00 pc 00036540  /apex/com.android.runtime/lib/bionic/libc.so (syscall+28) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0003bf8f  /apex/com.android.runtime/lib/bionic/libc.so (__futex_wait_ex(void volatile*, bool, int, bool, timespec const*)+94) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0008513d  /apex/com.android.runtime/lib/bionic/libc.so (pthread_cond_wait+32) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #03 pc 0003d369  /apex/com.android.vndk.v34/lib/libc++.so (std::__1::condition_variable::wait(std::__1::unique_lock<std::__1::mutex>&)+8) (BuildId: 67a8dc0833a48df90f3e394346219f58)
+    #04 pc 00097219  /vendor/lib/hw/hwcomposer.amlogic.so (HwcVsync::vsyncThread(void*)+168) (BuildId: 64d59311734159bcfb132ace080f4d3a)
+    #05 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #06 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"vndbinder:7394_" sysTid=7418
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0003dc03  /apex/com.android.vndk.v34/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206) (BuildId: 3abbd2a83a0822e983ae24cd030075ea)
+    #03 pc 0003de4d  /apex/com.android.vndk.v34/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+8) (BuildId: 3abbd2a83a0822e983ae24cd030075ea)
+    #04 pc 0003e5bb  /apex/com.android.vndk.v34/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+70) (BuildId: 3abbd2a83a0822e983ae24cd030075ea)
+    #05 pc 00044d25  /apex/com.android.vndk.v34/lib/libbinder.so (android::PoolThread::threadLoop()+12) (BuildId: 3abbd2a83a0822e983ae24cd030075ea)
+    #06 pc 0000d7dd  /apex/com.android.vndk.v34/lib/libutils.so (android::Thread::_threadLoop(void*)+164) (BuildId: da953c087dba6702555f2e7a16e48c34)
+    #07 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #08 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"binder:7394_1" sysTid=7419
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0003fab3  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #03 pc 0003fcfd  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+8) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #04 pc 0004046b  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+70) (BuildId: fbca6f00cf6f188953657re::graphics::composer3::impl::meson::ComposerClient::executeCommands(std::__1::vector<aidl::android::hardware::graphics::composer3::DisplayCommand, std::__1::allocator<aidl::android::hardware::graphics::composer3::DisplayCommand> > const&, std::__1::vector<aidl::android::hardware::graphics::composer3::CommandResultPayload, std::__1::allocator<aidl::android::hardware::graphics::composer3::CommandResultPayload> >*)+60) (BuildId: 8a56e5faf9739d00d27cb6877713f0af)
+    #11 pc 0001660b  /vendor/lib/android.hardware.graphics.composer3-V2-ndk.so (aidl::android::hardware::graphics::composer3::_aidl_android_hardware_graphics_composer3_IComposerClient_onTransact(AIBinder*, unsigned int, AParcel const*, AParcel*)+726) (BuildId: af811d663713aea6a308b14e4c8511b8)
+    #12 pc 00008aab  /system/lib/libbinder_ndk.so (ABBinder::onTransact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+90) (BuildId: 7fe6b4f8622a61f6a86570653f411a95)
+    #13 pc 0004ed2b  /system/lib/libbinder.so (android::BBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+202) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #14 pc 0004003f  /system/lib/libbinder.so (android::IPCThreadState::executeCommand(int)+590) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #15 pc 0003fd57  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+98) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #16 pc 0004046b  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+70) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #17 pc 00047151  /system/lib/libbinder.so (android::PoolThread::threadLoop()+12) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #18 pc 0000d7dd  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+164) (BuildId: 3a5e8e87595bdc03e4e7d198dce7883e)
+    #19 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #20 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"binder:7394_4" sysTid=7611
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0003fab3  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #03 pc 0003fcfd  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+8) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #04 pc 0004046b  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+70) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #05 pc 00047151  /system/lib/libbinder.so (android::PoolThread::threadLoop()+12) (BuildId: fbca6f00cf6f18895365785570be0021)
+    #06 pc 0000d7dd  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+164) (BuildId: 3a5e8e87595bdc03e4e7d198dce7883e)
+    #07 pc 00085b2f  /apex/com.android.runtime/lib/bionic/libc.so (__pthread_start(void*)+40) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #08 pc 0003c5f3  /apex/com.android.runtime/lib/bionic/libc.so (__start_thread+30) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+
+"vndbinder:7394_" sysTid=7612
+    #00 pc 00076544  /apex/com.android.runtime/lib/bionic/libc.so (__ioctl+12) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #01 pc 0004217f  /apex/com.android.runtime/lib/bionic/libc.so (ioctl+26) (BuildId: f64bb76e7958089d1604765e6a7b56c7)
+    #02 pc 0003dc03  /apex/com.android.vndk.v34/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206) (BuildId: 3abbd2a83a0822e983ae24cd030075ea)
+    #03 pc 0003de4d  /apex/com.android.vndk.v34/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+8) (BuildId: 3abbd2a83a0822e983ae24cd030075ea)
+    #04 pc 0003e5bb
+
+
+
+
+
+@endcode
+
+@code
+
+ 
+암호해제, 압축해제 후,
+img_gen_unlock.sh 
+
+ota_gen_unlock.sh
+./ota_gen_unlock.sh --file ../lghv_k1200ua/out/target/product/K1200UA/K1200UA-V-01.00.0000.zip
+
+을 사용하여 F/W Sign 후 F/W를 업데이트 합니다.
+ 
+이후 아래와 같은 방법으로 remount 할 수 있습니다.
+adb connect 192.168.0.xxx
+or
+pairing 버튼 누르고 전원 인가 -> led 1번 깜박이면 손 떼고 -> 2번 깜박이면 3번 누르면-> device mode
+ 
+adb shell “reboot bootloader” 또는 전원인가시 전원버튼을 누르고 있다가 LED3번 점멸 후 전원버튼9회 입력
+
+>> 안됨.
+
+
+
+
+fastboot oem password “k98pqr!@”
+fastboot flashing unlock
+fastboot reboot
+
+@endcode
+
+@code
+Dolby Vision 미동작
+01-01 09:00:11.646   361   361 E SystemControl: [CConfigFile]:/vendor/lib/firmware/amdv/dv_config.bin don't exist!
+01-01 09:00:11.646   361   361 E SystemControl: [CConfigFile]:/vendor/lib/firmware/amdv/dv_config.bin don't exist!
+01-01 09:00:11.646   361   361 E SystemControl: [CConfigFile]:no dv_config.bin in /mnt/vendor/odm_ext/etc/tvconfig/panel/dv_config.bin and /odm/etc/tvconfig/panel/dv_config.bin and /vendor/lib/firmware/amdv/dv_config.bin
+01-01 09:00:11.646   361   361 E SystemControl: [CConfigFile]:/vendor/lib/firmware/amdv/Amlogic_dv.cfg don't exist!
+01-01 09:00:11.646   361   361 E SystemControl: [CConfigFile]:/vendor/lib/firmware/amdv/Amlogic_dv.cfg don't exist!
+01-01 09:00:11.646   361   361 E SystemControl: [CConfigFile]:no Amlogic_dv.cfg in /mnt/vendor/odm_ext/etc/tvconfig/panel/Amlogic_dv.cfg and /odm/etc/tvconfig/panel/Amlogic_dv.cfg and /vendor/lib/firmware/amdv/Amlogic_dv.cfg
+01-01 09:00:11.780   332   332 E MesonHwc: dolby vision driver is not ready
+01-01 09:00:11.781   332   332 E MesonHwc: dolby vision driver is not ready
+01-01 09:00:11.783   332   332 E MesonHwc: dolby vision driver is not ready
+01-01 09:00:13.186     0     0 W [1 T190   ..] dovi_sc2_5_15_stb26: disagrees about version of symbol module_layout
+01-01 09:00:13.186     0     0 W         : [1 T190   ..] !!!MUST FIX!!! dovi_sc2_5_15_stb26: ko need recompile.
+01-01 09:00:13.186     0     0 W [1 T190   d.] CPU: 1 PID: 190 Comm: init Tainted: P           OE     5.15.170-android14-11-g6dbb32cb49cf-dirty #1
+01-01 09:00:13.187     0     0 W [1 T190   ..] dovi_sc2_5_15_stb26: Unknown symbol __ubsan_handle_cfi_check_fail_abort (err -2)
+01-01 09:00:13.187     0     0 W [1 T190   ..] dovi_sc2_5_15_stb26: Unknown symbol __cfi_slowpath_diag (err -2)
+
+@endcode
+
+*/

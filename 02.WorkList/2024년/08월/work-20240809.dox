@@ -1,0 +1,105 @@
+/*!
+@page work_20240809	2024.08.09
+
+# SKB 수원 
+---
+## bkouc500_ota_kaon2024080901 배포 테스트
+
+[기본기능테스트 결과파일](../data/SKB_UC500_기본기능테스트_20240809_V1.0.xlsx)
+
+@code
+특이사항 
+- Tombstone Widevine 브로트컴 패치 반영
+- BT연결 시 VOD 싱크 맞지 않는 현상 수정 패치 미반영 
+- known issue : 음소거 상태에서 다른 채널 이동 시, 볼륨 출력되는 현상 
+
+@endcode
+---
+## Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음
+https://jira.kaonmedia.com/browse/K1023-188
+
+@code
+
+클린빌드, 넥서스 빌드, 버전별 빌드 테스트
+HCN 최신빌드에서도 동일증상 발생
+브로드컴 패치에 문제가 있는것으로 판단 분석예정
+
+@endcode
+---
+## 음소거 상태에서 다른 채널 이동 시, 볼륨 출력되는 현상
+https://jira.kaonmedia.com/browse/K1023-191
+
+@code
+
+분석
+1. TTS가 LIVE채널의 오디오와 중첩되는 것을 막기위해 mute 했다가 unmute를 하는데 전체 시스템 뮤트를 하면 UI 쪽에 영향이 있으니 오디오디코더를 mute/umute 하는것 같음.
+2. VOD, LIVE, 유튜브 영상 재생시 볼륨 업/다운하면 볼륨변화에 대해 TTS가 동작하는데 VOD/LIVE는 TTS동작동안 뮤트되고 유튜브는 영상음성과 TTS음성이 믹스
+
+
+# 로그 1
+logcat | egrep "mute|Mute|MUTE"
+ 
+채널재핑
+뮤트 상태시
+TTS시작
+08-09 15:51:11.857   858  3597 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][758]VOLUME SET:toBeMuteStatus=0, volume=20, current mute=0
+08-09 15:51:11.857   858  3597 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][797]VOLUME SET: tempMute is true !!!
+08-09 15:51:11.870   858 26555 D PL_DECODER: [pl_decoder.c][pl_dec_isAudioDecoderMute][2836][pl_dec_isAudioDecoderMute] isMute=1, toBeMuteStatus=0
+08-09 15:51:11.870   858 26555 D PL_DECODER: [pl_decoder.c][pl_dec_setAudioDecoderMute][2829][pl_dec_setAudioDecoderMute] setAudioDecoderMute  handle : 0x2ee1ec , mute 1
+08-09 15:51:12.980   858 26592 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2873]VOLUME SET:muted!! for passthrough
+08-09 15:51:12.986   466  5406 D AF::TrackHandle: OpPlayAudio: track:195 usage:1 not muted
+ 
+TTS 종료
+08-09 15:51:16.698   858 26646 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2882]VOLUME SET:unmuted!! for passthrough
+ 
+언뮤트 상태시
+TTS시작
+08-09 15:53:04.753   858  3624 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][758]VOLUME SET:toBeMuteStatus=0, volume=20, current mute=0
+08-09 15:53:04.753   858  3624 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][803]VOLUME SET:unmuted!! for passthrough
+08-09 15:53:04.764   858 28231 D PL_DECODER: [pl_decoder.c][pl_dec_isAudioDecoderMute][2836][pl_dec_isAudioDecoderMute] isMute=0, toBeMuteStatus=0
+08-09 15:53:04.845   858 28231 D PL_DECODER: [pl_decoder.c][pl_dec_setAudioDecoderVolume][2786]VOLUME SET:unmuted!! for passthrough
+08-09 15:53:05.968   858 28283 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2873]VOLUME SET:muted!! for passthrough
+08-09 15:53:05.973   466  5406 D AF::TrackHandle: OpPlayAudio: track:197 usage:1 not muted
+ 
+TTS 종료
+08-09 15:53:11.559   858 28368 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2882]VOLUME SET:unmuted!! for passthrough
+ 
+
+=========================================
+
+# 로그 2
+unmute / TTS off 
+채널재핑
+08-09 16:17:55.922   858  3597 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][758]VOLUME SET:toBeMuteStatus=0, volume=20, current mute=0
+08-09 16:17:55.922   858  3597 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][803]VOLUME SET:unmuted!! for passthrough
+08-09 16:17:55.929   858 20336 D PL_DECODER: [pl_decoder.c][pl_dec_isAudioDecoderMute][2836][pl_dec_isAudioDecoderMute] isMute=0, toBeMuteStatus=0
+08-09 16:17:56.040   858 20336 D PL_DECODER: [pl_decoder.c][pl_dec_setAudioDecoderVolume][2786]VOLUME SET:unmuted!! for passthrough
+unmute 실행함
+ 
+mute / TTS off 
+채널재핑
+08-09 16:18:35.043   858  3624 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][758]VOLUME SET:toBeMuteStatus=0, volume=20, current mute=0
+08-09 16:18:35.043   858  3624 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][797]VOLUME SET: tempMute is true !!!
+08-09 16:18:35.052   858 20961 D PL_DECODER: [pl_decoder.c][pl_dec_isAudioDecoderMute][2836][pl_dec_isAudioDecoderMute] isMute=1, toBeMuteStatus=0
+08-09 16:18:35.052   858 20961 D PL_DECODER: [pl_decoder.c][pl_dec_setAudioDecoderMute][2829][pl_dec_setAudioDecoderMute] setAudioDecoderMute  handle : 0x329ea4 , mute 1
+mute 실행
+ 
+mute / TTS on
+채널 재핑
+08-09 16:15:22.320   858  3597 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][758]VOLUME SET:toBeMuteStatus=0, volume=20, current mute=0
+08-09 16:15:22.320   858  3597 D PL_DECODER: [pl_decoder.c][pl_dec_startAudio][797]VOLUME SET: tempMute is true !!!
+08-09 16:15:23.979   858 17994 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2873]VOLUME SET:muted!! for passthrough
+08-09 16:15:23.990   466 20692 D AF::TrackHandle: OpPlayAudio: track:235 usage:1 not muted
+mute 실행
+08-09 16:15:24.620  3270  3270 I chromium: [metrics_stat_logger] VolumeMuted=1
+TTS 실행 >> 종료
+08-09 16:15:28.106   858 18050 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2882]VOLUME SET:unmuted!! for passthrough
+unmute 실행
+
+@endcode
+---
+<br>
+---
+
+
+*/

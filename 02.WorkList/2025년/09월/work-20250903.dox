@@ -1,0 +1,99 @@
+/*!
+@page work_20250903	2025.09.03
+
+---
+
+# LGHV
+> [K0644-381] [울산방송]Android recovery 에서 리모컨이 안먹는 이슈
+
+@code
+박영록[Park Young Rok] 어제 오후 7:53
+이슈 발생한 세트에서 아래 출력 결과도 공유 부탁드립니다.
+ 
+cat /sys/kernel/debug/mmc0/ios
+cat /sys/block/mmcblk0/device/cid
+cat /sys/block/mmcblk0/device/date
+cat /sys/block/mmcblk0/device/fwrev
+cat /sys/block/mmcblk0/device/hwrev
+cat /sys/block/mmcblk0/device/manfid
+cat /sys/block/mmcblk0/device/name
+cat /sys/block/mmcblk0/device/oemid
+cat /sys/block/mmcblk0/device/rev
+cat /sys/block/mmcblk0/device/serial
+
+추가로 질문이 있는데요, 위의 /sys/kernel/debug/mmc0/ios 출력 정보를 정상 세트에서 확인해 보면, 아래와 같이 나옵니다.
+ 
+# cat /sys/kernel/debug/mmc0/ios
+clock:          200000000 Hz
+actual clock:   200000000 Hz
+vdd:            21 (3.3 ~ 3.4 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      3 (8 bits)
+timing spec:    9 (mmc HS200)
+signal voltage: 1 (1.80 V)
+driver type:    0 (driver type B)
+즉, eMMC 클럭을 200MHz로 사용하여 HS200 속도로 사용하고 있는데, 이게 의도되었고 기존부터 이렇게 설정하여 사용하고 있었는지요?
+ 
+ 
+>> 답변
+-STB#1
+S/N: BC10009577006231
+CM MAC: 547E1A97277F
+HOST ID: 1D00119AB1 
+
+K1100UA:/ # cat /sys/kernel/debug/mmc0/ios
+clock:          200000000 Hz
+actual clock:   200000000 Hz
+vdd:            21 (3.3 ~ 3.4 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      3 (8 bits)
+timing spec:    9 (mmc HS200)
+signal voltage: 1 (1.80 V)
+driver type:    0 (driver type B)
+K1100UA:/ # cat /sys/block/mmcblk0/device/cid
+150100414a5444345206f3bf72179a00
+K1100UA:/ # cat /sys/block/mmcblk0/device/date
+09/2023
+K1100UA:/ # cat /sys/block/mmcblk0/device/fwrev
+0x0600000000000000
+K1100UA:/ # cat /sys/block/mmcblk0/device/hwrev
+0x0
+K1100UA:/ # cat /sys/block/mmcblk0/device/manfid
+0x000015
+K1100UA:/ # cat /sys/block/mmcblk0/device/name
+AJTD4R
+K1100UA:/ # cat /sys/block/mmcblk0/device/oemid
+0x0100
+K1100UA:/ # cat /sys/block/mmcblk0/device/rev
+0x8
+K1100UA:/ # cat /sys/block/mmcblk0/device/serial
+0xf3bf7217
+K1100UA:/ #
+
+
+박영록[Park Young Rok]
+오전 11:05
+넵, 제 정상 세트라 거의 똑같네요. 제조년월만 제꺼는 "03/2020"이고, 위 이슈 발생 세트는 "09/2023"이네요
+
+=========================
+ 
+cp /data/dalvik-cache/arm/* /data/local/tmp/ 
+cd /data/local/tmp/
+rm apex@com.android.appsearch@javalib@service-appsearch.jar@classes.dex
+rm apex@com.android.appsearch@javalib@service-appsearch.jar@classes.vdex 
+rm apex@com.android.media@javalib@service-media-s.jar@classes.dex
+rm apex@com.android.media@javalib@service-media-s.jar@classes.vdex
+rm apex@com.android.permission@javalib@service-permission.jar@classes.dex
+rm apex@com.android.permission@javalib@service-permission.jar@classes.vdex
+@endcode
+
+
+
+*/
+
+
+

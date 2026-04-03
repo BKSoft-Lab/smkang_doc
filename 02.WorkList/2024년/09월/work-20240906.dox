@@ -1,0 +1,115 @@
+/*!
+@page work_20240906	2024.09.06~09
+
+# 가온본사
+---
+https://jira.kaonmedia.com/browse/K1010-85
+
+> 시험용 FW 요청 대응
+
+- ICMP 제거 (networkmonitor - check connection 주석처리)
+@code
+kaon_bcm_androidtv12\vendor\kaon\prebuilts\scripts\networkmonitor
+
+    # - check connection 주석처리
+    #connect="$(getprop vendor.kaon.network.connect 0)"
+	#loga "check connection : '${connect}'"
+    #[ ${connect} == 0 ] && target=1 || target=0
+	#loga "target : '${target}'"
+    #ips=(
+    #    $(getprop net.gateway)
+    #    $(getprop net.dns1)
+    #    $(getprop net.dns2)
+    #    $(ip neigh | grep 'eth0 ' | grep -E 'STALE|REACHABLE')
+    #)
+    #result=-1
+	#for ip in ${ips[@]}; do
+	#	loga "for ip : '${ip}'"
+	#	[ -z "${ip}" ] && continue
+	#	[ "${ip//[0-9]}" != "..." ] && continue
+	#	isPrivateNetwork "${ip}"
+	#	if [ $? == 0 ]; then
+	#		pingtest "${ip}" ${target}
+	#		result=$?
+	#	else
+	#		pingtest "${ip}" 1
+	#		result=$?
+	#	fi
+	#	# -1=invalid, 0=succeed, 1=failed, 2=unreachable
+	#	[ ${result} == -1 ] && continue # invalid args
+	#	[ ${result} != 1 ] && break
+	#done
+
+
+@endcode
+
+- DSB Basic 모드 (66136_Only_Basic_mode.patch 적용)
+@code
+https://jira.kaonmedia.com/secure/attachment/66136/66136_Only_Basic_mode.patch
+--- /home/platform/project/cable/lghv/vendor/broadcom/refsw/BSEAV/cable/docsis/estb/StbHostApps/DsgCC/DsgCC/DsgClientCtlThread.cpp	2024-08-23 17:30:26.907106533 +0900
++++ /home/platform/project/cable/hcn_skb/vendor/broadcom/refsw/BSEAV/cable/docsis/estb/StbHostApps/DsgCC/DsgCC/DsgClientCtlThread.cpp	2024-09-06 11:37:38.115769824 +0900
+@@ -931,7 +931,7 @@
+ 		return;
+ 	}
+ #endif
+-
++	#if 0
+ 	// If we failed in Basic mode, there is nothing to do.
+ 	// Just reset everything and go to initial state.
+ 	if( fDsgMode == kDsgBasicMode )
+@@ -961,9 +961,9 @@
+ 
+ 		return;
+ 	}
+-
+ 	gAlwaysMsgNoFields (fMessageLogSettings) << "IN ADVANCE MODE. Resetting Tunnel Settings." << endl;
+-
++	#endif
++	
+ 	fNumberOfDsLockAttempts--;
+ 
+ 	// Clear tunnel settings.
+
+
+https://jira.kaonmedia.com/secure/attachment/66137/66137_Basic_Advance_mode.patch	
+--- /home/platform/project/cable/lghv/vendor/broadcom/refsw/BSEAV/cable/docsis/estb/StbHostApps/DsgCC/DsgCC/DsgClientCtlThread.cpp	2024-08-23 17:30:26.907106533 +0900
++++ /home/platform/project/cable/hcn_skb/vendor/broadcom/refsw/BSEAV/cable/docsis/estb/StbHostApps/DsgCC/DsgCC/DsgClientCtlThread.cpp	2024-09-06 11:44:25.417357655 +0900
+@@ -974,7 +974,7 @@
+ 	#endif
+ 	
+ 	// Remove BASIC mode from scan logic.
+-	#if 0 
++	#if 1 
+ 	// eCM indicates that it has scanned the complete spectrum without
+ 	// finding any DCDs (if in advanced mode)
+ 	// Now if all clients currently registered provided their IDs	
+@endcode
+
+
+> DSB 모드 확인
+@code
+CM> /estb/dsg_thread
+ 
+DSG SvcMgr Thread
+==================
+DSG Mode                       : kDsgAdvanceMode
+DsgTunnelStatus                : kDsgNotStarted
+Waitingfirst DCD after DS lock : 0
+DSG channel validation state   : 0
+Two-Way mode                   : two-way
+Two-Way state                  : kDsgUsInitial
+SEB Upstream Impairment Counter: 0
+DHCP complete                  : false
+OTF MDD detected               : false
+DCC/DBC ds change in progress  : false
+Tdsg1 is running               : false
+Tdsg2 is running               : false
+Tdsg3 is running               : false
+Tdsg4 is running               : false
+@endcode
+
+
+---
+<br>
+---
+*/

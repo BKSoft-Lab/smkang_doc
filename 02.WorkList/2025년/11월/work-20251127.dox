@@ -1,0 +1,46 @@
+/*!
+@page work_20251127	2025.11.27
+
+---
+
+# [ATV14 신규구현]Issue #12751: 넷플릭스>돌비애트모스 컨텐츠 재생 시 오디오 늦게 출력되는 현상 
+> LGHV과 협의하여 기능제거
+
+@code
+
+console:/ $ param_set 0 "hal_param_force_ddp=1"
+console:/ $ param_set 0 "hal_param_force_ddp=0"
+
+@endcode
+
+
+@code
+
+11-27 12:08:08.650   856   954 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=131 (KEYCODE_F1) / scanCode=131 / interactive=true / down=true / deviceId=3 / deviceName=gpio_keypad
+11-27 12:08:08.865   856   954 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=131 (KEYCODE_F1) / scanCode=131 / interactive=true / down=false / deviceId=3 / deviceName=gpio_keypad
+11-27 12:08:08.900  1246  1259 D BtGatt.GattService: registerForNotification() - address=20:44:41:91:B6:42 enable: true
+11-27 12:08:08.901  1246  1836 W bt_stack: [WARNING:bta_gattc_api.cc(689)] notification already registered
+11-27 12:08:08.901  1246  1836 D BtGatt.GattService: onRegisterForNotifications() - address=null, status=0, registered=1, handle=81
+11-27 12:08:08.908  1246  1259 D BtGatt.GattService: writeCharacteristic() - trying to acquire permit.
+11-27 12:08:08.909  1246  1836 D BtGatt.GattService: onWriteCharacteristic() - increasing permit for address=20:44:41:91:B6:42
+11-27 12:08:08.909  2089  5951 I ConnectServiceSmartPair: [KAON-BT] onCharacteristicWrite: uuid= 00002a06-0000-1000-8000-00805f9b34fb instanceId=81 write DATA : 01
+11-27 12:08:08.914  2089  2089 I ConnectServiceSmartPair: [KAON-BT] sendBroadcast action is kaon.android.intent.action.FIND_ME.START
+
+1|console:/ # getprop ro.vendor.platform.is.forceddp
+
+console:/ # setprop ro.vendor.platform.is.forceddp 1
+console:/ # getprop ro.vendor.platform.is.forceddp
+1
+console:/ #
+
+
+console:/ $ param_set 0 "hal_param_force_ddp=1"
+console:/ $ param_set 0 "hal_param_force_ddp=0"
+
+
+@endcode
+
+*/
+
+
+

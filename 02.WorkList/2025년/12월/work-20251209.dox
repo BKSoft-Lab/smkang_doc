@@ -1,0 +1,135 @@
+/*!
+@page work_20251209	2025.12.09
+
+---
+
+# SKB [AVTicker대개체] 2025-11-06 UC500에서 공지메시지가 미표시되는 현상
+
+
+@code
+
+1차 분석
+
+현재 로직 : Extension ID (SO ID) 2바이트를 비교할 때, 상위 8비트와 하위 8비트의 일치 여부를 OR 조건
+
+SO ID 3200 : 0x0c80
+SO ID 3300 : 0x0ce4
+> 상위 바이트(0x0c)가 일치하면서 OR 조건이 충족되어 3300 섹션이 필터를 통과함. 문제를 수정하려면 OR 조건을 AND 조건으로 수정필요
+
+Hcn/lghv 향은 Extension ID 로 비교하는 로직이 없고 SKB에만 있어 버그인지, 의도한 개발인지 확인이 필요
+
+ 
+
+이 수정이 다른 서비스에 영향을 주지 않도록 다음 사항에 대한 확인 필요
+
+필터 그룹화 의도 : 해당 OR 조건이 Extension ID 필드를 독립적인 필터 그룹으로 보고 두 조건 중 하나만 충족해도 통과 시키려는 의도가 있었는지 여부
+다른 서비스 영향 : AV Ticker 외에 다른 OOB 섹션 필터가 현재의 OR 로직에 의존하여 유연하게 동작하고 있는 경우가 있는지 여부
+
+
+Z:\SKB\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\service\oob\pl_oob_table_id_parsing.cpp
+
+			/* Positive Table ID Filter */
+			if(sf->positiveLen == 5)
+			{
+				PLOGV("%s: table_ID :: { pid=0x%x, crc=%d } : positiveValue=0x%02x == table_id=0x%02x , sf->positiveLen=%d", __FUNCTION__, sf->pid, sf->crc, positiveTables[0], popData.tableId, sf->positiveLen);
+				PLOGV("%s: extention_ID #1 :: { pid=0x%x, crc=%d } : positiveValue=0x%02x == extentionId_1=0x%02x", __FUNCTION__, sf->pid, sf->crc, positiveTables[3], popData.extentionId_1);
+				PLOGV("%s: extention_ID #2 :: { pid=0x%x, crc=%d } : positiveValue=0x%02x == extentionId_2=0x%02x", __FUNCTION__, sf->pid, sf->crc, positiveTables[4], popData.extentionId_2);
+				if((positiveTables[0] == popData.tableId) 
+					&& ((positiveTables[3] != 0 && (positiveTables[3] == popData.extentionId_1)) || (positiveTables[4] != 0 && (positiveTables[4] == popData.extentionId_2))))
+				{
+					uint32_t user = sf->user;
+					hidl_vec<uint8_t> vuc;
+					vuc.setToExternal(&popData.buf[0], popData.bufLen);
+					if (sf->callback)
+					{
+						// Debug for DMS multicast message
+						PLOGV("%s: calling callback(filterHandle=0x%x, pid=0x%x, table_id=0x%02x, buf=%p, bufLen=%d, user=%p)",
+							  __FUNCTION__, filter, sf->pid, vuc[0], &vuc[0], popData.bufLen, (void *)user);
+						auto ret = sf->callback->onSectionFilter(filter, vuc, popData.bufLen, user);
+						if (!ret.isOk() && ret.isDeadObject()) {
+							PLOGE("%s:(EX_TRANSACTION_FAILED) Remote process died ret.isDeadObject() = true", __FUNCTION__);
+						}
+						else if(!ret.isOk()) {
+							PLOGE("%s:(EX_TRANSACTION_FAILED) FAILED_TRANSACTION ret.isOk()) = false", __FUNCTION__);
+						}
+						// Debug for DMS multicast message
+						PLOGV("%s: called callback(filterHandle=0x%x, pid=0x%x, table_id=0x%02x, buf=%p, bufLen=%d, user=%p)",
+							  __FUNCTION__, filter, sf->pid, vuc[0], &vuc[0], popData.bufLen, (void *)user);
+					}
+				}
+			}
+
+@endcode
+
+
+# LGHV [ATV14 기능변경] 히든메뉴 기능 추가 - Issue #12910
+
+
+@code
+Z:\K1200_ATV14\lghv_k1200ua\vendor\quber\middleware\core\datasource\lghv\TsReceiveTask.cpp
+
+@endcode
+
+* REMOTE_KEY(0x66, KEY_FAVORITES) - 0x16c - 364
+* REMOTE_KEY(0x66, KEY_FN_F4) - 0x1d5 - 469 
+
+* REMOTE_KEY(0x70, KEY_PROGRAM) - 0x16a - 362
+REMOTE_KEY(0x70, 192) - 192
+
+REMOTE_KEY(0xDA, KEY_F13) - 183
+* REMOTE_KEY(0xDA, KEY_SEARCH) - 217
+REMOTE_KEY(0xDA, KEY_FN_F9) - 0x1da - 474
+
+#define KEY_FN_F9		0x1da
+
+제철장터
+12-09 17:32:56.001     0     0 I         : [1 T0     ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0x66 -> keycode=364 (dev_no=0, mode=normal)
+편성표
+12-09 17:32:59.446     0     0 I         : [1 T0     ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0x70 -> keycode=192 (dev_no=0, mode=normal)
+마이크 ()
+12-09 18:00:57.790     0     0 I         : [1 T27    ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0xda -> keycode=217 (dev_no=0, mode=normal)
+
+기존
+제철장터
+12-09 17:27:28.908     0     0 I         : [1 T27    ds] meson-ir fe084040.ir: meson-ir: custom=0x2548 scancode=0x66 -> keycode=469 (dev_no=0, mode=normal)
+편성표
+12-09 17:28:23.154     0     0 I         : [1 T0     ds] meson-ir fe084040.ir: meson-ir: custom=0x2548 scancode=0x70 -> keycode=362 (dev_no=0, mode=normal)
+마이크 
+12-09 18:06:09.457     0     0 I         : [1 T664   ds] meson-ir fe084040.ir: meson-ir: custom=0x2548 scancode=0xda -> keycode=474 (dev_no=0, mode=normal)
+
+
+
+12-10 15:42:10.024     0     0 I         : [3 T41    ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0x66 -> keycode=364 (dev_no=0, mode=normal)
+12-10 15:42:10.220   900   998 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=191 (KEYCODE_BUTTON_4) / scanCode=364 / interactive=true / down=false / deviceId=3 / deviceName=ir_keypad0_0
+
+12-10 17:13:53.191     0     0 I         : [3 T0     ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0x70 -> keycode=362 (dev_no=0, mode=normal)
+12-10 17:13:53.181   900   998 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=172 (KEYCODE_GUIDE) / scanCode=362 / interactive=true / down=true / deviceId=3 / deviceName=ir_keypad0_0
+
+12-10 17:23:55.315     0     0 I         : [3 T0     ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0xda -> keycode=217 (dev_no=0, mode=normal)
+12-10 17:23:55.386   900   998 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=225 (KEYCODE_PAIRING) / scanCode=217 / interactive=true / down=false / deviceId=3 / deviceName=ir_keypad0_0
+
+
+기존
+12-10 15:29:32.258     0     0 I         : [1 T27    ds] meson-ir fe084040.ir: meson-ir: custom=0x2548 scancode=0x66 -> keycode=469 (dev_no=0, mode=normal)
+12-10 15:29:32.248   837   937 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=191 (KEYCODE_BUTTON_4) / scanCode=469 / interactive=true / down=true / deviceId=3 / deviceName=ir_keypad0_0
+12-10 15:29:32.472  2338  2338 I KaonGlobalKeyReceiver: keycode : KEYCODE_BUTTON_4 up
+
+
+12-10 15:30:32.267     0     0 I         : [1 T0     ds] meson-ir fe084040.ir: meson-ir: custom=0x2548 scancode=0x70 -> keycode=362 (dev_no=0, mode=normal)
+12-10 15:30:32.572   837   937 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=172 (KEYCODE_GUIDE) / scanCode=362 / interactive=true / down=false / deviceId=3 / deviceName=ir_keypad0_0
+12-10 15:30:32.584  2374  2374 I LGHV-APP: intent extra >> keycode : 192
+
+
+신규
+* REMOTE_KEY(0x66, KEY_FAVORITES) - 0x16c - 364
+12-11 10:09:40.940     0     0 I         : [3 T52    ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0x66 -> keycode=364 (dev_no=0, mode=normal)
+12-11 10:09:41.135   888   983 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=191 (KEYCODE_BUTTON_4) / scanCode=364 / interactive=true / down=false / deviceId=2 / deviceName=ir_keypad0_0
+* REMOTE_KEY(0x70, KEY_PROGRAM) - 0x16a - 362
+12-11 10:12:26.784     0     0 I         : [3 T41    ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0x70 -> keycode=362 (dev_no=0, mode=normal)
+12-11 10:12:26.982   888   983 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=172 (KEYCODE_GUIDE) / scanCode=362 / interactive=true / down=false / deviceId=2 / deviceName=ir_keypad0_0
+
+* REMOTE_KEY(0xDA, KEY_SEARCH) - 217
+12-11 10:13:06.177     0     0 I         : [3 T0     ds] meson-ir fe084040.ir: meson-ir: custom=0x3848 scancode=0xda -> keycode=217 (dev_no=0, mode=normal)
+12-11 10:13:06.165   888   983 D LGHV-RCU: [WindowManager_keyCode] interceptKeyTq keycode=225 (KEYCODE_PAIRING) / scanCode=217 / interactive=true / down=true / deviceId=2 / deviceName=ir_keypad0_0
+
+*/

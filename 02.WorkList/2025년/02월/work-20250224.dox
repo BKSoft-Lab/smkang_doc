@@ -1,0 +1,546 @@
+/*!
+@page work_20250224	2025.02.24 상암
+
+---
+
+# SKB SPL 2025-01-01
+
+## 1) Framework
+> https://source.android.com/docs/security/bulletin/2025-01-01?hl=ko#Framework
+
+@code
+업데이트된 AOSP 버전 12 적용
+CVE					참조		유형	심각도	업데이트된 AOSP 버전
+1. CVE-2024-49724	A-369351375	EoP	높음	12, 12L, 13, 14, 15
+2. CVE-2024-49738	A-370840874	EoP	높음	12, 12L, 13, 14, 15
+3. CVE-2024-49744	A-360846772	EoP	높음	12, 12L, 13, 14, 15
+4. CVE-2024-49745	A-370831157	EoP	높음	12, 12L, 13, 14, 15
+5. CVE-2024-49733	A-365738306	ID	높음	12, 12L, 13, 14, 15
+
+@endcode
+
+### Framework1 CVE-2024-49724 A-369351375
+@code
+android-12.0.0_r1/platform/frameworks/base/0003-Update-checkKeyIntent.bulletin.patch
+patch -p1 < 0003-Update-checkKeyIntent.bulletin.patch
+git add services/core/java/com/android/server/accounts/AccountManagerService.java
+git commit -m "CVE-2024-49724
+From 0af0a98f5e097e0449b2bc1d797e70429cb3b027 Mon Sep 17 00:00:00 2001
+From: Dmitry Dementyev <dementyev@google.com>
+Date: Wed, 16 Oct 2024 15:01:59 -0700
+Subject: [PATCH] Update checkKeyIntent
+
+1) Explicityly set  component after target activity check.
+2) Update Intent subclass check.
+
+Bug: 360846772
+Test: manual
+Flag: EXEMPT bugfix
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:9aea913656e6e6ff82ee7c8b3b59e32f747f2785)
+Merged-In: Iafc1e2260107f7ecc18c90ce12f8987b4fc76350
+Change-Id: Iafc1e2260107f7ecc18c90ce12f8987b4fc76350
+"
+
+@endcode
+
+### Framework2 CVE-2024-49738 A-370840874
+@code
+android-12.0.0_r1/platform/frameworks/native/0003-libbinder-Parcel-validate-read-data-before-write.bulletin.patch
+patch -p1 < 0003-libbinder-Parcel-validate-read-data-before-write.bulletin.patch
+git add libs/binder/Parcel.cpp
+git commit -m "CVE-2024-49738
+From 835aaaf81f9ae762f322c8832659002ccd40ee9a Mon Sep 17 00:00:00 2001
+From: Steven Moreland <smoreland@google.com>
+Date: Wed, 2 Oct 2024 00:37:59 +0000
+Subject: [PATCH] libbinder: Parcel: validate read data before write
+
+This is slow, but it's required to prevent memory
+corruption.
+
+Ignore-AOSP-First: security
+Bug: 370840874
+Test: fuzzer
+(cherry picked from commit c54dad65317f851ce9d016bd90ec6a7a04da09fc)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:61dd4436d9b2289f8507b96ba21dcb2d447a0df0)
+Merged-In: Ibc5566ade0389221690dc90324f93394cf7fc9a5
+Change-Id: Ibc5566ade0389221690dc90324f93394cf7fc9a5
+"
+
+@endcode
+
+### Framework3 CVE-2024-49744 A-360846772
+@code
+android-12.0.0_r1/platform/frameworks/base/0003-Update-checkKeyIntent.bulletin.patch
+patch -p1 < 0003-Update-checkKeyIntent.bulletin.patch
+patching file services/core/java/com/android/server/accounts/AccountManagerService.java
+Reversed (or previously applied) patch detected!  Assume -R? [n] n
+Apply anyway? [n] n
+Skipping patch.
+
+@endcode
+
+### Framework4 CVE-2024-49745 A-370831157
+@code
+android-12.0.0_r1/platform/frameworks/native/0002-libbinder-Parcel-grow-rejects-large-data-pos.bulletin.patch
+patch -p1 < 0002-libbinder-Parcel-grow-rejects-large-data-pos.bulletin.patch
+git add libs/binder/Parcel.cpp
+git commit -m "CVE-2024-49745
+From c85bebc839e8069bd71e84e7f034a560465c5346 Mon Sep 17 00:00:00 2001
+From: Steven Moreland <smoreland@google.com>
+Date: Wed, 2 Oct 2024 01:00:23 +0000
+Subject: [PATCH] libbinder: Parcel: grow rejects large data pos
+
+This is unexpected behavior so throw an error.
+Allocating this much memory may cause OOM or
+other issues.
+
+Bug: 370831157
+Test: fuzzer
+(cherry picked from commit 608524d462278c2c9f6716cd94f126c85e9f2e91)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:bcb513a0082ef5832ca35b9f44509b9a1a89ff2e)
+Merged-In: Iea0884ca61b08e52e6a6e9c66693e427cb5536f4
+Change-Id: Iea0884ca61b08e52e6a6e9c66693e427cb5536f4
+"
+
+@endcode
+
+### Framework5 CVE-2024-49733 A-365738306
+@code
+android-12.0.0_r1/platform/frameworks/base/0004-Always-show-all-approved-apps.bulletin.patch
+patch -p1 < 0004-Always-show-all-approved-apps.bulletin.patch
+git add packages/SettingsLib/src/com/android/settingslib/applications/ServiceListing.java
+git add packages/SettingsLib/tests/robotests/src/com/android/settingslib/applications/ServiceListingTest.java
+git commit -m "CVE-2024-49733
+From f46c1bf872075e55f70aa88303f24ee877fe850f Mon Sep 17 00:00:00 2001
+From: Julia Reynolds <juliacr@google.com>
+Date: Mon, 7 Oct 2024 11:10:31 -0400
+Subject: [PATCH] Always show all approved apps
+
+Regardless of what the current criteria is in order to be approved,
+show everything that's currently approved, since the criteria might
+have been more lax when it was approved
+
+Test: manual
+Test: ServiceListingTest
+Flag: EXEMPT bug fix
+Bug: 365738306
+(cherry picked from commit 234c5e843ca427b1dd47e91e3969f3309dd787bf)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:a4c353d1c8117564260b9ae72264ddd7935e9926)
+Merged-In: I6c19d3dbff6ecabc74729a7f021f293e26601944
+Change-Id: I6c19d3dbff6ecabc74729a7f021f293e26601944
+"
+
+@endcode
+
+## 2) System
+> https://source.android.com/docs/security/bulletin/2024-12-01?hl=ko#System
+
+@code
+
+업데이트된 AOSP 버전 12 적용
+CVE					참조		유형	심각도	업데이트된 AOSP 버전
+1. CVE-2024-43096	A-323850943	RCE	심각	12, 12L, 13, 14, 15
+2. CVE-2024-43770	A-364026473	RCE	심각	12, 12L, 13, 14, 15
+3. CVE-2024-43771	A-364027949	RCE	심각	12, 12L, 13, 14, 15
+4. CVE-2024-49747	A-364027038	RCE	심각	12, 12L, 13, 14, 15
+5. CVE-2024-49748	A-364025411	RCE	심각	12, 12L, 13, 14, 15
+6. CVE-2024-49749	A-355461643	RCE	높음	12, 12L, 13, 14, 15
+7. CVE-2024-34722	A-251514170	EoP	높음	12, 12L, 13, 14
+8. CVE-2024-34730	A-308429049	EoP	높음	12, 12L, 13, 14
+9. CVE-2024-43095	A-340480881	EoP	높음	12, 12L, 13, 14, 15
+10. CVE-2024-43765	A-233605527	EoP	높음	12, 12L, 13, 14, 15
+12. CVE-2024-49742	A-363248394	EoP	높음	12, 12L, 13, 14, 15
+12. CVE-2024-43763	A-356886209	DoS	높음	12, 12L, 13, 14, 15
+13. CVE-2024-49736	A-316578327	DoS	높음	12, 12L, 13, 14
+
+@endcode
+
+### System1 CVE-2024-43096 A-323850943
+@code
+android-12.0.0_r1/platform/system/bt/0003-Fix-OOB-write-in-build_read_multi_rsp-of-gatt_sr-cc.bulletin.patch
+patch -p1 < 0003-Fix-OOB-write-in-build_read_multi_rsp-of-gatt_sr-cc.bulletin.patch
+git add stack/eatt/eatt.h
+git add stack/gatt/gatt_sr.cc
+git commit -m "CVE-2024-43096 
+From 84a756e528cc130227cd4ece378fdc488eee2d34 Mon Sep 17 00:00:00 2001
+From: Brian Delwiche <delwiche@google.com>
+Date: Mon, 8 Jul 2024 22:42:18 +0000
+Subject: [PATCH] Fix OOB write in build_read_multi_rsp of gatt_sr.cc
+
+build_read_multi_rsp is missing a bounds check, which can lead to an
+OOB write when the mtu parameter is set to zero.
+
+Add that bounds check.
+
+Bug: 323850943
+Test: atest GattSrTest
+Test: researcher POC
+Tag: #security
+Flag: EXEMPT trivial validity checks
+Ignore-AOSP-First: Security
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:c177fdbd6189a114239e11e2713740b5a50624e1)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:54f370dbe213031d60d2c3ef24dff7a119274c96)
+Merged-In: Icc8209aec68873c9821a36c579cd5df05c6ec8b8
+Change-Id: Icc8209aec68873c9821a36c579cd5df05c6ec8b8
+"
+@endcode
+
+### System2 CVE-2024-43770 364026473
+@code
+android-12.0.0_r1/platform/system/bt/0005-Fix-OOB-writes-in-gatt_sr-cc.bulletin.patch
+patch -p1 < 0005-Fix-OOB-writes-in-gatt_sr-cc.bulletin.patch
+git add stack/gatt/gatt_sr.cc
+git commit -m "CVE-2024-43770 / CVE-2024-43771 / CVE-2024-49747 / CVE-2024-49748
+From 84a756e528cc130227cd4ece378fdc488eee2d34 Mon Sep 17 00:00:00 2001
+From: Brian Delwiche <delwiche@google.com>
+Date: Mon, 8 Jul 2024 22:42:18 +0000
+Subject: [PATCH] Fix OOB write in build_read_multi_rsp of gatt_sr.cc
+
+build_read_multi_rsp is missing a bounds check, which can lead to an
+OOB write when the mtu parameter is set to zero.
+
+Add that bounds check.
+
+Bug: 323850943
+Test: atest GattSrTest
+Test: researcher POC
+Tag: #security
+Flag: EXEMPT trivial validity checks
+Ignore-AOSP-First: Security
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:c177fdbd6189a114239e11e2713740b5a50624e1)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:54f370dbe213031d60d2c3ef24dff7a119274c96)
+Merged-In: Icc8209aec68873c9821a36c579cd5df05c6ec8b8
+Change-Id: Icc8209aec68873c9821a36c579cd5df05c6ec8b8
+"
+@endcode
+
+### System3 CVE-2024-43771 364027949
+@code
+android-12.0.0_r1/platform/system/bt/0005-Fix-OOB-writes-in-gatt_sr-cc.bulletin.patch
+@endcode
+
+### System4 CVE-2024-49747 364027038
+@code
+android-12.0.0_r1/platform/system/bt/0005-Fix-OOB-writes-in-gatt_sr-cc.bulletin.patch
+@endcode
+
+### System5 CVE-2024-49748 364025411
+@code
+android-12.0.0_r1/platform/system/bt/0005-Fix-OOB-writes-in-gatt_sr-cc.bulletin.patch
+@endcode
+
+### System6 CVE-2024-49749 355461643
+@code
+android-12.0.0_r1/platform/external/giflib/0001-Fix-potential-overflow-when-calculating-ImageSize.bulletin.patch
+patch -p1 < 0001-Fix-potential-overflow-when-calculating-ImageSize.bulletin.patch
+git add dgif_lib.c
+git commit -m "CVE-2024-49749
+From bb55328d3074ae0bf3fec0d0dc1a125b6606d813 Mon Sep 17 00:00:00 2001
+From: Sadaf Ebrahimi <sadafebrahimi@google.com>
+Date: Tue, 17 Sep 2024 21:02:42 +0000
+Subject: [PATCH] Fix potential overflow when calculating ImageSize
+
+The modified if statement doesn't check the size of ImageDesc.Width and
+ImageDesc.Height. If ImageDesc.Width and ImageDesc.Height are larger
+than SIZE_MAX, then ImageSize overflows.
+
+Bug: 355461643
+Test: TreeHugger
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:b379176c0987587a9186ac73b9b1fab2655657ae)
+Merged-In: Ieef04e789acf783eda2dff2cd9284ed204f1d117
+Change-Id: Ieef04e789acf783eda2dff2cd9284ed204f1d117
+"
+@endcode
+
+### System7 CVE-2024-34722 251514170
+@code
+android-12.0.0_r1/platform/system/bt/0001-Fix-an-authentication-bypass-bug-in-SMP.bulletin.patch
+android-12.0.0_r1/platform/system/bt/0006-Resolve-incomplete-fix-for-SMP-authentication-bypass.bulletin.patch
+patch -p1 < 0001-Fix-an-authentication-bypass-bug-in-SMP.bulletin.patch
+patching file stack/smp/smp_act.cc
+Reversed (or previously applied) patch detected!  Assume -R? [n]
+Apply anyway? [n]
+Skipping patch.
+2 out of 2 hunks ignored -- saving rejects to file stack/smp/smp_act.cc.rej
+patching file stack/smp/smp_int.h
+Reversed (or previously applied) patch detected!  Assume -R? [n]
+Apply anyway? [n]
+Skipping patch.
+1 out of 1 hunk ignored -- saving rejects to file stack/smp/smp_int.h.rej
+
+patch -p1 < 0006-Resolve-incomplete-fix-for-SMP-authentication-bypass.bulletin.patch
+git add stack/smp/smp_act.cc
+git commit -m "CVE-2024-34722
+From 6c742b8f21e9b8ce137dda5e37dc37b42f6ae9d1 Mon Sep 17 00:00:00 2001
+From: Brian Delwiche <delwiche@google.com>
+Date: Mon, 22 Apr 2024 21:14:56 +0000
+Subject: [PATCH] Fix an authentication bypass bug in SMP
+
+When pairing with BLE legacy pairing initiated
+from remote, authentication can be bypassed.
+This change fixes it.
+
+Bug: 251514170
+Test: m com.android.btservices
+Test: manual run against PoC
+Ignore-AOSP-First: security
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:8a3dbadc71428a30b172a74343be08498c656747)
+Merged-In: I66b1f9a80060f48a604001829db8ea7c96c7b7f8
+Change-Id: I66b1f9a80060f48a604001829db8ea7c96c7b7f8
+---
+From 04a51ac70697f5d9aa0969d50e9ba881c6ccb819 Mon Sep 17 00:00:00 2001
+From: Brian Delwiche <delwiche@google.com>
+Date: Mon, 14 Oct 2024 22:29:35 +0000
+Subject: [PATCH] Resolve incomplete fix for SMP authentication bypass
+
+Fix for b/251514170 was landed correctly on main, but in older branches
+SMP contains identical functions smp_proc_init and smp_proc_rand, both
+of which exhibit the problem, and only the former of which was patched.
+This allows the problem to still appear on branches from sc-dev to
+udc-dev.
+
+Add the logic to smp_proc_rand.
+
+Bug: 251514170
+Test: m com.android.btservices
+Tag: #security
+Ignore-AOSP-First: security
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:9eb06968ebaac1c2e2763c6a9d845fd21265805f)
+Merged-In: I8b1aae86ed2d38cd0118ca68f076e04ce6f40ddb
+Change-Id: I8b1aae86ed2d38cd0118ca68f076e04ce6f40ddb
+"
+@endcode
+
+### System8 CVE-2024-34730 308429049
+@code
+android-12.0.0_r1/platform/packages/apps/Bluetooth/0001-RESTRICT-AUTOMERGE-Disallow-unexpected-incoming-HID-connections-.bulletin.patch
+android-12.0.0_r1/platform/system/bt/0002-RESTRICT-AUTOMERGE-Disallow-unexpected-incoming-HID-connections-.bulletin.patch
+patch -p1 < 0001-RESTRICT-AUTOMERGE-Disallow-unexpected-incoming-HID-connections-.bulletin.patch
+git add jni/com_android_bluetooth_hid_host.cpp
+git add src/com/android/bluetooth/hid/HidHostService.java
+
+patch -p1 < 0002-RESTRICT-AUTOMERGE-Disallow-unexpected-incoming-HID-connections-.bulletin.patch
+git add btif/include/btif_hh.h
+git add btif/include/btif_storage.h
+git add btif/src/btif_hh.cc
+git add btif/src/btif_storage.cc
+git add include/hardware/bt_hh.h
+
+git commit -m "CVE-2024-34730
+From 32c40a35e023c2535b884738e8aaf886e84f0657 Mon Sep 17 00:00:00 2001
+From: Himanshu Rawat <rwt@google.com>
+Date: Mon, 8 Apr 2024 19:44:45 +0000
+Subject: [PATCH] RESTRICT AUTOMERGE Disallow unexpected incoming HID
+ connections 2/2
+
+HID profile accepted any new incoming HID connection. Even when the
+connection policy disabled HID connection, remote devices could initiate
+HID connection.
+This change ensures that incoming HID connection are accepted only if
+application was interested in that HID connection.
+This vulnerarbility no longer exists on the main because of feature
+request b/324093729.
+
+Test: Manual | Pair and connect a HID device, disable HID connection
+from Bluetooth device setting, attempt to connect from the HID device.
+Bug: 308429049
+Ignore-AOSP-First: security
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:5fc87e65eb3d70f051e2902d3e81ce6587ab1a96)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:6d9a002091d88009db9e9de43f690d3d9fee15a0)
+Merged-In: I1d7e886b1045d026f96c8274aca86dc499f87777
+Change-Id: I1d7e886b1045d026f96c8274aca86dc499f87777
+---
+From 9dd4fadb2a05e363c269e190180dccfaf78346b4 Mon Sep 17 00:00:00 2001
+From: Himanshu Rawat <rwt@google.com>
+Date: Mon, 8 Apr 2024 19:42:21 +0000
+Subject: [PATCH] RESTRICT AUTOMERGE Disallow unexpected incoming HID
+ connections 1/2
+
+HID profile accepted any new incoming HID connection. Even when the
+connection policy disabled HID connection, remote devices could initiate
+HID connection.
+This change ensures that incoming HID connection are accepted only if
+application was interested in that HID connection.
+This vulnerarbility no longer exists on the main because of feature
+request b/324093729.
+
+Test: Manual | Pair and connect a HID device, disable HID connection
+from Bluetooth device setting, attempt to connect from the HID device.
+Bug: 308429049
+Ignore-AOSP-First: security
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:18c635ad7923f5c26d6cd4cf7f7c66b2fa02462b)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:674298968a36f54d049b385a2976afc29777d821)
+Merged-In: I6e9db983e752dd498625078c13b736cd4c668806
+Change-Id: I6e9db983e752dd498625078c13b736cd4c668806
+"
+@endcode
+
+### System9 CVE-2024-43095 340480881
+@code
+android-12.0.0_r1/platform/packages/modules/Permission/0001-Fix-Dynamic-Permission-group-auto-grant-behaivor.bulletin.patch
+patch -p1 < 0001-Fix-Dynamic-Permission-group-auto-grant-behaivor.bulletin.patch
+git add PermissionController/src/com/android/permissioncontroller/permission/data/LightPermInfoLiveData.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/data/PermGroupLiveData.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/model/livedatatypes/LightAppPermGroup.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/model/livedatatypes/LightPackageInfo.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/model/livedatatypes/LightPermInfo.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/model/livedatatypes/LightPermission.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/service/AutoRevokePermissions.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/service/RuntimePermissionsUpgradeController.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/ui/model/AppPermissionViewModel.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/ui/model/GrantPermissionsViewModel.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/utils/KotlinUtils.kt
+git add PermissionController/src/com/android/permissioncontroller/permission/utils/SafetyNetLogger.java
+git add PermissionController/tests/mocking/src/com/android/permissioncontroller/permission/utils/GrantRevokeTests.kt
+git commit -m "CVE-2024-43095
+From df23ca3cbedb49921857c8c74bf878075acc19c2 Mon Sep 17 00:00:00 2001
+From: Yi-an Chen <theianchen@google.com>
+Date: Thu, 8 Aug 2024 01:15:57 +0000
+Subject: [PATCH] Fix Dynamic Permission group auto grant behaivor
+
+Fix the Dynamic Permission group auto grant behaivor so that a
+permission group is only considered granted when (1) all permissions
+were auto-granted or (2) a platform permission in the same group is
+granted.
+
+Bug: 340480881
+Test: DynamicPermissionsTest
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:5c55ade87055fc8b99d2031fff8cd1b6309ec123)
+Merged-In: I37b550f0c3933bc790c2917a14e917efbcccc4e8
+Change-Id: I37b550f0c3933bc790c2917a14e917efbcccc4e8
+"
+@endcode
+
+### System10 CVE-2024-43765 233605527
+@code
+android-12.0.0_r1/platform/packages/apps/DocumentsUI/0001-Prevent-clickjacking-attack-in-DocsUi-.bulletin.patch
+patch -p1 < 0001-Prevent-clickjacking-attack-in-DocsUi-.bulletin.patch
+git add AndroidManifest.xml
+git add src/com/android/documentsui/BaseActivity.java
+git add src/com/android/documentsui/picker/ConfirmFragment.java
+git commit -m "CVE-2024-43765
+From 1f946c342807bf9a1432ecbb5ed44dd55c3c27dd Mon Sep 17 00:00:00 2001
+From: Aditya <adityasngh@google.com>
+Date: Sat, 24 Aug 2024 11:21:13 +0000
+Subject: [PATCH] Prevent clickjacking attack in DocsUi.
+
+* Added permission `HIDE_OVERLAY_WINDOWS` in the Manifest.
+* Set the flag to hide overlay windows to true in BaseActivity and
+  ConfirmFragment.
+
+Bug: 233605527
+Test: Manually, see http://b/233605527#comment4
+Flag: EXEMPT bugfix
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:151f6663da151c0db569c455f35ee1c9c86f2a4e)
+Merged-In: I511730856be58cad3e13fa50bfac1e1ee2f5fee0
+Change-Id: I511730856be58cad3e13fa50bfac1e1ee2f5fee0
+"
+@endcode
+
+### System11 CVE-2024-49742 363248394
+@code
+android-12.0.0_r1/platform/packages/apps/Settings/0001--CDM-NLS-Check-if-the-NLS-service-has-an-intent-filter.bulletin.patch
+patch -p1 < 0001--CDM-NLS-Check-if-the-NLS-service-has-an-intent-filter.bulletin.patch
+git add src/com/android/settings/notification/NotificationAccessConfirmationActivity.java
+git commit -m "CVE-2024-49742
+From 886de2797bc66f97c558d6642ef444a2d03e9355 Mon Sep 17 00:00:00 2001
+From: Guojing Yuan <guojing@google.com>
+Date: Tue, 1 Oct 2024 21:59:31 +0000
+Subject: [PATCH] [CDM][NLS] Check if the NLS service has an intent-filter
+
+Bug: 363248394
+Test: CTS
+Flag: EXEMPT bugfix
+(cherry picked from commit 7ae59a42eb13f643d842525208619037c074371a)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:38f40c1fb9f647b226087dbd822ead930940c6a2)
+Merged-In: Ib79c219cde8d73a218ceb7911f4552d43e384d8e
+Change-Id: Ib79c219cde8d73a218ceb7911f4552d43e384d8e
+"
+@endcode
+
+### System12 CVE-2024-43763 356886209
+@code
+android-12.0.0_r1/platform/system/bt/0004-Fix-GATT-Read-Multiple-Variable-Response-builder.bulletin.patch
+patch -p1 < 0004-Fix-GATT-Read-Multiple-Variable-Response-builder.bulletin.patch
+git add stack/gatt/gatt_sr.cc
+git commit -m "CVE-2024-43763
+From 2063b807d3a4a54deebf214d7b78c1b4fe521322 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jakub=20Paw=C5=82owski?= <jpawlowski@google.com>
+Date: Thu, 1 Aug 2024 14:12:58 +0000
+Subject: [PATCH] Fix 'GATT Read Multiple Variable Response' builder
+
+0 length value is perfectly fine, and should result in just length
+added into the packet.
+Currently, for 0 length value we just break out of loop, and don't add
+any value.
+This means, that if first characetristic in response had 0 length, we
+would return empty packet.
+
+Ignore-AOSP-First: security fix
+Test: mma -j32;
+Bug: 352696105
+Bug: 356886209
+Flag: exempt, obvious logic fix
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:8bca10d5c1121dd8b9945d3777d69f0a0082a00d)
+Merged-In: Ida4f6b566cf9fa40fc5330d8084c29669ccaa608
+Change-Id: Ida4f6b566cf9fa40fc5330d8084c29669ccaa608
+"
+@endcode
+
+### System13 CVE-2024-49736 316578327
+@code
+android-12.0.0_r1/platform/packages/apps/Settings/0002-Disable-factory-reset-in-DSU-mode.bulletin.patch
+patch -p1 < 0002-Disable-factory-reset-in-DSU-mode.bulletin.patch
+git add src/com/android/settings/MainClear.java
+git commit -m "CVE-2024-49736
+From e9bd5a935b731c85b6de1256c960dd18b819c785 Mon Sep 17 00:00:00 2001
+From: t <locc@google.com>
+Date: Thu, 2 Nov 2023 08:06:59 +0000
+Subject: [PATCH] Disable factory reset in DSU mode
+
+Bug: 302317901
+Bug: 316578327
+Test: build
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:eab34a052d0357a28b41c9c02dab3cf5b761a961)
+Merged-In: I485eb6ac7beec0893d91ca5fe8ad88ecd96a5cbe
+Change-Id: I485eb6ac7beec0893d91ca5fe8ad88ecd96a5cbe
+"
+@endcode
+
+## 3) PLATFORM_SECURITY_PATCH
+
+@code
+
+/kaon_bcm_androidtv12/build/make/core/version_defaults.mk
+PLATFORM_SECURITY_PATCH := 2025-01-01
+git add build/make/core/version_defaults.mk
+git commit -m "PLATFORM_SECURITY_PATCH := 2025-01-01"
+
+@endcode
+
+<br>
+
+# LGHV Alaska 펌웨어 버전 변경 
+
+> 172.16.5.201 /home/a3team/work/lghv/alaska/fw_build.sh 수정
+
+@code
+line-110 FW_BUILD_CNTS=0                     -> FW_BUILD_CNTS=10
+line-111 if [[ $FW_BUILD_CNTS_PARAMETER != "0" ]]; then FW_BUILD_CNTS=$FW_BUILD_CNTS_PARAMETER; fi
+         -> #if [[ $FW_BUILD_CNTS_PARAMETER != "0" ]]; then FW_BUILD_CNTS=$FW_BUILD_CNTS_PARAMETER; fi		
+
+line-187 FW_BUILD_CNTS=0                     -> FW_BUILD_CNTS=10
+line-188 if [[ $FW_BUILD_CNTS_PARAMETER != "0" ]]; then FW_BUILD_CNTS=$FW_BUILD_CNTS_PARAMETER; fi
+         -> #if [[ $FW_BUILD_CNTS_PARAMETER != "0" ]]; then FW_BUILD_CNTS=$FW_BUILD_CNTS_PARAMETER; fi
+		 
+메일상은 ota펌웨어 갯수가 7개에서 4개로 줄이는 것으로 보이나 최성훈PL의 의견에 따라 수정하지 않음.
+line-160 for ((idx = 2;idx < 8; idx++)); do  -> for ((idx = 2;idx < 5; idx++)); do
+line-175 if [[ "$idx" == "7" ]]; then        -> if [[ "$idx" == "4" ]]; then
+@endcode
+
+---
+
+*/
+
+
+

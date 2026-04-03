@@ -1,0 +1,65 @@
+/*!
+@page work_20250521	2025.05.21
+
+---
+
+# 인천 방문 준비
+
+> STB - K1100UA-2025042110-user-alaska.zip
+@code
+18 Apr, 2025 1 commit
+강성민(kaongroup)'s avatar
+cm_FactoryReset call at stb_FactoryReset
+강성민(kaongroup) authored 1 month ago
+0d9777db
+
+공장초기화 > 부팅성공 
+
+1|console:/ $ su
+console:/ # ifconfig
+eth0.2    Link encap:Ethernet  HWaddr 74:3a:ef:c1:47:79
+          inet addr:192.168.100.9  Bcast:192.168.100.255  Mask:255.255.255.0
+          inet6 addr: fe80::763a:efff:fec1:4779/64 Scope: Link
+          UP BROADCAST RUNNING  MTU:1500  Metric:1
+          RX packets:134 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:239 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:9379 TX bytes:34676
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope: Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:44680 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:44680 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1
+          RX bytes:43008920 TX bytes:43008920
+
+eth0      Link encap:Ethernet  HWaddr 74:3a:ef:c1:47:79  Driver bcmgenet
+          inet addr:10.217.1.160  Bcast:10.217.1.255  Mask:255.255.254.0
+          inet6 addr: fe80::4f3a:420:6c02:19d2/64 Scope: Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:80118 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:11764 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:89349312 TX bytes:1748221
+
+eth0.1    Link encap:Ethernet  HWaddr 74:3a:ef:c1:47:79
+          inet addr:192.168.17.10  Bcast:192.168.17.255  Mask:255.255.255.0
+          inet6 addr: fe80::763a:efff:fec1:4779/64 Scope: Link
+          UP BROADCAST RUNNING  MTU:1500  Metric:1
+          RX packets:44749 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:1042 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:42687027 TX bytes:132691
+
+@endcode
+
+
+
+
+
+*/
+
+
+

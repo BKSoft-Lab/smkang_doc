@@ -1,0 +1,53 @@
+/*!
+@page work_20240902	2024.09.02
+
+# 서초 HCN
+---
+https://jira.kaonmedia.com/browse/K1010-78
+
+@code
+대안1 용 펌웨어 생성
+
+Main Git
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/afa0ac681771a37621965456b26eac03dfdf74f8
+
+Hal Git
+http://kkms.kaonmedia.com/gitlab/hcn/kstb1157_hals/commit/7f5d409a50fe356b5bf92bf4cf7e8e583c6b70da
+
+수정사항 
+stb과 cm 간 reset을 동기화 하는 reset 로직을 보완
+1. 개요: cm reset 명령을 stb에서 직접 호출
+2. 수정사항(cm reset 방법)
+  - 기존 : pl_hcn_notifyCmUpgrade() api 호출
+    cm fw 업데이트 로직을 재사용함(fw 파일 없어 업데이트 fail 후 cm 재부팅 유도)
+  - 변경 : pl_hcn_rebootCmForRebootStb api 호출(신규 plapi 추가)
+    cm reset 명령을 snmp를 통해 직접 전달함
+  *function prototype(pl_hcn.h)
+    void pl_hcn_notifyCmUpgrade(bool byApp);
+    void pl_hcn_rebootCmForRebootStb(void);  //신규 plapi 추가함
+ 
+3. 검증
+  a. Cisco망(MDF On) : 10회 이상 시험 시 정상동작 확인함
+    - case 1 : Stb Reboot시 re터널링 문제 검토 (15회)
+      정상부팅 -> 홈메뉴 > 설정 > 스스로 진단 > sw reboot -> 정상부팅 후 IP획득,DSG패킷, CM상태 확인, Mini EPG 출력 확인(re터널링 성공여부)
+    - case 2 : Stb Reboot시 re터널링 문제 및 Crash(화면블랙,DSG 미수신 및 hcn로고멈춤) 검토 (10회)
+      정상부팅 -> 상향차단 -> 안드로이드 설정의 sw reboot -> 정상부팅 후 DSG패킷, CM상태 확인 
+      -> 망 정상연결 -> (1~5분 후) IP획득, DSG패킷, CM상태 확인, Mini EPG 출력 확인(re터널링 성공여부)
+ 
+  b. Casa망: 10회 이상 시험 시 정상동작 확인함
+    - case 1 : Crash(화면블랙 및 hcn로고멈춤) 검토 (15회)
+      정상부팅 -> 홈메뉴 >  설정 > 스스로 진단 > sw reboot -> 정상부팅 후 IP획득, DSG패킷,  CM상태 확인
+    - case 2 :  Crash(화면블랙,DSG 미수신 및 hcn로고멈춤) 검토  (10회)
+      정상부팅 -> 상향차단 -> 안드로이드 설정의 sw reboot -> 정상부팅 후 DSG패킷, CM상태 확인 
+      -> 망 정상연결 -> (1~5분 후) IP획득, DSG패킷, CM상태 확인
+
+  c. 절전모드 진입시 reboot가 여러번 되는 문제 : 10회 이상 시험 시 정상동작 확인함
+    - pl_hcn_notifyCmUpgrade() 대신 pl_hcn_rebootCmForRebootStb() 사용으로 발생하지 않을 것으로 판단
+    - 홈메뉴 > 사용환경 설정 > 절전모드 설정 에서 "사용" 설정
+      슬립모드 진입 2분 후 절전모드 진입 시 STB 리부트 명령이 여러번 들어오는지 확인 
+
+@endcode
+---
+<br>
+---
+*/

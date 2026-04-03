@@ -1,0 +1,100 @@
+/*!
+@page work_20250919	2025.09.19
+
+---
+
+# [K1100UA] 불량 검출 방안 검토를 위한 LGHV 김포 LIVE 센터 방문
+
+> https://jira.kaonmedia.com/browse/K0644-393
+
+@code
+불량 유형 2 : SW에서 미들웨어 안 올라오는 STB
+부팅초기 cm connection check 스크립트에서 cm에 연결이 되지않아 다음 스텝으로 넘어가지 못하는 것으로 보임
+CM에 시리얼포트 연결해 보았는데 로그도 안나옴
+
+같은증상 다른 시료 테스트 요청 (CM 로그여부 / H/W 점검) > 나선주M
+
+불량
+
+console:/ # ifconfig
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope: Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:192 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:192 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1
+          RX bytes:18014 TX bytes:18014
+
+eth0      Link encap:Ethernet  HWaddr 98:77:e7:24:53:87  Driver bcmgenet
+          inet6 addr: fe80::c290:b54f:a00e:c1f8/64 Scope: Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:294 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 TX bytes:50760
+
+eth0:1    Link encap:Ethernet  HWaddr 98:77:e7:24:53:87
+          inet addr:192.168.100.9  Bcast:192.168.100.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+
+console:/ #
+
+130|console:/ # ping 192.168.100.1
+PING 192.168.100.1 (192.168.100.1) 56(84) bytes of data.
+From 192.168.100.9: icmp_seq=1 Destination Host Unreachable
+^C
+
+console:/ # getprop vendor.cm.ni.snmp.name
+console:/ #
+
+console:/ # getprop vendor.cm.ni.tftp.name
+
+console:/ #
+
+정상시료
+
+console:/ # ifconfig
+eth0.2    Link encap:Ethernet  HWaddr 18:34:af:c7:3f:aa
+          inet addr:192.168.100.9  Bcast:192.168.100.255  Mask:255.255.255.0
+          inet6 addr: fe80::1a34:afff:fec7:3faa/64 Scope: Link
+          UP BROADCAST RUNNING  MTU:1500  Metric:1
+          RX packets:16 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:68 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:1151 TX bytes:11221
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope: Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:342 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:342 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1
+          RX bytes:223027 TX bytes:223027
+
+eth0      Link encap:Ethernet  HWaddr 18:34:af:c7:3f:aa  Driver bcmgenet
+          inet6 addr: fe80::e230:74e1:16cd:a3ee/64 Scope: Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:506 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:648 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:51069 TX bytes:93025
+
+eth0.1    Link encap:Ethernet  HWaddr 18:34:af:c7:3f:aa
+          inet addr:192.168.17.10  Bcast:192.168.17.255  Mask:255.255.255.0
+          inet6 addr: fe80::1a34:afff:fec7:3faa/64 Scope: Link
+          UP BROADCAST RUNNING  MTU:1500  Metric:1
+          RX packets:490 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:532 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:40810 TX bytes:71658
+          
+console:/ # getprop vendor.cm.ni.snmp.name
+eth0.1
+console:/ # getprop vendor.cm.ni.tftp.name
+eth0.2
+
+@endcode
+
+*/

@@ -1,0 +1,66 @@
+/*!
+@page work_20251023	2025.10.23
+
+---
+
+# K1100 - 2024.09 생산 STB 2대에 대한 테스트 
+
+@code
+상암에 보유하고 있던 2024.09 생산 STB 2대에 대한 테스트 결과입니다.
+1대는 20회 동안 발생이 없었으며, 1대는 기존 발생STB 과 같은 빈도로 발생 하였습니다.
+
+┌────────────────┬──────────────────────┐
+│STB             │설정화면 직후 전원 OFF│
+├────────────────┼──────────────────────┤
+│2024.09 생산    │ 0/20                 │
+│BC10003009000457│                      │
+├────────────────┼──────────────────────┤
+│2024.09 생산    │ 4/20                 │
+│BC10003009009917│                      │
+└────────────────┴──────────────────────┘
+
+@endcode
+
+
+logcat | egrep "smkang|adjustPositionOnScreen"
+dumpsys window windows | sed -n '/[Vv]olume/,/Window #/p'
+
+
+frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogImpl.java
+545:        mWindow.setWindowAnimations(com.android.internal.R.style.Animation_Toast);
+569:            mDialogView.animate()
+1096:        mRingerDrawerContainer.animate()
+1110:        mSelectedRingerContainer.animate()
+1121:            mSelectedRingerContainer.animate()
+1125:            mSelectedRingerContainer.animate()
+1156:        mRingerDrawerContainer.animate()
+1163:            mRingerDrawerContainer.animate()
+1167:            mRingerDrawerContainer.animate()
+1176:        mSelectedRingerContainer.animate()
+1293:                mODICaptionsTooltipView.animate()
+1315:            mODICaptionsTooltipView.animate().cancel();
+1317:            mODICaptionsTooltipView.animate()
+1553:        mDialogView.animate().cancel();
+1561:        ViewPropertyAnimator animator = mDialogView.animate()
+2596:            mRingerDrawerNewSelectionBg.animate()
+2615:                mRingerDrawerNewSelectionBg.animate()
+2619:                mRingerDrawerNewSelectionBg.animate()
+
+
+frameworks/base/packages/SystemUI/res/values/styles.xml
+296:        <item name="android:windowEnterAnimation">@anim/navbar_fade_in</item>
+297:        <item name="android:windowExitAnimation">@null</item>
+444:        <item name="android:windowAnimationStyle">@null</item>
+817:        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+845:        <item name="android:windowAnimationStyle">@null</item>
+855:        <item name="android:windowAnimationStyle">@null</item>
+889:      <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+1409:        <item name="android:windowEnterAnimation">@anim/long_press_lock_screen_popup_enter</item>
+1410:        <item name="android:windowExitAnimation">@anim/long_press_lock_screen_popup_exit</item>
+
+frameworks/base/packages/SystemUI/res/values-television/styles.xml
+23:        <item name="android:windowEnterAnimation">@null</item>
+24:        <item name="android:windowExitAnimation">@null</item>
+
+
+*/

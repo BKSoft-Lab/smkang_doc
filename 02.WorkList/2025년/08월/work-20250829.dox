@@ -1,0 +1,52 @@
+/*!
+@page work_20250829	2025.08.29
+
+---
+
+# LGHV K1100
+
+> 부팅초기 히든메뉴 초기화시 일반리부팅 되는 이슈
+
+@code
+
+정상 로그
+[  400.941533] init: [service-misbehaving] : service 'nxserver' is still running 3000ms after receiving SIGTERM
+[  401.186143] libprocessgroup: Failed to kill process cgroup uid 1000 pid 3032 in 233ms, 1 processes remain
+[  401.199459] init: [service-misbehaving] : service 'nxserver' is still running 0ms after receiving SIGKILL
+[  402.011345] audit: netlink_unicast sending to audit_pid=2943 returned error: -111
+[  402.019116] audit: audit_pid=2943 reset
+[  402.304262] reboot: Restarting system with command 'recovery'
+
+비정상 로그
+[   76.005431] init: [service-misbehaving] : service 'nxserver' is still running 3000ms after receiving SIGTERM
+[   76.244670] libprocessgroup: Failed to kill process cgroup uid 1000 pid 3030 in 228ms, 1 processes remain
+[   76.257145] init: [service-misbehaving] : service 'nxserver' is still running 0ms after receiving SIGKILL
+[   77.087373] audit: netlink_unicast sending to audit_pid=2942 returned error: -111
+[   77.094965] audit: audit_pid=2942 reset
+[   77.506921] reboot: Restarting system with command ''
+
+@endcode
+
+> [K0644-378] 신품 HOST ID 정보 N/A 증상 원인 문의의 件 
+
+@code
+
+박영록[Park Young Rok]
+2025. 8. 29. 오전 11:06
+추가 질문이 있는데요, /data/ 파티션은 포맷을 어디서 어떤 커맨드로 하나요?
+
+답변
+
+recovery.cpp (start_recovery)  
+   └── WipeData()   [bootable/recovery/install/wipe_data.cpp]  
+         └── erase_volume("/data")  
+               └── fs_mgr_do_format()  [system/core/fs_mgr/fs_mgr_format.cpp]  
+                     └── format_f2fs()
+                            └── "make_f2fs -g android"
+
+@endcode
+
+*/
+
+
+

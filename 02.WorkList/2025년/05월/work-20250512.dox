@@ -1,0 +1,104 @@
+/*!
+@page work_20250512	2025.05.12
+
+---
+
+# HCN xTS
+> STS - 2025.05.11_23.12.03
+@code
+Suite / Plan	STS / sts-dynamic-full
+Suite / Build	12_sts-r36 / 13002298
+Host Info	Result/@start ABX-216 (Linux - 6.8.0-59-generic)
+Start time / End Time	Sun May 11 23:12:03 KST 2025 / Mon May 12 00:01:57 KST 2025
+Tests Passed	923
+Tests Failed	22
+Modules Done	20
+Modules Total	20
+Fingerprint	SKYHCN/KSTB1157/K1100UA:12/STT5.221215.001/kaon2025050901:user/release-keys
+Security Patch	2025-04-01
+Release (SDK)	12 (31)
+ABIs	armeabi-v7a,armeabi
+@endcode
+
+> CTS 실패항목 PASS
+@code
+
+@endcode
+
+> GTS - 2025.05.13_11.55.37.252_1453
+@code
+Suite / Plan	GTS / gts
+Suite / Build	12_r3 / 13064529
+Host Info	Result/@start ABX-216 (Linux - 6.8.0-59-generic)
+Start time / End Time	Tue May 13 11:55:41 KST 2025 / Tue May 13 12:05:33 KST 2025
+Tests Passed	1391
+Tests Failed	18
+Modules Done	149
+Modules Total	150
+Fingerprint	SKYHCN/KSTB1157/K1100UA:12/STT5.221215.001/kaon2025050901:user/release-keys
+Security Patch	2025-04-01
+Release (SDK)	12 (31)
+ABIs	armeabi-v7a,armeabi
+@endcode
+
+# K1100 xTS
+> STS - 2025.05.13_12.09.01
+@code
+Suite / Plan	STS / sts-dynamic-full
+Suite / Build	12_sts-r36 / 13002298
+Host Info	Result/@start ABX-216 (Linux - 6.8.0-59-generic)
+Start time / End Time	Tue May 13 12:09:01 KST 2025 / Tue May 13 13:00:00 KST 2025
+Tests Passed	925
+Tests Failed	20
+Modules Done	20
+Modules Total	20
+Fingerprint	LGHelloVision/K1100UA/K1100UA:12/STT5.221215.001/kaon2025050901:user/release-keys
+Security Patch	2025-04-01
+Release (SDK)	12 (31)
+ABIs	armeabi-v7a,armeabi
+@endcode
+
+> CTS 실패항목 PASS
+@code
+run cts -m CtsIntentSignatureTestCases -t android.signature.cts.intent.IntentTest#shouldNotFindUnexpectedIntents
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageWrite
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageRead29
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsMultiple
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternal
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternalConsistent
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStats
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ListeningPortsTest#testNoRemotelyAccessibleListeningTcp6Ports
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Unspecified_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsJniTestCases -t android.jni.cts.JniStaticTest#test_dlopenPublicLibraries
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Visible_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysVisible_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysHidden_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Hidden_EditorDialogLostFocusAfterUnlocked
+
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushAvc
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushHevc
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushVp9
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoPlaybackAvc
+@endcode
+
+> GTS - 2025.05.11_23.11.48.585_3914
+@code
+Suite / Plan	GTS / gts
+Suite / Build	12_r3 / 13064529
+Host Info	Result/@start ABX-216 (Linux - 6.8.0-59-generic)
+Start time / End Time	Sun May 11 23:11:52 KST 2025 / Sun May 11 23:25:26 KST 2025
+Tests Passed	1389
+Tests Failed	18
+Modules Done	148
+Modules Total	149
+Fingerprint	LGHelloVision/K1100UA/K1100UA:12/STT5.221215.001/kaon2025050901:user/release-keys
+Security Patch	2025-04-01
+Release (SDK)	12 (31)
+ABIs	armeabi-v7a,armeabi
+@endcode
+
+
+*/
+
+
+

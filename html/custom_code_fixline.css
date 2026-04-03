@@ -1,0 +1,27 @@
+
+/* Doxygen @code ... @endcode block monospace + vertical spacing fix */
+
+div.fragment, pre.fragment, div.fragment .line, pre.fragment code {
+    font-family: 'D2Coding', 'Consolas', 'Courier New', monospace !important;
+    font-size: 0.95em;
+    line-height: 0.0em !important;  /* 세로 간격을 원래 폰트 높이로 맞춤 */
+    letter-spacing: 1.1em;  /* 기본은 0em — 숫자를 늘릴수록 가로폭 증가 */
+    text-rendering: geometricPrecision;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "clig" 0, "calt" 0;
+    white-space: pre;
+}
+
+/* 시각적 구분용 스타일 (선택 사항) */
+div.fragment, pre.fragment {
+    background-color: #f8f8f8;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 6px 8px;
+    overflow-x: auto;
+}
+
+/* 각 코드 줄의 세로 폭 보정 */
+div.fragment .line {
+    line-height: 1.0em !important;  /* D2Coding/Consolas에서 라인 밀착 정렬 */
+}

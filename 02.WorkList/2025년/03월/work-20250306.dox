@@ -1,0 +1,144 @@
+/*!
+@page work_20250306	2025.03.06
+
+---
+
+# 리모컨 베터리 부족 알림
+
+@code
+	private void showRemoteBatteryLowNotification() {
+		Context context = mContext; // PhoneWindowManager는 이미 mContext를 가지고 있음.
+
+		String channelId = "my_channel";
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		// Android 8.0 이상에서는 NotificationChannel 필요
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			NotificationChannel channel = new NotificationChannel(
+				channelId, "My Notifications", NotificationManager.IMPORTANCE_HIGH);
+			notificationManager.createNotificationChannel(channel);
+		}
+
+		// Notification 생성
+		Notification.Builder builder;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder = new Notification.Builder(context, channelId);
+		} else {
+			builder = new Notification.Builder(context);
+		}
+
+		builder.setSmallIcon(com.android.internal.R.drawable.sym_def_app_icon)
+			.setContentTitle("리모컨 건전지가 부족합니다.")
+			.setContentText("리모컨 건전지를 교체해주세요.")
+			.setAutoCancel(true);
+
+		// Notification 표시
+		notificationManager.notify(1001, builder.build());
+		Log.d(TAG, "smkang showRemoteBatteryLowNotification end");
+	}
+
+@endcode	
+
+
+@code
+	private void showRemoteBatteryLowNotification() {
+		Context context = mContext.getApplicationContext(); // 🔹 Context 수정
+		Log.d(TAG, "smkang showRemoteBatteryLowNotification start");
+
+		String channelId = "my_channel";
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		// 🔹 NotificationManager가 null인지 확인
+		if (notificationManager == null) {
+			Log.e(TAG, "NotificationManager is null");
+			return;
+		}
+
+		// 🔹 Android 8.0 이상에서는 NotificationChannel 필요
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			Log.d(TAG, "Creating Notification Channel");
+			NotificationChannel channel = new NotificationChannel(
+				channelId, "My Notifications", NotificationManager.IMPORTANCE_HIGH);
+			notificationManager.createNotificationChannel(channel);
+		}
+
+		// Notification 생성
+		Notification.Builder builder;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder = new Notification.Builder(context, channelId);
+		} else {
+			builder = new Notification.Builder(context);
+			builder.setPriority(Notification.PRIORITY_HIGH); // 🔹 Android 7.1 이하에서 필요
+		}
+
+		// 🔹 아이콘을 알림에 적절한 것으로 변경
+		builder.setSmallIcon(android.R.drawable.ic_dialog_alert)
+			.setContentTitle("리모컨 건전지가 부족합니다.")
+			.setContentText("리모컨 건전지를 교체해주세요.")
+			.setAutoCancel(true);
+
+		// Notification 표시
+		notificationManager.notify(1001, builder.build());
+		Log.d(TAG, "smkang showRemoteBatteryLowNotification end");
+	}
+@endcode
+
+@code
+	private void showRemoteBatteryLowNotification() {
+		Context context = mContext.getApplicationContext(); // 🔹 Context 수정
+		Log.d(TAG, "smkang showRemoteBatteryLowNotification start");
+
+		String channelId = "my_channel";
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		// 🔹 NotificationManager가 null인지 확인
+		if (notificationManager == null) {
+			Log.e(TAG, "smkang NotificationManager is null");
+			return;
+		}
+
+		// 🔹 Android 8.0 이상에서는 NotificationChannel 필요
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			Log.d(TAG, "smkang Creating Notification Channel");
+			NotificationChannel channel = new NotificationChannel(
+				channelId, "My Notifications", NotificationManager.IMPORTANCE_HIGH);
+			notificationManager.createNotificationChannel(channel);
+		}
+
+		// Notification 생성
+		Notification.Builder builder;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder = new Notification.Builder(context, channelId);
+		} else {
+			builder = new Notification.Builder(context);
+			builder.setPriority(Notification.PRIORITY_HIGH); // 🔹 Android 7.1 이하에서 필요
+		}
+
+		// 🔹 아이콘을 알림에 적절한 것으로 변경
+		builder.setSmallIcon(android.R.drawable.ic_dialog_alert)
+			.setContentTitle("리모컨 건전지가 부족합니다.")
+			.setContentText("리모컨 건전지를 교체해주세요.")
+			.setAutoCancel(true);
+
+		// Notification 표시
+		notificationManager.notify(1001, builder.build());
+		Log.d(TAG, "smkang showRemoteBatteryLowNotification end");
+	}
+
+@endcode
+
+@code
+
+
+/non/snmp/show
+
+10.5.113.44
+10.45.191.69
+10.45.240.5
+
+@endcode
+
+*/
+
+
+

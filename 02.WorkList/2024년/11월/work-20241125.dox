@@ -1,0 +1,323 @@
+/*!
+@page work_20241125	2024.11.25
+
+# 가온본사
+---
+
+## GTS 실패  
+
+> 요청 사항 Mail (최신 GTVS, SPL11, SPL12 적용 후 테스트)
+@code
+안녕하세요. 김원균PM입니다.
+
+@강성민매니저님,
+브로드컴에서 최신 GTVS를 받아서 GTS 실패 항목 돌려보랍니다.
+아래에 최신 GTVS 와 SPL 2024-11, 2024-12복사했습니다.
+적용 후 GtsMediaRouterTestCases 선검증 후 전체 xts 검증 요청 드립니다.
+
++ GTVS link : https://drive.google.com/file/d/1-dV8LS6zv3CNZPjSCVmJMDDdXkh9SReS/view?usp=sharing
+commit	312704e506ede00cb79721cddd42182b24f0e5f2
+
++ Security Patch 2024-11(android-12.0.0_r1) : https://drive.google.com/file/d/1D0ppJawqcXURYvdpIRnaST5sXby_s45V/view?usp=sharing
++ Security Patch 2024-12(android-12.0.0_r1) : https://drive.google.com/file/d/10yR4YF566tmrWRIxeXbm5zlAPFYli_yj/view?usp=sharing
+
+@endcode
+
+> SPL 적용 
+@code
+
+2024-11-01 
+프레임워크
+CVE	참조	유형	심각도	업데이트된 AOSP 버전
+CVE-2024-40660	A-347307756 [2]	EoP	높음	14, 15
+CVE-2024-43081	A-341256043	EoP	높음	12, 12L, 13, 14, 15
+CVE-2024-43085	A-353712853	EoP	높음	12, 12L, 13, 14, 15
+CVE-2024-43093	A-341680936	EoP	높음	12, 13, 14, 15
+CVE-2024-43082	A-296915959	ID	높음	12, 12L
+CVE-2024-43084	A-281044385	ID	높음	12, 12L, 13, 14, 15
+CVE-2024-43086	A-343440463	ID	높음	12, 12L, 13, 14, 15
+
+
+CVE-2024-43081	A-341256043
+android-12.0.0_r1/platform/frameworks/base/0006-Disallow-device-admin-package-and-protected-packages-to-be-reins.bulletin.patch
+
+CVE-2024-43085	A-353712853
+android-12.0.0_r1/platform/frameworks/base/0005-Set-no-data-transfer-on-function-switch-timeout-for-accessory-mo.bulletin.patch
+
+CVE-2024-43093	A-341680936
+android-12.0.0_r1/platform/frameworks/base/0008-Restrict-access-to-directories.bulletin.patch
+
+CVE-2024-43082	A-296915959
+android-12.0.0_r1/platform/frameworks/base/0001-fix-Security-Report-Reveal-images-across-users-via-EditUserPh.bulletin.patch
+
+CVE-2024-43084	A-281044385
+android-12.0.0_r1/platform/frameworks/base/0004-Check-more-URIs-in-notifications.bulletin.patch
+
+CVE-2024-43086	A-343440463	
+android-12.0.0_r1/platform/frameworks/base/0002-Remove-authenticator-data-if-it-was-disabled-.bulletin.patch
+
+
+시스템
+이 섹션의 가장 심각한 취약점이 악용될 경우 추가 실행 권한 없이 원격 코드 실행이 발생할 수 있습니다.
+
+CVE	참조	유형	심각도	업데이트된 AOSP 버전
+CVE-2024-43091	A-344620577	RCE	높음	12, 12L, 13, 14, 15
+CVE-2024-29779	A-329701910	EoP	높음	14
+CVE-2024-34719	A-242996380	EoP	높음	12, 12L, 13, 14
+CVE-2024-40661	A-308138085	EoP	높음	12, 12L, 13, 14
+CVE-2024-43080	A-330722900	EoP	높음	12, 12L, 13, 14, 15
+CVE-2024-43087	A-353700779	EoP	높음	12, 12L, 13, 14, 15
+CVE-2024-43088	A-326057017	EoP	높음	12, 12L, 13, 14, 15
+CVE-2024-43089	A-304280682	EoP	높음	12, 12L, 13, 14, 15
+CVE-2024-43090	A-331180422	ID	높음	12, 12L, 13, 14
+CVE-2024-43083	A-348352288	DoS	높음	12, 12L, 13, 14, 15
+
+
+CVE-2024-43091	A-344620577
+android-12.0.0_r1/platform/external/skia/0001-RESTRICT-AUTOMERGE-Avoid-potential-overflow-when-allocating-3D-.bulletin.patch
+
+CVE-2024-34719	A-242996380
+android-12.0.0_r1/platform/packages/apps/Bluetooth/0001-Fix-permission-bypasses-to-multiple-methods.bulletin.patch
+
+CVE-2024-40661	A-308138085
+중복 - android-12.0.0_r1/platform/frameworks/base/0004-Check-more-URIs-in-notifications.bulletin.patch
+
+CVE-2024-43080	A-330722900
+android-12.0.0_r1/platform/packages/apps/Settings/0002-startActivityForResult-with-new-Intent.bulletin.patch
+
+CVE-2024-43087	A-353700779
+android-12.0.0_r1/platform/packages/apps/Settings/0001-RESTRICT-AUTOMERGE-Stops-hiding-a11y-services-with-the-same-pack.bulletin.patch
+
+CVE-2024-43088	A-326057017
+android-12.0.0_r1/platform/packages/apps/Settings/0003-RESTRICT-AUTOMERGE-Checks-cross-user-permission-before-handling-.bulletin.patch
+
+CVE-2024-43089	A-304280682
+android-12.0.0_r1/platform/packages/providers/MediaProvider/0001-Prevent-apps-from-renaming-files-they-don-t-own.bulletin.patch
+
+CVE-2024-43090	A-331180422
+android-12.0.0_r1/platform/frameworks/base/0007-RESTRICT-AUTOMERGE-Clear-app-provided-shortcut-icons.bulletin.patch
+
+CVE-2024-43083	A-348352288
+android-12.0.0_r1/platform/packages/modules/Wifi/0001-Fix-security-isseu-by-change-the-field-in-WifiConfig.bulletin.patch
+
+
+중복 - cp android-12.0.0_r1/platform/frameworks/base/0004-Check-more-URIs-in-notifications.bulletin.patch ./
+
+cp android-12.0.0_r1/platform/external/skia/0001-RESTRICT-AUTOMERGE-Avoid-potential-overflow-when-allocating-3D-.bulletin.patch ./
+patch -p1 < 0001-RESTRICT-AUTOMERGE-Avoid-potential-overflow-when-allocating-3D-.bulletin.patch 
+patching file src/effects/SkEmbossMaskFilter.cpp
+        수정함:        src/effects/SkEmbossMaskFilter.cpp
+
+cp android-12.0.0_r1/platform/packages/apps/Bluetooth/0001-Fix-permission-bypasses-to-multiple-methods.bulletin.patch ./
+patch -p1 < 0001-Fix-permission-bypasses-to-multiple-methods.bulletin.patch
+patching file src/com/android/bluetooth/Utils.java
+        수정함:        src/com/android/bluetooth/Utils.java
+
+
+cp android-12.0.0_r1/platform/packages/apps/Settings/0001-RESTRICT-AUTOMERGE-Stops-hiding-a11y-services-with-the-same-pack.bulletin.patch ./
+patch -p1 < 0001-RESTRICT-AUTOMERGE-Stops-hiding-a11y-services-with-the-same-pack.bulletin.patch
+patching file src/com/android/settings/accessibility/AccessibilitySettings.java
+        수정함:        src/com/android/settings/accessibility/AccessibilitySettings.java
+
+cp android-12.0.0_r1/platform/packages/apps/Settings/0002-startActivityForResult-with-new-Intent.bulletin.patch ./
+patch -p1 < 0002-startActivityForResult-with-new-Intent.bulletin.patch 
+patching file src/com/android/settings/users/AppRestrictionsFragment.java
+        수정함:        src/com/android/settings/accessibility/AccessibilitySettings.java
+
+cp android-12.0.0_r1/platform/packages/apps/Settings/0003-RESTRICT-AUTOMERGE-Checks-cross-user-permission-before-handling-.bulletin.patch ./
+patch -p1 < 0003-RESTRICT-AUTOMERGE-Checks-cross-user-permission-before-handling-.bulletin.patch
+patching file src/com/android/settings/applications/AppInfoBase.java
+        수정함:        src/com/android/settings/applications/AppInfoBase.java
+
+cp android-12.0.0_r1/platform/packages/providers/MediaProvider/0001-Prevent-apps-from-renaming-files-they-don-t-own.bulletin.patch ./
+patch -p1 < 0001-Prevent-apps-from-renaming-files-they-don-t-own.bulletin.patch
+patching file src/com/android/providers/media/MediaProvider.java
+Hunk #1 succeeded at 6459 (offset -33 lines).
+        수정함:        src/com/android/providers/media/MediaProvider.java
+        수정함:        src/com/android/providers/media/MediaProvider.java.orig
+
+cp android-12.0.0_r1/platform/packages/modules/Wifi/0001-Fix-security-isseu-by-change-the-field-in-WifiConfig.bulletin.patch ./
+patch -p1 < 0001-Fix-security-isseu-by-change-the-field-in-WifiConfig.bulletin.patch
+patching file service/java/com/android/server/wifi/WifiConfigurationUtil.java
+patching file service/tests/wifitests/src/com/android/server/wifi/WifiConfigurationUtilTest.java
+        수정함:        service/java/com/android/server/wifi/WifiConfigurationUtil.java
+        수정함:        service/tests/wifitests/src/com/android/server/wifi/WifiConfigurationUtilTest.java
+
+cp android-12.0.0_r1/platform/frameworks/base/0007-RESTRICT-AUTOMERGE-Clear-app-provided-shortcut-icons.bulletin.patch ./
+patch -p1 < 0007-RESTRICT-AUTOMERGE-Clear-app-provided-shortcut-icons.bulletin.patch
+patching file core/java/android/view/KeyboardShortcutInfo.java
+patching file packages/SystemUI/src/com/android/systemui/statusbar/KeyboardShortcuts.java
+        수정함:        core/java/android/view/KeyboardShortcutInfo.java
+        수정함:        packages/SystemUI/src/com/android/systemui/statusbar/KeyboardShortcuts.java
+
+
+/build/make/core/version_defaults.mk
+
+
+cp android-12.0.0_r1/platform/frameworks/base/0006-Disallow-device-admin-package-and-protected-packages-to-be-reins.bulletin.patch ./
+cp android-12.0.0_r1/platform/frameworks/base/0005-Set-no-data-transfer-on-function-switch-timeout-for-accessory-mo.bulletin.patch ./
+cp android-12.0.0_r1/platform/frameworks/base/0008-Restrict-access-to-directories.bulletin.patch ./
+cp android-12.0.0_r1/platform/frameworks/base/0001-fix-Security-Report-Reveal-images-across-users-via-EditUserPh.bulletin.patch ./
+cp android-12.0.0_r1/platform/frameworks/base/0004-Check-more-URIs-in-notifications.bulletin.patch ./
+cp android-12.0.0_r1/platform/frameworks/base/0002-Remove-authenticator-data-if-it-was-disabled-.bulletin.patch ./
+
+
+patch -p1 < 0001-fix-Security-Report-Reveal-images-across-users-via-EditUserPh.bulletin.patch 
+        수정함:        packages/SettingsLib/src/com/android/settingslib/users/EditUserPhotoController.java
+
+patch -p1 < 0002-Remove-authenticator-data-if-it-was-disabled-.bulletin.patch 
+        수정함:        packages/SettingsLib/src/com/android/settingslib/users/EditUserPhotoController.java
+        수정함:        services/core/java/com/android/server/accounts/AccountManagerService.java
+		
+patch -p1 < 0004-Check-more-URIs-in-notifications.bulletin.patch 
+        수정함:        core/java/android/app/Notification.java
+        수정함:        core/java/android/app/Person.java
+        수정함:        core/java/android/widget/RemoteViews.java
+        수정함:        packages/SettingsLib/src/com/android/settingslib/users/EditUserPhotoController.java
+        수정함:        services/core/java/com/android/server/accounts/AccountManagerService.java
+
+patch -p1 < 0005-Set-no-data-transfer-on-function-switch-timeout-for-accessory-mo.bulletin.patch
+        수정함:        core/java/android/app/Notification.java
+        수정함:        core/java/android/app/Person.java
+        수정함:        core/java/android/widget/RemoteViews.java
+        수정함:        packages/SettingsLib/src/com/android/settingslib/users/EditUserPhotoController.java
+        수정함:        services/core/java/com/android/server/accounts/AccountManagerService.java
+        수정함:        services/usb/java/com/android/server/usb/UsbDeviceManager.java
+
+patch -p1 < 0006-Disallow-device-admin-package-and-protected-packages-to-be-reins.bulletin.patch 
+        수정함:        core/java/android/app/Notification.java
+        수정함:        core/java/android/app/Person.java
+        수정함:        core/java/android/widget/RemoteViews.java
+        수정함:        packages/SettingsLib/src/com/android/settingslib/users/EditUserPhotoController.java
+        수정함:        services/core/java/com/android/server/accounts/AccountManagerService.java
+        수정함:        services/core/java/com/android/server/pm/PackageManagerService.java
+        수정함:        services/usb/java/com/android/server/usb/UsbDeviceManager.java
+
+patch -p1 < 0008-Restrict-access-to-directories.bulletin.patch 
+        수정함:        core/java/android/app/Notification.java
+        수정함:        core/java/android/app/Person.java
+        수정함:        core/java/android/widget/RemoteViews.java
+        수정함:        packages/ExternalStorageProvider/src/com/android/externalstorage/ExternalStorageProvider.java
+        수정함:        packages/SettingsLib/src/com/android/settingslib/users/EditUserPhotoController.java
+        수정함:        services/core/java/com/android/server/accounts/AccountManagerService.java
+        수정함:        services/core/java/com/android/server/pm/PackageManagerService.java
+        수정함:        services/usb/java/com/android/server/usb/UsbDeviceManager.java
+
+SPL12
+
+2024-12-01 security patch level—Vulnerability summary
+Security patch levels of 2024-12-01 or later must address the following issues.
+
+Component	Severity	CVEs
+Framework	High	CVE-2024-43762, CVE-2024-43764, CVE-2024-43769
+System	High	CVE-2024-43767, CVE-2024-43097, CVE-2024-43768
+
+
+CVE-2024-43764
+A-317048495	EoP	High	13, 14
+CVE-2024-43769
+A-360807442	EoP	High	14, 15
+
+
+CVE-2024-43762
+A-340239088	EoP	High	12, 12L, 13, 14, 15
+android-12.0.0_r1/platform/frameworks/base/0001-Properly-handle-onNullBinding-in-appwidget-service-.bulletin.patch
+
+CVE-2024-43767
+A-352631932	RCE	High	12, 12L, 13, 14, 15
+android-12.0.0_r1/platform/external/skia/0001-RESTRICT-AUTOMERGE-Check-for-size-overflow-before-allocating-Sk.bulletin.patch
+
+CVE-2024-43097
+A-350118416	EoP	High	12, 12L, 13, 14, 15
+android-12.0.0_r1/platform/external/skia/0002-Prevent-overflow-when-growing-an-SkRegion-s-RunArray.bulletin.patch
+
+CVE-2024-43768
+A-349678452	EoP	High	12, 12L, 13, 14, 15
+android-12.0.0_r1/platform/external/skia/0003--pdf-Bounds-check-in-skia_alloc_func.bulletin.patch
+
+
+cp android-12.0.0_r1/platform/frameworks/base/0001-Properly-handle-onNullBinding-in-appwidget-service-.bulletin.patch ./
+cp android-12.0.0_r1/platform/external/skia/0001-RESTRICT-AUTOMERGE-Check-for-size-overflow-before-allocating-Sk.bulletin.patch ./
+cp android-12.0.0_r1/platform/external/skia/0002-Prevent-overflow-when-growing-an-SkRegion-s-RunArray.bulletin.patch ./
+cp android-12.0.0_r1/platform/external/skia/0003--pdf-Bounds-check-in-skia_alloc_func.bulletin.patch ./
+
+patch -p1 < 0001-Properly-handle-onNullBinding-in-appwidget-service-.bulletin.patch
+patching file core/java/android/widget/RemoteViewsAdapter.java
+patching file services/appwidget/java/com/android/server/appwidget/AppWidgetServiceImpl.java
+
+
+patch -p1 < 0001-RESTRICT-AUTOMERGE-Check-for-size-overflow-before-allocating-Sk.bulletin.patch
+patching file src/core/SkBlurMF.cpp
+
+patch -p1 < 0002-Prevent-overflow-when-growing-an-SkRegion-s-RunArray.bulletin.patch
+patching file src/core/SkRegion.cpp
+
+patch -p1 < 0003--pdf-Bounds-check-in-skia_alloc_func.bulletin.patch
+patching file src/pdf/SkDeflate.cpp
+
+@endcode
+
+> gts 로그 분석 
+
+@code
+
+--------- beginning of crash
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: FATAL EXCEPTION: main
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: Process: com.android.systemui, PID: 880
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: java.lang.RuntimeException: Unable to start receiver com.android.systemui.media.dialog.MediaOutputDialogReceiver: java.lang.IllegalArgumentException: null is not a valid Bluetooth address
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.app.ActivityThread.handleReceiver(ActivityThread.java:4317)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.app.ActivityThread.access$1600(ActivityThread.java:247)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2064)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:201)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:288)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7839)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1003)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: Caused by: java.lang.IllegalArgumentException: null is not a valid Bluetooth address
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.bluetooth.BluetoothDevice.<init>(BluetoothDevice.java:1165)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at android.bluetooth.BluetoothAdapter.getRemoteDevice(BluetoothAdapter.java:832)
+11-25 21:09:58.190 10070   880   880 E AndroidRuntime: 	at com.android.settingslib.media.InfoMediaManager.addMediaDevice(InfoMediaManager.java:491)
+
+@endcode
+
+> InfoMediaManager.java 수정
+
+@code
+
+frameworks\base\packages\SettingsLib\src\com\android\settingslib\media\InfoMediaManager.java
+
+			case TYPE_HEARING_AID:
+			case TYPE_BLUETOOTH_A2DP:
++				if (route.getAddress() == null) {
++					Log.d(TAG, "route.getAddress() is null");
++					break;
++				}
+
+@endcode
+
+
+> 테스트 결과
+
+@code
+1. GTVS 적용
+-> 동일한 실패 발생
+2. GTVS 적용 + BT 리모컨 페어링
+-> 동일한 실패 발생
+3. GTVS 적용 spl11 적용 
+-> 동일한 실패 발생
+3. GTVS 적용 spl12 적용 
+-> 동일한 실패 발생
+4. GTVS / SPL11 / SPL12 원복 후 InfoMediaManager.java 수정함
+-> 문제 해결
+@endcode
+
+
+<br>
+---
+<br>
+---
+
+
+*/

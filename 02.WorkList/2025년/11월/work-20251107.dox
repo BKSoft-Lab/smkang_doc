@@ -1,0 +1,37 @@
+/*!
+@page work_20251107	2025.11.07
+
+---
+
+# !!
+
+> !!
+
+@code
+Z:\K1200_ATV14\lghv_packages\hiddenmenu\pages\SelfDiagPage.h
+Z:\K1200_ATV14\lghv_packages\hiddenmenu\pages\SelfDiagPage.cpp
+
+
+sgkang@lguplus-pc:~/K1200_ATV14/lghv_k1200ua$ 
+mv ../middleware ./vendor/quber/
+mv ../packages ./vendor/quber/
+
+source build/envsetup.sh;lunch 3
+ 
+hiddenmenu/pages/HiddenMenuPage.cpp
+m -j$(nproc) hiddenmenu
+adb push out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/bin/hiddenmenu
+cp out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/quber/prebuilts/packages/hiddenmenu/
+
+mv vendor/quber/middleware ../middleware
+mv vendor/quber/packages ../packages
+
+@endcode
+
+@code
+
+
+
+@endcode
+
+*/

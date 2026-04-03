@@ -1,0 +1,198 @@
+/*!
+@page tip_xts xTS
+
+# 개발팀 pre xTS test 필요항목
+
+ | 항목 | 범위 | 수행 | 결과 | 비 고 |
+ |----------|----------|----------|----------|----------|
+ | SPL update | - | BTS Scan | - | Alert 없음, 누락 Patch로 인한 Warning 없음 |
+ | STS | All | run sts-dynamic-full | fail 0 / wifi TC 제외 가능 (사유: Security patch와 관련 없기 때문) | - | 
+ | GTVS 신규 버전 적용	| - | 버전 확인 | pm dump com.google.android.gms \| grep version	  | - | 
+ | GTS | All | run gts | fail 0 / wifi TC 제외 가능 (사유: GTVS update와 관련 없기 때문) | - | 
+ | TVTS | TVTS 최신 Tool 실행 | ./tvts-maint-cert | Tool 정상 실행, GTVS ver 낮을 경우 에러 출력되며 Tool 강제 종료  | - | 
+
+> LGHV : USB LAN 동작안함 1way로 설정하고 LAN포트 이용
+> HCN/SKB : USB LAN 이용
+
+# xTS 기본정보
+QE 에 xTS 툴이 들어 있는 USB 를 받아 최신버전으로 변경
+
+기본 설정 : https://confluence.kaonmedia.com/pages/viewpage.action?pageId=71994414
+
+강헌식M 자료 : http://172.16.5.75/html/devops_maintenance_xts_20240810.html
+
+[SKB BKO-UC500] xTS) 이슈 & 수정 이력 : https://confluence.kaonmedia.com/pages/viewpage.action?pageId=101614289
+
+# STS
+https://confluence.kaonmedia.com/display/GQE/xTS%29+STS
+@code
+Debug 펌웨어
+1. Factory reset
+2. Languge : English (United States)
+3. Location : On
+4. Connect to Wi-Fi 
+5. Developer option : On
+   Google settings → Device Preferences → About → Build 7회 선택 → Google settings → Developer option
+   ✔ Stay awake : On
+   ✔ USB debugging : On
+   ✔ Verify apps over USB : Off
+   
+$ adb devices
+$ adb connect 192.168.0.10:5555
+$ cd android-sts/tools/ 
+$ ./sts-tradefed  
+sts-tf > run sts-dynamic-full
+실패항목 재시도
+sts-tf > l r 
+실패항목 세션 확인후 
+sts-tf > run retry --retry #세션번호
+ 
+sts-tf > l i
+실행중인 테스트확인 명령어 
+ 
+wifi 관련 실패는 usb 무선랜 이용 retry
+
+@endcode
+
+# CTS
+https://confluence.kaonmedia.com/display/GQE/xTS%29+CTS
+@code
+user 펌웨어
+1. Factory reset
+2. Languge : English (United States)
+3. Location : On
+4. Connect to Wi-Fi 
+5. Developer option : On
+   Google settings → Device Preferences → About → Build 7회 선택 → Google settings → Developer option
+   ✔ Stay awake : On
+   ✔ USB debugging : On
+   ✔ Verify apps over USB : Off
+
+$ adb devices
+$ adb connect 192.168.0.10:5555
+$ cd android-cts/tools/ 
+$ ./cts-tradefed  
+
+CTS 실패항목
+run cts -m CtsIntentSignatureTestCases -t android.signature.cts.intent.IntentTest#shouldNotFindUnexpectedIntents
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageWrite
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageRead29
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsMultiple
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternal
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternalConsistent
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStats
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ListeningPortsTest#testNoRemotelyAccessibleListeningTcp6Ports
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Unspecified_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsPermissionTestCases -t android.permission.cts.OneTimePermissionTest#testPermissionRevokedOnKill
+run cts -m CtsPermissionTestCases -t android.permission.cts.OneTimePermissionTest#testOneTimePermission
+run cts -m CtsJniTestCases -t android.jni.cts.JniStaticTest#test_dlopenPublicLibraries
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Visible_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysVisible_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysHidden_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Hidden_EditorDialogLostFocusAfterUnlocked
+run cts -m CtsWifiTestCases -t android.net.wifi.cts.WifiManagerTest#testNetworkSetupWizardPermission
+run cts -m CtsWifiTestCases -t android.net.wifi.cts.WifiManagerTest#testNetworkStackPermission
+
+2024-11 
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushAvc
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushHevc
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushVp9
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoPlaybackAvc
+
+QA에서 HDMI(작은거) 장치를 빌려 사용 
+run cts -m CtsHdmiCecHostTestCases -t android.hdmicec.cts.common.HdmiCecSystemStandbyTest#cect_HandleBroadcastStandby
+run cts -m CtsHdmiCecHostTestCases -t android.hdmicec.cts.common.HdmiCecSystemStandbyTest#cect_HandleAddressedStandby	
+
+@endcode
+
+# TVTS
+https://confluence.kaonmedia.com/display/GQE/xTS%29+TVTS#xTS)TVTS-3.STB%EA%B8%B0%EB%B3%B8%EC%84%A4%EC%A0%95
+@code
+user 펌웨어
+1. Factory reset
+2. Languge : English (United States)
+3. Location : On
+4. Connect to Wi-Fi 
+5. Developer option : On
+   Google settings → Device Preferences → About → Build 7회 선택 → Google settings → Developer option
+   ✔ Stay awake : On
+   ✔ USB debugging : On
+   ✔ Verify apps over USB : Off
+6. TV 연결
+7. Google Account login
+8. Google Assistant 활성화
+   Google Settings → Device Preferences → Google Assistant → ON
+9. All Apps Update
+   Google Play Store → My page → Manage apps & games → Updates → Update all
+10. Google Play Movies/Games/Youtube/Assistant 1회 실행
+    Youtube 실행 후 구글 계정 선택 화면 나올 경우 계정 선택하여 Youtube home 진입 확인
+11. PC,  STB 동일 네트워크 연결
+
+QA에서 HDMI(큰거) 장치를 빌려 사용 
+/tvts-tradefed 실행 전 매회 아래 명령어 수행 후 실행
+$ lsusb
+$ sudo sh -c "echo 'SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\"10c4\", GROUP=\"plugdev\", MODE=\"0664\"' > /etc/udev/rules.d/52-usb.rules"
+$ sudo udevadm control --reload
+$ sudo udevadm trigger
+
+2024-11 
+
+run tvts-cert -m TvtsHdmiHostTestCases
+run tvts-cert -m TvtsSmokeTestCases -t com.google.android.smoketests.tvts.TvtsSmokeTest#testSmoke[smoke-json-file-exists]
+run tvts-cert -m TvtsYouTubeTS -t com.google.android.apps.yts.tvts.YtsReport#yts[FormatSupportTestsMediaAC35.1-20.6.5.1]
+run tvts-cert -m TvtsYouTubeTS -t com.google.android.apps.yts.tvts.YtsReport#yts[EMEConformanceTestsEncryptionSchemeAC3AudioCbcs-3.5.18.1]
+run tvts-cert -m TvtsYouTubeTS -t com.google.android.apps.yts.tvts.YtsReport#yts[EMEConformanceTestsEncryptionSchemeEAC3AudioCbcs-3.5.3.1]
+run tvts-cert -m TvtsYouTubeTS -t com.google.android.apps.yts.tvts.TvtsYouTubeTS#testYTS
+
+@endcode
+
+# GTS
+https://confluence.kaonmedia.com/display/GQE/xTS%29+GTS
+@code
+user 펌웨어
+1. Factory reset
+2. Languge : English (United States)
+3. Location : On
+4. Connect to Wi-Fi 
+5. Developer option : On
+   Google settings → Device Preferences → About → Build 7회 선택 → Google settings → Developer option
+   ✔ Stay awake : On
+   ✔ USB debugging : On
+   ✔ Verify apps over USB : Off
+   
+$ 구글 로그인
+$ export APE_API_KEY=~/google_test/gts-kaonmedia-tv.json
+$ ./gts-tradefed
+
+com.google.android.apps.starttimes.tvts.TvtsAppStartTimesHostTest#testWarmStart
+run gts -m GtsMbaPrivilegedPermissionTestCases -t com.google.android.mbaprivilegedpermission.gts.GtsDebugCertificateTest#testMbaPrivilegedPermission
+
+2024-11 
+run gts -m GtsMediaRouterTestCases -t com.google.android.gts.media.router.MediaRouter2Test#publishAddresslessBluetoothRoute_doesNotCrashSystemUi
+run gts -m GtsEdiHostTestCases -t com.google.android.gts.edi.HardwareTrustDeviceInfo#testCollectDeviceInfo
+run gts -m GtsNetStatsHostTestCases -t com.google.android.gts.netstats.NetStatsHostTest#testASetThreadStatsUid
+	
+
+ GtsEdiHostTestCases
+GtsNetStatsHostTestCases 
+
+Test
+	
+Result
+	
+Details
+
+
+com.google.android.gts.netstats.NetStatsHostTest#testASetThreadStatsUid
+
+
+[CTS]
+armeabi-v7a CtsOsHostTestCases
+android.os.cts.InattentiveSleepTests#
+: 해당 모듈 TC 4건은 Devices Preferences > Screensaver 5Mins 설정, Stay Awake OFF 후 Pass
+
+
+@endcode
+
+
+*/

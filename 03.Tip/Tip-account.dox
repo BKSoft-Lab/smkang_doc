@@ -1,0 +1,262 @@
+/*!
+@page tip_account 계정 관련
+
+## K1100 jenkins
+@code
+\\172.16.5.201\Android3Team\work\nvme\skb\release\2024.02.28-14-out
+a3team / kaon1234!@
+
+
+정전 또는 리부팅 후, jenkins 시작 방법 ( 리눅스 데몬 서비스 사용하지 않으므로, 부팅 후 시작되지 않습니다  )
+a3team@buildserver:~$ cd work/jenkins/
+a3team@buildserver:~/work/jenkins$ ls -al
+total 262616
+drwxrwxr-x  3 a3team a3team     4096  1월  8  2024 .
+drwxr-xr-x 10 a3team a3team     4096  9월  3 11:36 ..
+-rw-rw-r--  1 a3team a3team 91193351  6월 22  2022 jenkins-2.346.1.war
+-rw-rw-r--  1 a3team a3team 86500998  1월  2  2024 jenkins-2.426.2.war
+-rw-rw-r--  1 a3team a3team 91193351  1월  8  2024 jenkins.war
+drwxrwxr-x  2 a3team a3team     4096  1월  8  2024 logs
+-rw-rw-r--  1 a3team a3team      464  1월  8  2024 start.sh
+a3team@buildserver:~/work/jenkins$ bash start.sh
+
+
+@endcode
+                              
+## HCN jenkins
+@code
+172.16.5.75
+khs / k
+@endcode
+
+## SKB jenkins
+@code
+172.16.5.89
+jks / j
+@endcode
+
+## https://gitlab.altimedia.com/atv
+@code
+sungmin.kang@kaongroup.com / k56325@kaon
+
+
+git config --global user.email "sungmin.kang@kaongroup.com"
+
+@endcode
+
+
+
+## http://kaon.kaonmedia.com/
+@code
+k230506 / dlatl!@
+sungmin.kang / k56325@kaon
+@endcode
+
+## 구글계정 
+@code
+mundijob@gmail.com / k56325@google
+
+mundijob.test@gmail.com / k56325@test
+
+my
+no.names.9.9.9.9.5@gmail.com / mundijobgut@99995
+
+기타
+no.names.9.9.9.9.6@gmail.com / mundijobgut@99996
+
+압축
+no.names.9.9.9.9.3@gmail.com / k56325@noname
+latrommi74@gmail.com / k56325@google
+
+@endcode
+
+## 가온 jira
+@code
+https://jira.kaonmedia.com
+sungmin.kang / K56325@kaon (대문자K)
+@endcode 
+
+## 가온 bitbucket
+@code
+https://bitbucket.kaonmedia.com/
+sungmin.kang / K56325@kaon (대문자K)
+
+최성훈[CHOI SUNGHOON]
+계정생성관련 별다르게 한게 없었던게 같은데... 김현수매니저님에게 물어봐 주십시요
+ 
+강성민[Kang Sung Min]
+김현수M님도 모른다고 하시는데요. 권한요청은 어느분께 요청해야 하나요?
+
+최성훈[CHOI SUNGHOON]
+글쎄요.. 그러면 김경진 팀장일것 같네요
+@endcode 
+
+## 가온 confluence
+@code
+https://confluence.kaonmedia.com/login.action
+sungmin.kang / K56325@kaon (대문자K)
+@endcode 
+
+## 가온 redmine
+@code
+http://kaonqa.duckdns.org/redmine/issues/16396
+sungmin.kang / k56325@kaon
+@endcode 
+
+## vpn 
+@code
+kaonmedia / 10.212.134.116
+k230506 / k230506!@
+@endcode
+
+## 빌드서버 172.16.5.87 
+@code
+sgkang / kaon1234
+@endcode
+
+## 빌드서버 172.16.5.89
+@code
+ksm / kaon1234
+jmj / mj119
+@endcode
+
+## 빌드서버 172.16.5.84
+@code
+smkang / kaon1234
+@endcode
+
+## LGHV 
+@code
+VPN : https://vpn.lghv.net/gate
+DTV 로그인
+k230506 / k9904@kaon
+2025.07.30 변경
+k230506 / dlatl@vpn1
+2025.12.01 변경
+k230506 / k9904@kaon
+
+redmine : https://10.10.113.79:18090/login
+kangsm / tjdals!1
+2025.07.30 변경
+kangsm / k56325@redmine
+@endcode
+
+@code
+http://kaon.kaonmedia.com
+http://m.kaonmedia.com
+k230506/dlatl!@
+
+http://kaonqa.kaonmedia.com
+http://kkms.kaonmedia.com
+sungmin.kang/k56325@kaon
+
+\\172.16.5.75\khs
+a3team/kaon1234
+@endcode
+
+## CSP
+@code
+sungmin.kang@kaongroup.com
+k56325@BK
+@endcode
+
+## vm
+@code
+smkang / k56325
+@endcode
+
+## 기타정보
+@code
+QE SPL 다운로드 서버
+NAS url: https://kaon-dev1.synology.me/file/
++Vlab NAS도 연동함
+계정: ID: qe_r / PW: SPLtools6@
+
+URL : https://secuvpn.altimedia.com:10443
+ID : kaon_vpn01
+PW : Kaonktvpn9202!@
+
+/etc/hosts 파일에
+10.255.0.121 gitlab.altimedia.com
+
+sudo ./SecuwaySSLU_client
+
+@endcode
+
+## 개인통관고유부호
+@code
+P741150002354
+@endcode
+
+## tcafe
+@code
+kkang74 / k56325
+kangsm3 / k56325
+@endcode
+
+## 서라운드 STB ssh
+@code
+port : 23502
+root / bentley.conti.GT4-R#2015
+@endcode
+
+## Smart2 adb
+@code
+ - IP : 192.168.45.47
+ - adb connect 192.168.45.47:5815 > adb shell
+@endcode
+
+## 이노비즈
+@code
+https://www.innobiz.net
+2688602836 / bksoft0909
+@endcode
+
+## 팀뷰어
+@code
+계정 : 구글계정 (mundijob)
+비번 : k56325@TeamViewer1
+@endcode
+
+## 성보 DB서버
+@code
+- TeamViewer
+1 054 046 876 / test@bksoft 
+ 
+@endcode
+
+## 데스트탑 
+@code
+- TeamViewer
+445 102 335 / test@bksoft
+@endcode
+
+## 노트북(성보제공)
+@code
+- 윈도우 계정
+테스터/1234
+- TeamViewer
+999 064 156 / test@bksoft
+- anydesk
+1378846568 / k56325@any
+@endcode
+
+## 인증서
+@code
+Tcomnet4!@#$
+@endcode
+
+## 한성대학
+@code
+대학원 
+02211302 / k56325@h
+@endcode
+
+## 휴가샵
+@code
+https://vacation.benepia.co.kr
+kkang74 / k56325@Ben
+@endcode
+
+
+*/

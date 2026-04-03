@@ -1,0 +1,148 @@
+/*!
+@page work_20241024	2024.10.24
+
+# SKB수원
+---
+## 3차 VOC에서 reboot 관련 요청 
+
+> 요청 사항 Mail
+@code
+
+@강성민매니저님,
+3차 VOC에서 reboot 발생해서, 알티의 함수에 잘못된 부분이 있는지 확인이 필요합니다.
+아래 out-bcm 파일 확인 요청 드립니다
+
+감사합니다.
+김원균드림
+
+From: support@broadcom.com <support@broadcom.com> 
+Sent: Thursday, October 24, 2024 11:24 AM
+To: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>
+Cc: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>; 이상훈[LEE SANGHOON] <lsh@kaongroup.com>; 김경달[Kim Kyungdal] <kendall.kim@kaonbroadband.com>; 한동우[HAN DONG WOO] <tony.han@kaongroup.com>; 김연호[YEON HO KIM] <yhkim@kaongroup.com>
+Subject: {Case#CS00012373355} ##-  Updated: STB is rebooted while aging
+
+-begin-
+Update By: Jason Lim(Broadcom Corporation)
+Update Time: 23-October-2024 19:23:41
+
+Latest Response: 
+Hi Kim WonKyun,
+ 
+Please check "/home/Sengkang/SKB_TEST/kaon_bcm_androidtv12/out-bcm/K1100UA/refs/obj.97216/nexus/core/synthpunk/nexus_core_api_compat.c:447." This will point out what the function was called at that time.
+Please let me know the time when STB is restarted so I can look at the logcat messages around that time.
+ 
+Thanks,
+Jason Lim
+
+@endcode
+
+> 작업내역
+
+@code
+안녕하세요. 강성민 입니다.
+
+요청하신 정보입니다.
+
+LINE 446 : NEXUS_P_COMPAT_IN_BEGIN(CORE_NEXUS_MemoryBlock_GetUserState_in_args)
+LINE 447 :    NEXUS_P_COMPAT_FIELD(IN, __rc, __src, __dst, NEXUS_MemoryBlockHandle, memoryBlock, HANDLE)
+LINE 448 : NEXUS_P_COMPAT_IN_END(CORE_NEXUS_MemoryBlock_GetUserState_in_args)
+
+강성민 드림.
+
+@endcode
+
+## 3차 VOC에서 reboot 관련 요청 - 로그추가
+
+> 요청 사항 Mail
+@code
+@강성민매니저님,
+오늘 발생한 STB reboot시료에 reboot 시점의 로그가 없네요.
+Braodcom에서 아래 정보들도 usb 로그에 저장되도록 요청이 왔습니다.
+
+작업 요청 드립니다.
+
+감사합니다.
+김원균드림
+
+From: support@broadcom.com <support@broadcom.com> 
+Sent: Thursday, October 24, 2024 3:14 PM
+To: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>
+Cc: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>; 이상훈[LEE SANGHOON] <lsh@kaongroup.com>; 김경달[Kim Kyungdal] <kendall.kim@kaonbroadband.com>; 한동우[HAN DONG WOO] <tony.han@kaongroup.com>; 김연호[YEON HO KIM] <yhkim@kaongroup.com>
+Subject: {Case#CS00012373355} ##-  Updated: STB is rebooted while aging
+
+-begin-
+Update By: Jason Lim(Broadcom Corporation)
+Update Time: 23-October-2024 23:13:35
+
+Latest Response: 
+Hi Kim WonKyun,
+ 
+In addition, please add the following info to "monitoring mem info". I'd like to know about memory pressure.
+=======================================
+# cat /proc/meminfo
+# free -h
+=======================================
+ 
+Thanks,
+Jason Lim
+
+@endcode
+
+> 작업내역
+
+SKB_TEST 폴더에만 추가
+
+[diff - SKB_TEST_20241024.diff](../data/20241024/SKB_TEST_20241024.diff)
+
+[추가 스크립트 - checkmemory](../data/20241024/checkmemory)
+
+## HCN 2024년 11월 SAT용 FW 준비 - 지원
+
+> 요청 사항 
+@code
+KSTB1157 FW 확정에 따라 정식 Ver 빌드 부탁드립니다.
+
+반영요청사항
+상향 신호 불안정 시 skyHCN로고에서 멈춤 증상 개선  (완료)
+5분 이상 단선 후 복구 시 CM 비정상 동작 개선  (반영필요)
+DSG Basic Mode Only로 적용: https://jira.kaonmedia.com/browse/K1010-85 
+ICMP 체크 주기 변경(반영필요)
+1초 -> X : https://jira.kaonmedia.com/browse/K1010-85 
+쿠팡플레이 실행 시 화면이 1/4만 보이는 증상 개선 (반영필요)
+절전모드 진입 시간 변경 (완료)
+즉시 -> 2분 후 진입 : https://jira.kaonmedia.com/browse/K1010-75 
+EPG APP Ver.49 반영(완료)
+
+    *** 공통 반영사항
+
+Security Patch : 2024년 8월, 9월 반영:https://jira.kaonmedia.com/browse/K1010-87 (완료)
+쿠팡플레이 이슈 수정 : https://jira.kaonmedia.com/browse/K0644-147 (반영필요-위 4번 항과 동일)
+GTVS Package 업데이트(v24.26.32) :https://jira.kaonmedia.com/browse/K1010-89 (완료)
+브로드컴 avMute 패치 (반영필요) : https://jira.kaonmedia.com/browse/K1023-199
+
+@endcode
+
+> 작업내역
+
+- ICMP 체크 주기 변경
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/5d71d0fccac7c19474ff5dbfc7fde6bc76e427d0
+
+- DSG Basic Mode Only
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/4a6171040c8e9e364b611f7b2408e28b0aa6b689
+
+- 쿠팡플레이 이슈
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/1c4712f6b145e2e463143b590d8fc7140d45a7dd
+
+- 브로드컴 avMute 패치
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/051560683d0ba3343ada4a4da1c0c3958b895d3c
+
+
+---
+<br>
+---
+
+*/

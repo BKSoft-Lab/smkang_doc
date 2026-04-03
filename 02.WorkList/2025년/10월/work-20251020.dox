@@ -1,0 +1,55 @@
+/*!
+@page work_20251020	2025.10.20
+
+---
+
+# LGHV K1100 Host ID N/A 이슈 재현 방법
+
+준비물 
+
+- USB 1 : OQC S/W (FAT32)
+
+https://bigfile.mail.naver.com/download?fid=HqR81635+6dqKwYwHriTKA2XKwYZKAU9KxgZKAulKquqK3YwFqMqFxMdKqvlHq3vKAEdFo3SKAvZKztrpzMwpAbdaAtXKo2rKrulKztm
+  
+- USB 2 : Bin 파일들 (EXT4)
+
+https://bigfile.mail.naver.com/download?fid=Hqe81635+6dqKwYZHriTKA2XKwYZKAU9KxgZKAulKquqK3YwFqMqFxMdKqvlHq2/KotwFoFSp6UmpxtdMxumpA2dM6tqKrKdazFvMo0o  
+
+@code
+
+1. USB 1을 시료에 장착 후 전원 인가
+2. quit 입력하여 OQC S/W 종료
+3. USB 1 제거 / USB 2 연결
+4. mkdir -p /mnt/ext4
+   mount -t ext4 /dev/sdb1 /mnt/ext4/
+5. bin 파일들을 eMMC에 flash
+    file=/mnt/ext4/dtbo_a.bin
+    dd if=${file} of=/dev/mmcblk0p26 bs=512 # PARTNAME=dtbo_a
+    file=/mnt/ext4/dtbo_b.bin
+    dd if=${file} of=/dev/mmcblk0p27 bs=512 # PARTNAME=dtbo_b
+    file=/mnt/ext4/boot_a.bin
+    dd if=${file} of=/dev/mmcblk0p28 bs=512 # PARTNAME=boot_a
+    file=/mnt/ext4/boot_b.bin
+    dd if=${file} of=/dev/mmcblk0p29 bs=512 # PARTNAME=boot_b
+    file=/mnt/ext4/super.bin
+    dd if=${file} of=/dev/mmcblk0p30 bs=512 # PARTNAME=super
+    file=/mnt/ext4/vbmeta_a.bin
+    dd if=${file} of=/dev/mmcblk0p32 bs=512 # PARTNAME=vbmeta_a
+    file=/mnt/ext4/vbmeta_b.bin
+    dd if=${file} of=/dev/mmcblk0p33 bs=512 # PARTNAME=vbmeta_b
+    file=/mnt/ext4/cache.bin
+    dd if=${file} of=/dev/mmcblk0p25 bs=512 # PARTNAME=cache
+    file=/mnt/ext4/userdata.bin
+    dd if=${file} of=/dev/mmcblk0p34 bs=512 # PARTNAME=userdata
+    file=/mnt/ext4/misc.bin
+    dd if=${file} of=/dev/mmcblk0p24 bs=512 # PARTNAME=misc
+    file=/mnt/ext4/metadata.bin
+    dd if=${file} of=/dev/mmcblk0p23 bs=512 # PARTNAME=metadata
+    sync
+6. 리부트
+7. 리모컨 설정화면 등장 시 전원 강제차단
+8. 부팅 후 구글설정 완료 후 히든메뉴에서 host id 확인
+
+@endcode
+
+*/

@@ -1,0 +1,75 @@
+/*!
+@page work_20241011	2024.10.11
+
+# SKB수원
+---
+## SKB 장기 안정성시 AV 블랙 이슈  
+
+> 요청 사항 Mail
+@code
+@강성민매니저님,
+SKB 장기 안정성 만 2일만에 AV 블랙 이슈 재현되어,
+브로드컴에서 아래 정보 공유 요청이 왔습니다.
+
+감사합니다.
+김원균드림
+
+From: support@broadcom.com <support@broadcom.com> 
+Sent: Friday, October 11, 2024 12:23 PM
+To: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>
+Cc: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>; 이상훈[LEE SANGHOON] <lsh@kaongroup.com>; 김경달[Kim Kyungdal] <kendall.kim@kaonbroadband.com>; 한동우[HAN DONG WOO] <tony.han@kaongroup.com>; 김연호[YEON HO KIM] <yhkim@kaongroup.com>
+Subject: {Case#CS00012371121} ##-  Updated: AV Black while aging with complex scenario (nexus/core/syncthunk/nexus_simple_decoder_abiverify_client.h:1332)
+
+-begin-
+Update By: Jason Lim(Broadcom Corporation)
+Update Time: 10-October-2024 20:23:18
+
+Latest Response: 
+Hi Kim WonKyun,
+ 
+Please check "out-bcm/K1100UA/refsw/obj.97216/nexus/core/syncthunk/nexus_simple_decoder_abiverify_client.h:770". I'd like to know what function is called in this file.
+Please check " Line 192777: 10-10 18:49:35.423   767 15791 D PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1098]". I'd like to know what functions are called in PL_DECODER.
+===================================================================
+ Line 167020: 10-10 18:46:09.284   767  2743 I PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1190][video] -- open handle = 0xd83c3cd0
+ Line 173149: 10-10 18:47:15.474   767  5139 D PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1098] 
+ Line 173150: 10-10 18:47:15.475   767  5139 D PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1169]scanMode is 1080p
+ Line 173151: 10-10 18:47:15.475   767  5139 I PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1171]videoResource : videoData = 0xd83c06d0, videoDecoder = 0xc1fa08, videoId = 6139, channelChangeMode=2
+ Line 173152: 10-10 18:47:15.476   767  5139 D PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1182]MAD deinterlace enabled
+ Line 173153: 10-10 18:47:15.476   767  5139 D PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1184]Contrast : 256
+ Line 173154: 10-10 18:47:15.476   767  5139 I PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1190][video] -- open handle = 0xd83c06d0
+ Line 175235: 10-10 18:47:21.369   767  5139 D PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1098] 
+ Line 188328: 10-10 18:49:33.484   386   386 E NEXUS   : !!!Error BERR_OS_ERROR(0x6) at /home/sgkang/SKB/kaon_bcm_androidtv12/out-bcm/K1100UA/refsw/obj.97216/nexus/core/syncthunk/nexus_core_abiverify_client.h:326
+ Line 188329: 10-10 18:49:33.484   386   386 E NEXUS   : !!!Error BERR_NOT_SUPPORTED(0x8) at /home/sgkang/SKB/kaon_bcm_androidtv12/vendor/broadcom/refsw/nexus/modules/core/src/nexus_memory_local.c:594
+ Line 188330: 10-10 18:49:33.484   386   386 E NEXUS   : !!!Error BERR_INVALID_PARAMETER(0x2) at /home/sgkang/SKB/kaon_bcm_androidtv12/vendor/broadcom/refsw/nexus/modules/core/src/nexus_memory_local.c:792
+ Line 189144: 10-10 18:49:33.759   386   386 E NEXUS   : !!!Error BERR_OS_ERROR(0x6) at /home/sgkang/SKB/kaon_bcm_androidtv12/out-bcm/K1100UA/refsw/obj.97216/nexus/core/syncthunk/nexus_core_abiverify_client.h:326
+ Line 189145: 10-10 18:49:33.759   386   386 E NEXUS   : !!!Error BERR_NOT_SUPPORTED(0x8) at /home/sgkang/SKB/kaon_bcm_androidtv12/vendor/broadcom/refsw/nexus/modules/core/src/nexus_memory_local.c:594
+ Line 189146: 10-10 18:49:33.759   386   386 E NEXUS   : !!!Error BERR_INVALID_PARAMETER(0x2) at /home/sgkang/SKB/kaon_bcm_androidtv12/vendor/broadcom/refsw/nexus/modules/core/src/nexus_memory_local.c:792
+ Line 192777: 10-10 18:49:35.423   767 15791 D PL_DECODER: [pl_decoder.c][pl_dec_openVideo][1098] 
+ Line 192778: 10-10 18:49:35.423   767   796 E NEXUS   : !!!Error BERR_OS_ERROR(0x6) at /home/sgkang/SKB/kaon_bcm_androidtv12/out-bcm/K1100UA/refsw/obj.97216/nexus/core/syncthunk/nexus_simple_decoder_abiverify_client.h:770
+ Line 192791: 10-10 18:49:35.430   767   796 F libc    : Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x8 in tid 796 (taurusserver), pid 767 (taurusserver)
+===================================================================
+ 
+Thanks,
+Jason Lim
+
+@endcode
+
+> 작업내역
+
+- [nexus_simple_decoder_abiverify_client.h](../data/20241011/nexus_simple_decoder_abiverify_client.h)
+
+@code
+
+@김원균 PM님
+
+해당파일 첨부합니다.
+
+강성민 드림.
+
+@endcode
+
+---
+<br>
+---
+
+*/

@@ -1,0 +1,497 @@
+/*!
+@page work_20250908	2025.09.08
+
+---
+
+# LGHV K1100UA SPL 2025-08-01
+
+> [2025-08-SC-20250807T071858Z-1-001.zip](../data/202509/2025-08-SC-20250807T071858Z-1-001.zip)
+
+@code
+
+└─frameworks
+    └─base
+            001-RESTRICT-AUTOMERGE-Defer-remove-splash-screen-while-device-is-locked.patch
+
+@endcode
+
+@code
+
+frameworks/base/001-RESTRICT-AUTOMERGE-Defer-remove-splash-screen-while-device-is-locked.patch
+patch -p1 < 001-RESTRICT-AUTOMERGE-Defer-remove-splash-screen-while-device-is-locked.patch
+rm 001-RESTRICT-AUTOMERGE-Defer-remove-splash-screen-while-device-is-locked.patch
+git add services/core/java/com/android/server/wm/ActivityRecord.java
+git add services/core/java/com/android/server/wm/DisplayContent.java
+git add services/core/java/com/android/server/wm/StartingData.java
+git add services/core/java/com/android/server/wm/WindowState.java
+git commit -m "001-RESTRICT-AUTOMERGE-Defer-remove-splash-screen-while-device-is-locked.patch"
+
+vi build/make/core/version_defaults.mk
+git add build/make/core/version_defaults.mk
+git commit -m "PLATFORM_SECURITY_PATCH := 2025-08-01"
+
+@endcode
+
+# LGHV K1100UA SPL 2025-09-01
+
+> [2025-09-SC-20250903T064458Z-1-001.zip](../data/202509/2025-09-SC-20250903T064458Z-1-001.zip)
+
+@code
+
+└─platform
+    ├─art
+    │      001-NewObject-for-abstract-classes.patch
+    │
+    ├─frameworks
+    │  ├─av
+    │  │      001-RESTRICT-AUTOMERGE-Move-AudioRecordClient-out-of-AudioPolicyService.patch
+    │  │      002-RESTRICT-AUTOMERGE-Validate-full-attr-chain-for-recording.patch
+    │  │      003-RESTRICT-AUTOMERGE-Fix-audio-AppOps-refcount-mismatch.patch
+    │  │
+    │  ├─base
+    │  │      001-Check-sound-Uri-permission-when-creating-a-notification-channel.patch
+    │  │      002-Sanitize-cross-profile-intents.patch
+    │  │      003-Ensuring-valid-packageName-when-granting-slice-permission.patch
+    │  │      004-Use-consistent-animation-when-forcibly-hiding-non-system-overlay.patch
+    │  │      005-Implement-onNullBinding-in-autofill-service-connection.patch
+    │  │      006-Calculate-how-much-memory-is-used-per-account.patch
+    │  │      007-Avoid-home-intent-normalization-if-it-is-from-trusted-callers.patch
+    │  │      008-Prevent-non-system-ShutdownActivity-from-being-launched-by-BatteryService.patch
+    │  │      009-Do-not-allow-custom-animation-of-untrusted-Toast.patch
+    │  │      010-RESTRICT-AUTOMERGE-Fix-recording-config-mic-indicator-suppression.patch
+    │  │      011-RESTRICT-AUTOMERGE-Disallow-PINNED-in-setLaunchWindowingMode.patch
+    │  │      012-Avoid-mixups-between-different-CPSes-in-ZenModeConditions.patch
+    │  │      013-Require-empty-output-for-PDF.patch
+    │  │      014-RESTRICT-AUTOMERGE-appops-Preflight-skip-datasource-validation.patch
+    │  │      015-RESTRICT-AUTOMERGE-Prevent-root-from-getting-unverified-attributions-from-non-system-apps.patch
+    │  │      016-DO-NOT-MERGE-Start-editor-as-the-launching-user-instead-of-personal.patch
+    │  │      017-Check-DPC-package-validity-during-package-updates.patch
+    │  │      018-ignore-invalid-proxy-settings.patch
+    │  │      019-Finish-all-when-last-in-chain-fail.patch
+    │  │      020-RESTRICT-AUTOMERGE-Ignore-pinned-Windows.patch
+    │  │
+    │  ├─native
+    │  │      001-RPC-state-termination-shutdown-session.patch
+    │  │      002-Don-u0027t-blur-too-many-layers.patch
+    │  │      003-shutdown-on-ENOMEM.patch
+    │  │      004-appendFrom.patch
+    │  │      005-update-ABI.patch
+    │  │
+    │  └─opt
+    │      └─telephony
+    │              001-Remove-get-set-of-voicemail-ringtone-uri-in-shared-preferences.patch
+    │
+    ├─packages
+    │  ├─apps
+    │  │  ├─Contacts
+    │  │  │      3cc4c4b.diff
+    │  │  │
+    │  │  ├─DocumentsUI
+    │  │  │      001-Trim-the-application-name-to-make-it-safe-for-presentation.patch
+    │  │  │
+    │  │  ├─ManagedProvisioning
+    │  │  │      001-Skip-permission-check-for-SCHEME_ANDROID_RESOURCE.patch
+    │  │  │
+    │  │  ├─Nfc
+    │  │  │      002-CardEmulationManager-filters-preinstalled-apps.patch
+    │  │  │      884b8be.diff
+    │  │  │
+    │  │  └─Settings
+    │  │          001-startActivityForResult-with-earlier-new-Intent.patch
+    │  │          002-Drop-PendingIntent-extras-from-external-packages-during-enrollment.patch
+    │  │          003-AppRestrictions-use-vetted-component.patch
+    │  │          004-Hide-notification-content-in-history.patch
+    │  │          005-Use-correct-API-to-get-calling-package-name-in-CredentialStorage.patch
+    │  │          006-Ignore-face-settings-extras-when-called-by-an-external-package.patch
+    │  │          007-Add-ComponentName-explicitly-to-make-sure-arbitary-intents-aren-u0027t-launched-from-Settings.patch
+    │  │
+    │  ├─modules
+    │  │  ├─CellBroadcastService
+    │  │  │      001-RESTRICT-AUTOMERGE-Update-getDefaultCBRPackageName-for-fixing-security-vulnerability.patch
+    │  │  │
+    │  │  └─Permission
+    │  │          001-Stop-one-time-sessions-iff-when-no-one-time-permission-is-granted.patch
+    │  │
+    │  ├─providers
+    │  │  └─MediaProvider
+    │  │          001-DO-NOT-MERGE-Fix-misuse-of-MediaProvider-INCLUDED_DEFAULT_DIRECTORIES.patch
+    │  │
+    │  └─services
+    │      └─Telephony
+    │              001-Remove-the-contacts-picker-from-VoicemailSettingsActivity.patch
+    │              002-DO-NOT-MERGE-remove-the-contacts-picker-from-CallForwardingOptions.patch
+    │
+    └─system
+        └─bt
+                001-Fix-an-OOB-Write-bug-in-avrc_vendor_msg.patch
+
+@endcode
+
+
+@code
+
+art/001-NewObject-for-abstract-classes.patch
+patch -p1 < 001-NewObject-for-abstract-classes.patch
+rm 001-NewObject-for-abstract-classes.patch
+git add runtime/jni/check_jni.cc
+git add runtime/jni/jni_internal.cc
+git commit -m "001-NewObject-for-abstract-classes.patch"
+
+frameworks/av/001-RESTRICT-AUTOMERGE-Move-AudioRecordClient-out-of-AudioPolicyService.patch
+patch -p1 < 001-RESTRICT-AUTOMERGE-Move-AudioRecordClient-out-of-AudioPolicyService.patch
+rm 001-RESTRICT-AUTOMERGE-Move-AudioRecordClient-out-of-AudioPolicyService.patch
+git add services/audiopolicy/service/Android.bp
+git add services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+git add services/audiopolicy/service/AudioPolicyService.cpp
+git add services/audiopolicy/service/AudioPolicyService.h
+git add services/audiopolicy/service/AudioRecordClient.cpp
+git add services/audiopolicy/service/AudioRecordClient.h
+git commit -m "001-RESTRICT-AUTOMERGE-Move-AudioRecordClient-out-of-AudioPolicyService.patch"
+
+frameworks/av/002-RESTRICT-AUTOMERGE-Validate-full-attr-chain-for-recording.patch
+patch -p1 < 002-RESTRICT-AUTOMERGE-Validate-full-attr-chain-for-recording.patch
+rm 002-RESTRICT-AUTOMERGE-Validate-full-attr-chain-for-recording.patch
+git add services/audiopolicy/service/AudioRecordClient.cpp
+git add services/audiopolicy/service/AudioRecordClient.h
+git commit -m "002-RESTRICT-AUTOMERGE-Validate-full-attr-chain-for-recording.patch"
+
+frameworks/av/003-RESTRICT-AUTOMERGE-Fix-audio-AppOps-refcount-mismatch.patch
+patch -p1 < 003-RESTRICT-AUTOMERGE-Fix-audio-AppOps-refcount-mismatch.patch
+rm 003-RESTRICT-AUTOMERGE-Fix-audio-AppOps-refcount-mismatch.patch
+git add media/utils/ServiceUtilities.cpp
+git add media/utils/include/mediautils/ServiceUtilities.h
+git add services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+git add services/audiopolicy/service/AudioPolicyService.cpp
+git add services/audiopolicy/service/AudioRecordClient.cpp
+git add services/audiopolicy/service/AudioRecordClient.h
+git commit -m "003-RESTRICT-AUTOMERGE-Fix-audio-AppOps-refcount-mismatch.patch"
+
+frameworks/base/001-Check-sound-Uri-permission-when-creating-a-notification-channel.patch
+patch -p1 < 001-Check-sound-Uri-permission-when-creating-a-notification-channel.patch
+rm 001-Check-sound-Uri-permission-when-creating-a-notification-channel.patch
+git add services/core/java/com/android/server/notification/NotificationRecord.java
+git add services/core/java/com/android/server/notification/PreferencesHelper.java
+git add services/tests/uiservicestests/src/com/android/server/notification/NotificationRecordTest.java
+git add services/tests/uiservicestests/src/com/android/server/notification/PreferencesHelperTest.java
+git commit -m "001-Check-sound-Uri-permission-when-creating-a-notification-channel.patch"
+
+frameworks/base/002-Sanitize-cross-profile-intents.patch
+patch -p1 < 002-Sanitize-cross-profile-intents.patch
+rm 002-Sanitize-cross-profile-intents.patch
+git add core/java/com/android/internal/app/ChooserActivity.java
+git add core/tests/coretests/src/com/android/internal/app/ChooserActivityCrossProfileIntentsTest.java
+git commit -m "002-Sanitize-cross-profile-intents.patch"
+
+frameworks/base/003-Ensuring-valid-packageName-when-granting-slice-permission.patch
+patch -p1 < 003-Ensuring-valid-packageName-when-granting-slice-permission.patch
+rm 003-Ensuring-valid-packageName-when-granting-slice-permission.patch
+git add services/core/java/com/android/server/slice/SlicePermissionManager.java
+git commit -m "003-Ensuring-valid-packageName-when-granting-slice-permission.patch"
+
+frameworks/base/004-Use-consistent-animation-when-forcibly-hiding-non-system-overlay.patch
+patch -p1 < 004-Use-consistent-animation-when-forcibly-hiding-non-system-overlay.patch
+rm 004-Use-consistent-animation-when-forcibly-hiding-non-system-overlay.patch
+git add services/core/java/com/android/server/wm/WindowState.java
+git add services/core/java/com/android/server/wm/WindowStateAnimator.java
+git commit -m "004-Use-consistent-animation-when-forcibly-hiding-non-system-overlay.patch"
+
+frameworks/base/005-Implement-onNullBinding-in-autofill-service-connection.patch
+patch -p1 < 005-Implement-onNullBinding-in-autofill-service-connection.patch
+rm 005-Implement-onNullBinding-in-autofill-service-connection.patch
+git add services/autofill/java/com/android/server/autofill/RemoteFillService.java
+git commit -m "005-Implement-onNullBinding-in-autofill-service-connection.patch"
+
+frameworks/base/006-Calculate-how-much-memory-is-used-per-account.patch
+patch -p1 < 006-Calculate-how-much-memory-is-used-per-account.patch
+rm 006-Calculate-how-much-memory-is-used-per-account.patch
+git add services/core/java/com/android/server/accounts/AccountManagerService.java
+git commit -m "006-Calculate-how-much-memory-is-used-per-account.patch"
+
+frameworks/base/007-Avoid-home-intent-normalization-if-it-is-from-trusted-callers.patch
+patch -p1 < 007-Avoid-home-intent-normalization-if-it-is-from-trusted-callers.patch
+rm 007-Avoid-home-intent-normalization-if-it-is-from-trusted-callers.patch
+git add services/core/java/com/android/server/wm/ActivityStartInterceptor.java
+git commit -m "007-Avoid-home-intent-normalization-if-it-is-from-trusted-callers.patch"
+
+frameworks/base/008-Prevent-non-system-ShutdownActivity-from-being-launched-by-BatteryService.patch
+patch -p1 < 008-Prevent-non-system-ShutdownActivity-from-being-launched-by-BatteryService.patch
+rm 008-Prevent-non-system-ShutdownActivity-from-being-launched-by-BatteryService.patch
+git add services/core/java/com/android/server/BatteryService.java
+git commit -m "008-Prevent-non-system-ShutdownActivity-from-being-launched-by-BatteryService.patch"
+
+frameworks/base/009-Do-not-allow-custom-animation-of-untrusted-Toast.patch
+patch -p1 < 009-Do-not-allow-custom-animation-of-untrusted-Toast.patch
+rm 009-Do-not-allow-custom-animation-of-untrusted-Toast.patch
+git add services/core/java/com/android/server/wm/DisplayPolicy.java
+git commit -m "009-Do-not-allow-custom-animation-of-untrusted-Toast.patch"
+
+??
+frameworks/base/010-RESTRICT-AUTOMERGE-Fix-recording-config-mic-indicator-suppression.patch
+patch -p1 < 010-RESTRICT-AUTOMERGE-Fix-recording-config-mic-indicator-suppression.patch
+rm 010-RESTRICT-AUTOMERGE-Fix-recording-config-mic-indicator-suppression.patch
+git add packages/SystemUI/src/com/android/systemui/appops/AppOpsControllerImpl.java
+git commit -m "010-RESTRICT-AUTOMERGE-Fix-recording-config-mic-indicator-suppression.patch"
+
+frameworks/base/011-RESTRICT-AUTOMERGE-Disallow-PINNED-in-setLaunchWindowingMode.patch
+patch -p1 < 011-RESTRICT-AUTOMERGE-Disallow-PINNED-in-setLaunchWindowingMode.patch
+rm 011-RESTRICT-AUTOMERGE-Disallow-PINNED-in-setLaunchWindowingMode.patch
+git add services/core/java/com/android/server/wm/SafeActivityOptions.java
+git add services/tests/wmtests/src/com/android/server/wm/TaskLaunchParamsModifierTests.java
+git commit -m "011-RESTRICT-AUTOMERGE-Disallow-PINNED-in-setLaunchWindowingMode.patch"
+
+frameworks/base/012-Avoid-mixups-between-different-CPSes-in-ZenModeConditions.patch
+patch -p1 < 012-Avoid-mixups-between-different-CPSes-in-ZenModeConditions.patch
+rm 012-Avoid-mixups-between-different-CPSes-in-ZenModeConditions.patch
+git add services/core/java/com/android/server/notification/ConditionProviders.java
+git add services/core/java/com/android/server/notification/ZenModeConditions.java
+git add services/tests/uiservicestests/src/com/android/server/notification/ZenModeHelperTest.java
+git add services/tests/uiservicestests/src/com/android/server/notification/ZenModeConditionsTest.java
+git commit -m "012-Avoid-mixups-between-different-CPSes-in-ZenModeConditions.patch"
+
+frameworks/base/013-Require-empty-output-for-PDF.patch
+patch -p1 < 013-Require-empty-output-for-PDF.patch
+rm 013-Require-empty-output-for-PDF.patch
+git add packages/PrintSpooler/src/com/android/printspooler/model/RemotePrintDocument.java
+git commit -m "013-Require-empty-output-for-PDF.patch"
+
+frameworks/base/014-RESTRICT-AUTOMERGE-appops-Preflight-skip-datasource-validation.patch
+patch -p1 < 014-RESTRICT-AUTOMERGE-appops-Preflight-skip-datasource-validation.patch
+rm 014-RESTRICT-AUTOMERGE-appops-Preflight-skip-datasource-validation.patch
+git add services/core/java/com/android/server/pm/permission/PermissionManagerService.java
+git commit -m "014-RESTRICT-AUTOMERGE-appops-Preflight-skip-datasource-validation.patch"
+
+frameworks/base/015-RESTRICT-AUTOMERGE-Prevent-root-from-getting-unverified-attributions-from-non-system-apps.patch
+patch -p1 < 015-RESTRICT-AUTOMERGE-Prevent-root-from-getting-unverified-attributions-from-non-system-apps.patch
+rm 015-RESTRICT-AUTOMERGE-Prevent-root-from-getting-unverified-attributions-from-non-system-apps.patch
+git add services/core/java/com/android/server/appop/AppOpsService.java
+git commit -m "015-RESTRICT-AUTOMERGE-Prevent-root-from-getting-unverified-attributions-from-non-system-apps.patch"
+
+frameworks/base/016-DO-NOT-MERGE-Start-editor-as-the-launching-user-instead-of-personal.patch
+patch -p1 < 016-DO-NOT-MERGE-Start-editor-as-the-launching-user-instead-of-personal.patch
+rm 016-DO-NOT-MERGE-Start-editor-as-the-launching-user-instead-of-personal.patch
+git add core/java/com/android/internal/app/ChooserActivity.java
+git commit -m "016-DO-NOT-MERGE-Start-editor-as-the-launching-user-instead-of-personal.patch"
+
+frameworks/base/017-Check-DPC-package-validity-during-package-updates.patch
+patch -p1 < 017-Check-DPC-package-validity-during-package-updates.patch
+rm 017-Check-DPC-package-validity-during-package-updates.patch
+git add core/java/android/app/admin/DeviceAdminInfo.java
+git add services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java
+git commit -m "017-Check-DPC-package-validity-during-package-updates.patch"
+
+frameworks/base/018-ignore-invalid-proxy-settings.patch
+patch -p1 < 018-ignore-invalid-proxy-settings.patch
+rm 018-ignore-invalid-proxy-settings.patch
+git add services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java
+git commit -m "018-ignore-invalid-proxy-settings.patch"
+
+frameworks/base/019-Finish-all-when-last-in-chain-fail.patch
+patch -p1 < 019-Finish-all-when-last-in-chain-fail.patch
+rm 019-Finish-all-when-last-in-chain-fail.patch
+git add services/core/java/com/android/server/pm/permission/PermissionManagerService.java
+git commit -m "019-Finish-all-when-last-in-chain-fail.patch"
+
+frameworks/base/020-RESTRICT-AUTOMERGE-Ignore-pinned-Windows.patch
+patch -p1 < 020-RESTRICT-AUTOMERGE-Ignore-pinned-Windows.patch
+rm 020-RESTRICT-AUTOMERGE-Ignore-pinned-Windows.patch
+git add services/core/java/com/android/server/wm/ActivityStarter.java
+git add services/core/java/com/android/server/wm/BackgroundLaunchProcessController.java
+git add services/core/java/com/android/server/wm/VisibleActivityProcessTracker.java
+git add services/core/java/com/android/server/wm/WindowProcessController.java
+git add services/tests/wmtests/src/com/android/server/wm/VisibleActivityProcessTrackerTests.java
+git commit -m "020-RESTRICT-AUTOMERGE-Ignore-pinned-Windows.patch"
+
+frameworks/native/001-RPC-state-termination-shutdown-session.patch
+patch -p1 < 001-RPC-state-termination-shutdown-session.patch
+rm 001-RPC-state-termination-shutdown-session.patch
+git add libs/binder/RpcSession.cpp
+git add libs/binder/RpcState.cpp
+git add libs/binder/RpcState.h
+git add libs/binder/include/binder/RpcSession.h
+git commit -m "001-RPC-state-termination-shutdown-session.patch"
+
+frameworks/native/002-Don-u0027t-blur-too-many-layers.patch
+patch -p1 < 002-Don-u0027t-blur-too-many-layers.patch
+rm 002-Don-u0027t-blur-too-many-layers.patch
+git add services/surfaceflinger/CompositionEngine/include/compositionengine/Output.h
+git add services/surfaceflinger/CompositionEngine/include/compositionengine/impl/Output.h
+git add services/surfaceflinger/CompositionEngine/include/compositionengine/impl/OutputLayerCompositionState.h
+git add services/surfaceflinger/CompositionEngine/include/compositionengine/impl/planner/CachedSet.h
+git add services/surfaceflinger/CompositionEngine/include/compositionengine/impl/planner/LayerState.h
+git add services/surfaceflinger/CompositionEngine/src/Output.cpp
+git add services/surfaceflinger/CompositionEngine/src/planner/CachedSet.cpp
+git add services/surfaceflinger/CompositionEngine/tests/planner/CachedSetTest.cpp
+git commit -m "002-Don-u0027t-blur-too-many-layers.patch"
+
+frameworks/native/003-shutdown-on-ENOMEM.patch
+patch -p1 < 003-shutdown-on-ENOMEM.patch
+rm 003-shutdown-on-ENOMEM.patch
+git add libs/binder/RpcState.cpp
+git commit -m "003-shutdown-on-ENOMEM.patch"
+
+frameworks/native/004-appendFrom.patch
+patch -p1 < 004-appendFrom.patch
+rm 004-appendFrom.patch
+git add libs/binder/Parcel.cpp
+git add libs/binder/tests/binderParcelTest.cpp
+git commit -m "004-appendFrom.patch"
+
+??? X
+frameworks/native/005-update-ABI.patch
+patch -p1 < 005-update-ABI.patch
+rm 005-update-ABI.patch
+git add 
+git commit -m "005-update-ABI.patch"
+
+frameworks/opt/telephony/001-Remove-get-set-of-voicemail-ringtone-uri-in-shared-preferences.patch
+patch -p1 < 001-Remove-get-set-of-voicemail-ringtone-uri-in-shared-preferences.patch
+rm 001-Remove-get-set-of-voicemail-ringtone-uri-in-shared-preferences.patch
+git add src/java/com/android/internal/telephony/util/NotificationChannelController.java
+git add src/java/com/android/internal/telephony/util/VoicemailNotificationSettingsUtil.java
+git commit -m "001-Remove-get-set-of-voicemail-ringtone-uri-in-shared-preferences.patch"
+
+packages/apps/Contacts/3cc4c4b.diff
+patch -p1 < 3cc4c4b.diff
+rm 3cc4c4b.diff
+git add src/com/android/contacts/vcard/SelectAccountActivity.java
+git commit -m "3cc4c4b.diff"
+
+packages/apps/DocumentsUI/001-Trim-the-application-name-to-make-it-safe-for-presentation.patch
+patch -p1 < 001-Trim-the-application-name-to-make-it-safe-for-presentation.patch
+rm 001-Trim-the-application-name-to-make-it-safe-for-presentation.patch
+git add res/values/strings.xml
+git add src/com/android/documentsui/base/Shared.java
+git add src/com/android/documentsui/dirlist/DirectoryFragment.java
+git add src/com/android/documentsui/dirlist/DocumentsAdapter.java
+git add tests/common/com/android/documentsui/dirlist/TestEnvironment.java
+git add tests/unit/com/android/documentsui/picker/ApplicationNameTest.kt
+git commit -m "001-Trim-the-application-name-to-make-it-safe-for-presentation.patch"
+
+packages/apps/ManagedProvisioning/001-Skip-permission-check-for-SCHEME_ANDROID_RESOURCE.patch
+patch -p1 < 001-Skip-permission-check-for-SCHEME_ANDROID_RESOURCE.patch
+rm 001-Skip-permission-check-for-SCHEME_ANDROID_RESOURCE.patch
+git add src/com/android/managedprovisioning/parser/DisclaimersParser.java
+git commit -m "001-Skip-permission-check-for-SCHEME_ANDROID_RESOURCE.patch"
+
+packages/apps/Nfc/884b8be.diff
+patch -p1 < 884b8be.diff
+rm 884b8be.diff
+git add src/com/android/nfc/cardemulation/CardEmulationManager.java
+git commit -m "884b8be.diff"
+
+packages/apps/Nfc/002-CardEmulationManager-filters-preinstalled-apps.patch
+patch -p1 < 002-CardEmulationManager-filters-preinstalled-apps.patch
+rm 002-CardEmulationManager-filters-preinstalled-apps.patch
+git add src/com/android/nfc/cardemulation/CardEmulationManager.java 
+git commit -m "002-CardEmulationManager-filters-preinstalled-apps.patch"
+
+packages/apps/Settings/002-Drop-PendingIntent-extras-from-external-packages-during-enrollment.patch
+patch -p1 < 002-Drop-PendingIntent-extras-from-external-packages-during-enrollment.patch
+rm 002-Drop-PendingIntent-extras-from-external-packages-during-enrollment.patch
+git add src/com/android/settings/biometrics/BiometricEnrollIntroduction.java
+git commit -m "002-Drop-PendingIntent-extras-from-external-packages-during-enrollment.patch"
+
+packages/apps/Settings/003-AppRestrictions-use-vetted-component.patch
+patch -p1 < 003-AppRestrictions-use-vetted-component.patch
+rm 003-AppRestrictions-use-vetted-component.patch
+git add src/com/android/settings/users/AppRestrictionsFragment.java
+git commit -m "003-AppRestrictions-use-vetted-component.patch"
+
+packages/apps/Settings/001-startActivityForResult-with-earlier-new-Intent.patch
+patch -p1 < 001-startActivityForResult-with-earlier-new-Intent.patch
+rm 001-startActivityForResult-with-earlier-new-Intent.patch
+git add src/com/android/settings/users/AppRestrictionsFragment.java
+git commit -m "001-startActivityForResult-with-earlier-new-Intent.patch"
+
+packages/apps/Settings/004-Hide-notification-content-in-history.patch
+patch -p1 < 004-Hide-notification-content-in-history.patch
+rm 004-Hide-notification-content-in-history.patch
+git add src/com/android/settings/notification/history/NotificationHistoryActivity.java
+git add src/com/android/settings/notification/history/NotificationHistoryAdapter.java
+git add src/com/android/settings/notification/history/NotificationSbnAdapter.java
+git commit -m "004-Hide-notification-content-in-history.patch"
+
+packages/apps/Settings/005-Use-correct-API-to-get-calling-package-name-in-CredentialStorage.patch
+patch -p1 < 005-Use-correct-API-to-get-calling-package-name-in-CredentialStorage.patch
+rm 005-Use-correct-API-to-get-calling-package-name-in-CredentialStorage.patch
+git add src/com/android/settings/security/CredentialStorage.java
+git commit -m "005-Use-correct-API-to-get-calling-package-name-in-CredentialStorage.patch"
+
+packages/apps/Settings/006-Ignore-face-settings-extras-when-called-by-an-external-package.patch
+patch -p1 < 006-Ignore-face-settings-extras-when-called-by-an-external-package.patch
+rm 006-Ignore-face-settings-extras-when-called-by-an-external-package.patch
+git add src/com/android/settings/SettingsActivity.java
+git add src/com/android/settings/biometrics/face/FaceSettings.java
+git commit -m "006-Ignore-face-settings-extras-when-called-by-an-external-package.patch"
+
+packages/apps/Settings/007-Add-ComponentName-explicitly-to-make-sure-arbitary-intents-aren-u0027t-launched-from-Settings.patch
+patch -p1 < 007-Add-ComponentName-explicitly-to-make-sure-arbitary-intents-aren-u0027t-launched-from-Settings.patch
+rm 007-Add-ComponentName-explicitly-to-make-sure-arbitary-intents-aren-u0027t-launched-from-Settings.patch
+git add src/com/android/settings/accounts/AccountTypePreferenceLoader.java
+git commit -m "007-Add-ComponentName-explicitly-to-make-sure-arbitary-intents-aren-u0027t-launched-from-Settings.patch"
+
+packages/modules/CellBroadcastService/001-RESTRICT-AUTOMERGE-Update-getDefaultCBRPackageName-for-fixing-security-vulnerability.patch
+patch -p1 < 001-RESTRICT-AUTOMERGE-Update-getDefaultCBRPackageName-for-fixing-security-vulnerability.patch
+rm 001-RESTRICT-AUTOMERGE-Update-getDefaultCBRPackageName-for-fixing-security-vulnerability.patch
+git add src/com/android/cellbroadcastservice/CellBroadcastHandler.java
+git add tests/src/com/android/cellbroadcastservice/tests/CellBroadcastHandlerTest.java
+git commit -m "001-RESTRICT-AUTOMERGE-Update-getDefaultCBRPackageName-for-fixing-security-vulnerability.patch"
+
+packages/modules/Permission/001-Stop-one-time-sessions-iff-when-no-one-time-permission-is-granted.patch
+patch -p1 < 001-Stop-one-time-sessions-iff-when-no-one-time-permission-is-granted.patch
+rm 001-Stop-one-time-sessions-iff-when-no-one-time-permission-is-granted.patch
+git add PermissionController/src/com/android/permissioncontroller/permission/model/AppPermissionGroup.java
+git add PermissionController/src/com/android/permissioncontroller/permission/utils/KotlinUtils.kt
+git commit -m "001-Stop-one-time-sessions-iff-when-no-one-time-permission-is-granted.patch"
+
+packages/providers/MediaProvider/001-DO-NOT-MERGE-Fix-misuse-of-MediaProvider-INCLUDED_DEFAULT_DIRECTORIES.patch
+patch -p1 < 001-DO-NOT-MERGE-Fix-misuse-of-MediaProvider-INCLUDED_DEFAULT_DIRECTORIES.patch
+rm 001-DO-NOT-MERGE-Fix-misuse-of-MediaProvider-INCLUDED_DEFAULT_DIRECTORIES.patch
+git add src/com/android/providers/media/MediaProvider.java
+git commit -m "001-DO-NOT-MERGE-Fix-misuse-of-MediaProvider-INCLUDED_DEFAULT_DIRECTORIES.patch"
+
+packages/services/Telephony/001-Remove-the-contacts-picker-from-VoicemailSettingsActivity.patch
+patch -p1 < 001-Remove-the-contacts-picker-from-VoicemailSettingsActivity.patch
+rm 001-Remove-the-contacts-picker-from-VoicemailSettingsActivity.patch
+git add src/com/android/phone/EditPhoneNumberPreference.java
+git add src/com/android/phone/settings/VoicemailSettingsActivity.java
+git commit -m "001-Remove-the-contacts-picker-from-VoicemailSettingsActivity.patch"
+
+packages/services/Telephony/002-DO-NOT-MERGE-remove-the-contacts-picker-from-CallForwardingOptions.patch
+patch -p1 < 002-DO-NOT-MERGE-remove-the-contacts-picker-from-CallForwardingOptions.patch
+rm 002-DO-NOT-MERGE-remove-the-contacts-picker-from-CallForwardingOptions.patch
+git add src/com/android/phone/CallForwardEditPreference.java
+git add src/com/android/phone/GsmUmtsCallForwardOptions.java
+git commit -m "002-DO-NOT-MERGE-remove-the-contacts-picker-from-CallForwardingOptions.patch"
+
+system/bt/001-Fix-an-OOB-Write-bug-in-avrc_vendor_msg.patch
+patch -p1 < 001-Fix-an-OOB-Write-bug-in-avrc_vendor_msg.patch
+rm 001-Fix-an-OOB-Write-bug-in-avrc_vendor_msg.patch
+git add stack/avrc/avrc_opt.cc
+git commit -m "001-Fix-an-OOB-Write-bug-in-avrc_vendor_msg.patch"
+
+vi build/make/core/version_defaults.mk
+git add build/make/core/version_defaults.mk
+git commit -m "PLATFORM_SECURITY_PATCH := 2025-09-01"
+
+@endcode
+
+# LGHV K1100UA google_gtvs_20250902
+
+@code
+git add vendor/google_gtvs/apps/arm64-v8a/Android.mk
+git add vendor/google_gtvs/apps/arm64-v8a/Katniss.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/Android.mk
+git add vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk
+
+
+git commit -m "google_gtvs_20250902 - Katniss.apk만 적용"
+
+
+@endcode
+
+*/
+
+
+
+

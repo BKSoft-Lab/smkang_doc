@@ -1,0 +1,178 @@
+/*!
+@page work_20260120	2026.01.20
+
+# BKSoft Github
+---
+## 1단계: 회사 전용 공간(Organization) 만들기
+
+@code
+
+개인 계정이 아닌 회사 이름의 '조직(Organization)'을 먼저 만들어야 관리와 보안이 쉬워집니다.
+
+GitHub 로그인: GitHub에 접속하여 로그인합니다.
+mundjob / k56325@bk
+
+조직 생성: 우측 상단 프로필 클릭 → [Your organizations] → **[New organization]**을 클릭합니다.
+
+플랜 선택: [Free] 플랜의 **[Create a free organization]**을 선택합니다. (소규모 팀은 무료로도 충분합니다.)
+
+정보 입력: * Organization name: BKSoft-Lab
+
+Contact email: 회사 업무용 이메일 입력 (mundijob@bksw.co.kr)
+
+Verify: 로봇이 아님을 인증하고 **[Next]**를 누릅니다.
+
+팀원 초대 건너뛰기: 지금 바로 초대해도 되지만, 설정을 마친 후 나중에 해도 됩니다. (일단 하단 [Complete setup] 클릭)
+
+@endcode
+
+
+## 1단계: 회사 전용 공간(Organization) 만들기
+
+@code
+
+개인 계정이 아닌 회사 이름의 '조직(Organization)'을 먼저 만들어야 관리와 보안이 쉬워집니다.
+
+GitHub 로그인: GitHub에 접속하여 로그인합니다.
+mundjob / k56325@bk
+
+조직 생성: 우측 상단 프로필 클릭 → [Your organizations] → **[New organization]**을 클릭합니다.
+
+플랜 선택: [Free] 플랜의 **[Create a free organization]**을 선택합니다. (소규모 팀은 무료로도 충분합니다.)
+
+정보 입력: * Organization name: BKSoft-Lab
+
+Contact email: 회사 업무용 이메일 입력 (mundijob@bksw.co.kr)
+
+Verify: 로봇이 아님을 인증하고 **[Next]**를 누릅니다.
+
+팀원 초대 건너뛰기: 지금 바로 초대해도 되지만, 설정을 마친 후 나중에 해도 됩니다. (일단 하단 [Complete setup] 클릭)
+
+@endcode
+
+## 2단계: 프로젝트 저장소(Repository) 만들기
+
+@code
+이제 BKSoft 조직 안에 실제 코드를 담을 '저장소'를 만듭니다.
+
+BKSoft 조직 페이지에서 [Repositories] 탭 → **[New repository]**를 클릭합니다.
+
+Repository name: 프로젝트 이름 입력 (AutoTest)
+
+https://github.com/BKSoft-Lab/AutoTest
+
+Public/Private: 반드시 **[Private]**을 선택하세요. (회사 코드가 외부에 노출되지 않습니다.)
+
+Initialize: 아래 항목들을 체크하면 초기 관리가 편해집니다.
+
+Add a README file: 프로젝트 설명 파일 생성
+
+Add .gitignore: Visual Studio를 선택 (불필요한 빌드 파일이 올라가는 것을 막아줍니다.)
+
+**[Create repository]**를 클릭하여 생성합니다.
+
+@endcode
+
+## 3단계: 팀원 초대하기 (BKSoft 멤버 추가)
+
+@code
+원들이 이 프로젝트에 접근할 수 있도록 권한을 줍니다.
+
+저장소 상단 메뉴의 [Settings] → 왼쪽 사이드바 **[Collaborators]**를 클릭합니다.
+
+[Add people] 버튼을 누릅니다.
+
+팀원의 GitHub ID나 이메일을 검색하여 선택한 후 **[Add to this repository]**를 클릭합니다.
+
+팀원에게 이메일로 초대장이 발송됩니다. 팀원이 이메일에서 초대를 수락해야 최종적으로 참여가 완료됩니다.
+
+@endcode
+
+## 4단계: 비주얼 스튜디오와 연결하기
+
+@code
+이제 각자의 컴퓨터에 있는 비주얼 스튜디오에서 코드를 올리고 내려받을 차례입니다.
+
+비주얼 스튜디오 실행: 작업 중인 프로젝트를 엽니다.
+
+Git 초기화: 하단 상태 표시줄의 [Git에 추가] 또는 메뉴에서 **[Git] -> [Git 저장소 만들기...]**를 선택합니다.
+
+원격 서버 연결: * 기존 원격을 선택합니다.
+
+원격 URL: GitHub 저장소 페이지의 [<> Code] 버튼을 눌러 나오는 주소(https://github.com/BKSoft-Lab/AutoTest.git)를 복사해 붙여넣습니다.
+
+푸시(Push): **[만들기 및 푸시]**를 누르면 내 코드가 GitHub 서버로 전송됩니다.
+@endcode
+
+
+## 5단계: 매일 사용하는 협업 사이클
+
+@code
+
+팀원들과 일할 때는 다음 세 가지만 기억하세요.
+
+1. pull	: 가져오기 (서버의 최신 코드를 내 PC로 받기 / 출근 직후, 작업 시작 전)
+2. commit : 저장하기 (내가 수정한 내용을 내 PC에 기록 / 의미 있는 코드 수정을 마쳤을 때)
+3. push : 올리기 (내 PC의 기록들을 서버에 공유 / 하루 일과 종료 전, 기능 완성 후)
+
+초보자 팁: 코드를 수정하기 전에 반드시 [Pull]을 먼저 해서 다른 사람이 올린 내용이 있는지 확인하세요. 
+그래야 나중에 코드가 꼬이는 '충돌'을 줄일 수 있습니다.
+
+@endcode
+
+
+# 자동화 테스트 git 적용 / 수정
+
+## (4단계: 비주얼 스튜디오와 연결하기) 수행
+
+## 새롭게 VS 에서 git clone 하기
+
+@code
+
+1. 비주얼 스튜디오를 실행합니다.
+2. 오른쪽 메뉴에서 [리포지토리 복제] (Clone a repository)를 선택합니다.
+3. 리포지토리 위치 칸에 아까 복사한 GitHub 주소를 붙여넣습니다.
+4. 로컬 경로 칸에서 코드가 저장될 내 컴퓨터의 폴더 위치를 확인합니다.
+5. [복제] 버튼을 누릅니다.
+6. 완료 후 우측하단에 브랜치 master 선택
+
+@endcode
+
+## 첫 빌드시 에러 처리
+
+@code
+
+빌드시 에러
+'Bitmap' 형식이 'System.Drawing.Common, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51' 및 'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'에 모두 있습니다.
+'Bitmap' 형식이 'System.Drawing.Common, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51' 및 'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'에 모두 있습니다.
+'Bitmap' 형식이 'System.Drawing.Common, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51' 및 'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'에 모두 있습니다.
+'Bitmap' 형식이 'System.Drawing.Common, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51' 및 'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'에 모두 있습니다.
+...
+
+
+비주얼 스튜디오 상단 메뉴 [도구] -> [NuGet 패키지 관리자] -> [패키지 관리자 콘솔]을 엽니다.
+다음 명령어를 입력하여 패키지를 강제로 복원합니다.
+PowerShell
+Update-Package -reinstall
+
+
+
+오후 12:57에 다시 빌드를 시작함...
+
+1>------ 모두 다시 빌드 시작: 프로젝트: WindowsFormsApp1, 구성: Debug Any CPU ------
+1>C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3277: 해결할 수 없는 "System.Drawing.Common"의 다른 버전 간 충돌이 발견되었습니다.
+1>C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\amd64\Microsoft.Common.CurrentVersion.targets(2437,5): warning MSB3277: "System.Drawing.Common, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51"과(와) "System.Drawing.Common, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" 사이에 충돌이 발생했습니다.
+
+
+비주얼 스튜디오 상단 메뉴에서 **[도구] -> [NuGet 패키지 관리자] -> [솔루션용 NuGet 패키지 관리]**를 클릭합니다.
+[업데이트] 탭으로 이동합니다.
+목록에서 **System.Drawing.Common**을 찾습니다.
+버전을 8.0.0 이상(가급적 최신 버전)으로 선택하고 **[설치]**를 클릭하여 업데이트합니다.
+업데이트 후 다시 빌드하면 해당 경고가 사라집니다.
+
+@endcode
+
+
+---
+
+*/

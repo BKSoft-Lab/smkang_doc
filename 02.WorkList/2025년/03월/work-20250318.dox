@@ -1,0 +1,179 @@
+/*!
+@page work_20250318	2025.03.18
+
+---
+
+# work
+
+logcat | egrep "KaonCmAutoUpgradeService|smkang" 
+getprop debug.cm.auto.firmware.name
+
+plapiapp-system  plapi setloglevel 6
+setprop persist.odm.block.cm.auto.upgrade 0
+getprop persist.odm.block.cm.auto.upgrade
+logcat | egrep "upgrade"
+
+10.5.113.44
+10.45.191.69
+10.45.240.5
+
+x:/LGHV/kaon_bcm_androidtv12/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
+X:\LGHV\kaon_bcm_androidtv12\frameworks\base\core\java\android\content\Intent.java
+
+
+dumpsys notification | grep "low_battery_channel"
+
+dumpsys notification | grep kaon_lowbettery_channel
+
+
+kaon_lowbettery_channel
+
+adb uninstall com.kaon.lowbettery
+adb shell am start -n com.kaon.lowbettery/.MainActivity
+adb shell am startservice -n com.kaon.lowbettery/.KeyEventService
+adb install KaonLowBetteryManager.apk
+adb install -r KaonLowBetteryManager1.apk
+adb install -r /KaonManagerService.apk
+
+
+logcat | egrep "smkang"
+logcat | egrep "smkang|GLOBAL_BUTTON|Intent|lowbettery"
+logcat | egrep "smkang|GLOBAL_BUTTON|lowbettery"
+ 
+adb connect 10.217.0.74:5555
+
+service list | grep kaon
+
+source build/envsetup.sh
+lunch K1100UA-userdebug
+mmm vendor/kaon/apps/KaonManagerService/
+
+com.cisco.epg.cjh.android
+
+adb shell input keyevent 201
+
+[ remount 방법 ]
+
+- "adb disable-verity" 를 할 경우 /mnt/scratch 파티션 이 생성되어 FW upgrade 가 실패하는 경우가 발생하니 테스트 후에는 꼭 "adb enable-verity" 를 실행해야 합니다.
+
+- userdebug 버전에서 adb로만 가능
+$ adb root
+$ adb disable-verity
+$ adb reboot
+$ adb wait-for-device
+$ adb root
+$ adb remount
+
+com.cisco.epg.cjh.android
+
+
+
+adb shell am broadcast -a com.kaon.lowbettery.ACTION_LOW_BATTERY -n com.kaon.lowbettery/.ButtonListenerService
+adb shell am broadcast -a android.intent.action.GLOBAL_BUTTON -n com.kaon.lowbettery/.ButtonListenerService
+
+adb shell am broadcast -a android.intent.action.GLOBAL_BUTTON -p com.cisco.epg.cjh.android
+
+adb shell am broadcast -a com.kaon.lowbettery.ACTION_LOW_BATTERY -p com.cisco.epg.cjh.android
+
+
+
+
+adb shell am broadcast -a android.intent.action.RCU_LOW_BATTERY -n com.kaonmedia.kaonmanagerservice/.RcuLowBatteryReceiver
+
+
+
+
+
+
+
+getprop persist.sys.usb.config
+
+reboot usbrole
+
+logcat | egrep "KaonManagerService|KaonDeviceManagerService|AudioModeChangeReceiver|BlackScreenActivity|KaonBootReceiver|KaonLog|KaonMainActivity|PropertyChangeService"
+
+
+logcat | egrep "KaonManagerService|GlobalButtonReceiver"
+
+
+D:\platform-tools>adb shell settings get secure enabled_notification_listeners
+                 com.google.android.tvrecommendations/com.google.android.tvrecommendations.NotificationsService
+
+
+com.android.tv.action.OPEN_NOTIFICATIONS_PANEL flg=0x10000000 cmp=com.google.android.tvrecommendations/.NotificationsSidePanelActivity
+
+adb shell am broadcast -a com.android.tv.action.OPEN_NOTIFICATIONS_PANEL -n com.google.android.tvrecommendations/.NotificationsSidePanelActivity
+
+adb shell am start -n com.google.android.tvrecommendations/.NotificationsSidePanelActivity
+
+adb shell am start -n com.google.android.tvrecommendations/.NotificationsSidePanelActivity -a android.intent.action.VIEW --es title "새로운 알림" --es message "ADB를 통해 추가된 알림입니다."
+
+
+adb shell am startservice -n com.google.android.tvrecommendations/.NotificationsService --es "title" "smkang1" --es "message" smkang1"
+
+
+adb shell am broadcast -a android.intent.action.NOTIFY --es android.title "smkang Android TV 알림" --es android.text "smkang ADB를 사용하여 추가된 알림입니다."
+  
+
+adb shell am broadcast -a android.intent.action.SHOW_NOTIFICATION --es android.title "Google TV 알림" --es android.text "이것은 Google TV의 알림 시스템을 통해 추가된 알림입니다."
+
+
+adb shell am startservice -n com.google.android.tvrecommendations/.NotificationService --es "title" "Google TV 알림" --es "message" "이 알림은 Google TV 시스템을 통해 추가되었습니다."
+
+
+adb shell am start -n com.google.android.tvrecommendations/.NotificationsSidePanelActivity -a android.intent.action.VIEW --es "title" "smkang" --es "message" "smkang smkang"
+
+
+adb shell am startservice -n com.google.android.tvrecommendations/.NotificationsService --es "title" "Google TV 알림" --es "message" "이것은 Google TV의 알림 시스템을 통해 추가된 알림입니다."
+
+
+03-19 17:13:25.272  4340  4340 D [LGHV_EPG]: CloudServiceDialog<home_UcpHkgB> : sendKey : 23 -> cloud consumed ^^ CloudService{TAG='CloudService<home_UcpHkgB> ', appId='home', sessionId='home_UcpHkgB', apexCloudDoc=ApexCloudDoc{appID='home', cloudIP='10.37.221.19', cloudPort=30000, initialURL='http://10.10.118.20:6080/ICUI/home/2.0.10/', xPos=0, yPos=0, width=1280, height=720, deviceID='74:3a:ef:48:5b:68', accountID='67821669', priority=1000, serverConnectTimeOut=15000, pingPeriod=10000, zOrder=0, option='null', imgConfig='null', isKeepFirstPage=true, encryption=true, initialValue='{"deviceInfo":{"accessToken":"02CEM1KQ8GIH2CMA6GRI3TEVKC","accountId":"TB202503140000547238","adid":"5838b38f-5f83-44cc-b092-577befe5b597","bluetoothDevice":0,"channelMode":"0","epgVersion":"2023-11-20_S001_ARDN_v_4.28.00","externalIp":"","googleNewNoti":2,"googleTotalNoti":2,"groupBits":"AAAAAAAQAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAA\u003d","hostIp":"10.217.1.101","isKids":false,"isWidgetMode":false,"macAddress":"74:3a:ef:48:5b:68","mapId":0,"nodeGroupId":"663","rating":0,"simplePurchase":false,"smartCardId":"60000294752","soCode":43,"soLogLevel":["1","2","3","4","5","6","7"],"speechBubble":true,"stbModel":"K1100UA","stbRegCode":"8e9d4368-3a9f-4201-8313-b79a641b2ffb","subscriberId":"67821669","superCasId":"503382017","urlGatherServer":"http://10.10.78.121:13000","urlPopServer":"http://10.37.221.210/uipf/public/static/oobsi/","vodAdultMenuCheck":1,"vodListType":"LIST","vodViewType":"LIST","vodWatching":false,"voiceGuide":false,"voiceGuideDesc":false},"launchInfo":{"TAG":"LaunchInfo","appInfo":{"appId":"home","appName":"home","appType":"0","csType":"ICS","isStandAlone":false},"callerAppId":"EPG","coldBooting":false,"entryCode":"08","homeKey":true,"hotKeyEvent":"Home","link":{"linkType":"sc01","linkValue":"101"},"onetimeMode":false,"rating":0,"resume":false,"resumeKeyCode":0,"sourceId":183,"userEventCode":0,"vodAdultMenuCheck":1,"voiceGuide":false,"debugVersion":"2023-11-20_S001_ARDN_v_4.28.00"}}', imgFrameRate=8, encodingType=5, socketBufferSize=16384}, apexCloudSession=com.altimedia.cloud.impl.ApexCloudSessionImpl@3e7a398, connected='true', CloudServiceWindow view[android.widget.FrameLayout{fda4ade VFE...... ........ 0,0-1280,720}], LaunchInfo{appInfo=AppInfo{appId='home', appName='home', subAppId='null', serviceId='null', appType='0', csType='ICS', isStandAlone=false}, link= [Link]  type:sc01 value:101 param:null, extInfoType=null, extInfo=null, resume=false, resumeKeyCode=0, onetimeMode=false, homeKey=true, coldBooting=false, sourceId=183, hotKeyEvent=Home, entryCode=08, callerAppId=EPG, menuPath=null, rating=0, vodAdultMenuCheck=1, voiceGuide=false, isAutoCloseHomeApp=false}}
+03-19 17:13:25.306  4340 11895 D [LGHV_EPG]: [WebSocketConnectReadThread-594] GoogleMessageHandler.:  <<<<  apexMessage :ApexMessageImpl{appSessionID='home_UcpHkgB', protocolType='lghv.Google.startGoogleSettings', arrivalTime=3194428, requestId=10, protocolPackage='lghv.Google', protocolMethod='startGoogleSettings', data='{"param":"noti"}'}
+03-19 17:13:25.307  4340 11895 D [LGHV_EPG]: [WebSocketConnectReadThread-594] GoogleMessageHandler.preSubscriber | onNext: apexMessage : ApexMessageImpl{appSessionID='home_UcpHkgB', protocolType='lghv.Google.startGoogleSettings', arrivalTime=3194428, requestId=10, protocolPackage='lghv.Google', protocolMethod='startGoogleSettings', data='{"param":"noti"}'}
+03-19 17:13:25.313  4340  4340 D [LGHV_EPG]: [main] GoogleMessageHandler.doProcessMessageImpl: <<< apex__cloud_received message : ApexMessageImpl{appSessionID='home_UcpHkgB', protocolType='lghv.Google.startGoogleSettings', arrivalTime=3194428, requestId=10, protocolPackage='lghv.Google', protocolMethod='startGoogleSettings', data='{"param":"noti"}'}
+03-19 17:13:25.313  4340  4340 D [LGHV_EPG]: [main] GoogleMessageHandler.doProcessMessageImpl: data : {"param":"noti"}
+03-19 17:13:25.315  4340  4340 D [LGHV_EPG]: JsonUtil : fromJson ret :  [StartGoogleSettingsDto]  param:noti
+03-19 17:13:25.315  4340  4340 D [LGHV_EPG]: [main] GoogleMessageHandler.doProcessMessageImpl: cloudMessage :  [StartGoogleSettingsDto]  param:noti
+03-19 17:13:25.315  4340  4340 D [LGHV_EPG]: GoogleMessageHandler : processWebAppMessage: called :  [StartGoogleSettingsDto]  param:noti
+03-19 17:13:25.316  4340 11895 D [LGHV_EPG]: GoogleMessageHandler : called notifyWebAppMessage consumed: true
+03-19 17:13:25.316  4340  4340 D [LGHV_EPG]: GoogleMethodImpl : startGoogleSettings: menu: noti
+03-19 17:13:25.319  4340 11768 D [LGHV_EPG]: [Scheduler-14] GoogleMessageHandler.getMessageReplier | onNext: apexMessage : ApexMessageImpl{appSessionID='home_UcpHkgB', protocolType='lghv.Google.startGoogleSettings', arrivalTime=3194428, requestId=10, protocolPackage='lghv.Google', protocolMethod='startGoogleSettings', data='{"param":"noti"}'}
+03-19 17:13:25.319  4340  4340 D [LGHV_EPG]: NavigationCommonActivity : WHAT_GO_TO_SETTINGS: menu: noti
+03-19 17:13:25.319  4340  4340 D [LGHV_EPG]: NavigationCommonActivity : hideNoticeDialog: called
+03-19 17:13:25.320  4340  4340 D [LGHV_EPG]: NoticeManager : goNotificationSetting() called.
+03-19 17:13:25.320  4340  4340 D [LGHV_EPG]: NoticeManager : readNotification() called.
+03-19 17:13:25.321  4340  4340 D [LGHV_EPG]: NoticeManager : getTotalNotiCount: size=2
+03-19 17:13:25.321  4340  4340 D [LGHV_EPG]: DeviceDataManagerCommon : setNewNoti() called. newNoti : 2
+03-19 17:13:25.323  3584  3731 I ActivityTaskManager: START u0 {act=com.android.tv.action.OPEN_NOTIFICATIONS_PANEL flg=0x10000000 cmp=com.google.android.tvrecommendations/.NotificationsSidePanelActivity} from uid 10071
+03-19 17:13:25.352  4340  4340 D [LGHV_EPG]: NavigationCommonActivity : onUserLeaveHint: getForegroundActivity: com.google.android.tvrecommendations.NotificationsSidePanelActivity
+03-19 17:13:25.357  4340  4340 D [LGHV_EPG]: NavigationCommonActivity : hideNoticeDialog: called
+03-19 17:13:25.391  4340  4340 D [LGHV_EPG]: CloudServiceDialog<home_UcpHkgB> : sendKey : 23 -> cloud consumed ^^ CloudService{TAG='CloudService<home_UcpHkgB> ', appId='home', sessionId='home_UcpHkgB', apexCloudDoc=ApexCloudDoc{appID='home', cloudIP='10.37.221.19', cloudPort=30000, initialURL='http://10.10.118.20:6080/ICUI/home/2.0.10/', xPos=0, yPos=0, width=1280, height=720, deviceID='74:3a:ef:48:5b:68', accountID='67821669', priority=1000, serverConnectTimeOut=15000, pingPeriod=10000, zOrder=0, option='null', imgConfig='null', isKeepFirstPage=true, encryption=true, initialValue='{"deviceInfo":{"accessToken":"02CEM1KQ8GIH2CMA6GRI3TEVKC","accountId":"TB202503140000547238","adid":"5838b38f-5f83-44cc-b092-577befe5b597","bluetoothDevice":0,"channelMode":"0","epgVersion":"2023-11-20_S001_ARDN_v_4.28.00","externalIp":"","googleNewNoti":2,"googleTotalNoti":2,"groupBits":"AAAAAAAQAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAA\u003d","hostIp":"10.217.1.101","isKids":false,"isWidgetMode":false,"macAddress":"74:3a:ef:48:5b:68","mapId":0,"nodeGroupId":"663","rating":0,"simplePurchase":false,"smartCardId":"60000294752","soCode":43,"soLogLevel":["1","2","3","4","5","6","7"],"speechBubble":true,"stbModel":"K1100UA","stbRegCode":"8e9d4368-3a9f-4201-8313-b79a641b2ffb","subscriberId":"67821669","superCasId":"503382017","urlGatherServer":"http://10.10.78.121:13000","urlPopServer":"http://10.37.221.210/uipf/public/static/oobsi/","vodAdultMenuCheck":1,"vodListType":"LIST","vodViewType":"LIST","vodWatching":false,"voiceGuide":false,"voiceGuideDesc":false},"launchInfo":{"TAG":"LaunchInfo","appInfo":{"appId":"home","appName":"home","appType":"0","csType":"ICS","isStandAlone":false},"callerAppId":"EPG","coldBooting":false,"entryCode":"08","homeKey":true,"hotKeyEvent":"Home","link":{"linkType":"sc01","linkValue":"101"},"onetimeMode":false,"rating":0,"resume":false,"resumeKeyCode":0,"sourceId":183,"userEventCode":0,"vodAdultMenuCheck":1,"voiceGuide":false,"debugVersion":"2023-11-20_S001_ARDN_v_4.28.00"}}', imgFrameRate=8, encodingType=5, socketBufferSize=16384}, apexCloudSession=com.altimedia.cloud.impl.ApexCloudSessionImpl@3e7a398, connected='true', CloudServiceWindow view[android.widget.FrameLayout{fda4ade VFE...... ........ 0,0-1280,720}], LaunchInfo{appInfo=AppInfo{appId='home', appName='home', subAppId='null', serviceId='null', appType='0', csType='ICS', isStandAlone=false}, link= [Link]  type:sc01 value:101 param:null, extInfoType=null, extInfo=null, resume=false, resumeKeyCode=0, onetimeMode=false, homeKey=true, coldBooting=false, sourceId=183, hotKeyEvent=Home, entryCode=08, callerAppId=EPG, menuPath=null, rating=0, vodAdultMenuCheck=1, voiceGuide=false, isAutoCloseHomeApp=false}}
+03-19 17:13:25.527  4769  4769 W NotifsPanelAdapter: onFocusChanged: still computing layout => scheduling
+03-19 17:13:25.545  3584  3628 I ActivityTaskManager: Displayed com.google.android.tvrecommendations/.NotificationsSidePanelActivity: +190ms
+03-19 17:13:25.568  4301  4301 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():38 Notify device unlocked.
+
+
+
+
+
+
+
+
+
+
+
+03-20 15:11:52.107  3607  3607 E NotificationPrefHelper: createDefaultChannelIfNeededLocked - Exception: android.content.pm.PackageManager$NameNotFoundException: com.kaon.lowbettery
+
+
+
+@endcode
+
+*/
+
+
+
+
+
+
+
+

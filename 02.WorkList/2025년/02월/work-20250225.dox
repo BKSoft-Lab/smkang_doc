@@ -1,0 +1,354 @@
+/*!
+@page work_20250225	2025.02.25 상암
+
+---
+
+# SKB SPL 2025-02-01 (LGHV K1100 2025.02.26 동일적용)
+
+## 1) Framework
+> https://source.android.com/docs/security/bulletin/2025-02-01?hl=ko#framework 
+
+@code
+업데이트된 AOSP 버전 12 적용
+CVE					참조		유형	심각도	업데이트된 AOSP 버전
+01.CVE-2024-49721	A-354682735	EoP	높음	12, 12L, 13
+02.CVE-2024-49743	A-305695605 [2] [3]	EoP	높음	12, 12L, 13, 14, 15
+03.CVE-2024-49746	A-359179312 [2]	EoP	높음	12, 12L, 13, 14, 15
+04.CVE-2023-40122	A-286235483	ID	높음	12, 12L, 13, 14, 15
+05.CVE-2023-40133	A-283264674	ID	높음	12, 12L, 13
+06.CVE-2023-40134	A-283101289	ID	높음	12, 12L, 13
+07.CVE-2023-40135	A-281848557	ID	높음	12, 12L, 13
+08.CVE-2023-40136	A-281666022	ID	높음	12, 12L, 13
+09.CVE-2023-40137	A-281665050	ID	높음	12, 12L, 13
+10.CVE-2023-40138	A-281534749	ID	높음	12, 12L, 13
+11.CVE-2023-40139	A-281533566	ID	높음	12, 12L, 13
+12.CVE-2024-0037	A-292104015	ID	높음	12, 12L, 13, 14, 15
+13.CVE-2025-0100	A-372670004	ID	높음	12, 12L, 13, 14, 15
+14.CVE-2024-49741	A-353240784	DoS	높음	12, 12L, 13, 14, 15
+@endcode
+
+### Framework01 CVE-2024-49721	A-354682735	
+@code
+android-12.0.0_r1/platform/frameworks/base/0005-InputMethodSubtypeArray-prevent-negative-count-injection.bulletin.patch
+patch -p1 < 0005-InputMethodSubtypeArray-prevent-negative-count-injection.bulletin.patch
+git add core/java/android/view/inputmethod/InputMethodSubtypeArray.java
+git add core/tests/coretests/src/android/view/inputmethod/InputMethodSubtypeArrayTest.java
+
+git commit -m "CVE-2024-49721
+From ba59566c81e1e68476efb3479e5358dbb07c5a3c Mon Sep 17 00:00:00 2001
+From: Adrian Roos <roosa@google.com>
+Date: Fri, 2 Jun 2023 13:57:57 +0000
+Subject: [PATCH] InputMethodSubtypeArray: prevent negative count injection
+
+Fixes an issue where negative counts could be injected
+via the Parcel constructor. The writeToParcel method
+in that case would write data that a subsequent read would
+not consume.
+
+Fixes: 277916797
+Fixes: 354682735
+Test: atest InputMethodSubtypeArrayTest
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:6eb79782ccdaf17664d298757d75d7c90bcc9cad)
+Merged-In: I7e881d82415051179c59bf5df97f8ba0a41e693e
+Change-Id: I7e881d82415051179c59bf5df97f8ba0a41e693e
+"
+@endcode
+
+### Framework02 CVE-2024-49743	A-305695605 
+@code
+android-12.0.0_r1/platform/frameworks/base/0004-Fix-allowlist-token-issues.bulletin.patch
+patch -p1 < 0004-Fix-allowlist-token-issues.bulletin.patch
+git add core/java/android/app/Notification.java
+git add core/java/android/os/Parcel.java
+git add core/tests/coretests/src/android/os/ParcelTest.java
+git add services/core/java/com/android/server/notification/NotificationManagerService.java
+git add services/core/java/com/android/server/notification/NotificationManagerService.java.orig
+git add services/tests/uiservicestests/src/com/android/server/notification/NotificationManagerServiceTest.java
+git add services/tests/uiservicestests/src/com/android/server/notification/NotificationManagerServiceTest.java.orig
+
+git commit -m "CVE-2024-49743
+From 03e01c2ae3e70275ed69cd5ed3c031e19185bb34 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Mat=C3=ADas=20Hern=C3=A1ndez?= <matiashe@google.com>
+Date: Tue, 12 Mar 2024 16:51:58 +0100
+Subject: [PATCH] Fix allowlist token issues
+
+1) Don't accept enqueued notifications with an unexpected token.
+2) Ensure allowlist token matches for all parceled and unparceled notifications (by only using the 'root notification' one).
+3) Simplify cookie usage in allowlist token serialization.
+4) Ensure group summary (and any notifications added directly by NMS) have the correct token.
+
+Bug: 328254922
+Bug: 305695605
+Test: atest NotificationManagerServiceTest ParcelTest CloseSystemDialogsTest + manually
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:2c4fbd5c03b63371c89f132294c3c7059ffa40df)
+Merged-In: I232e9b74eece745560ed2e762071b48984b3f176
+Change-Id: I232e9b74eece745560ed2e762071b48984b3f176
+"
+@endcode
+
+### Framework03 CVE-2024-49746	A-359179312 
+@code
+android-12.0.0_r1/platform/frameworks/native/0001-binder-fix-FD-handling-in-continueWrite.bulletin.patch
+patch -p1 < 0001-binder-fix-FD-handling-in-continueWrite.bulletin.patch
+git add libs/binder/IPCThreadState.cpp
+git add libs/binder/Parcel.cpp
+git add libs/binder/include/binder/Parcel.h
+git add libs/binder/tests/Android.bp
+git add libs/binder/tests/binderLibTest.cpp
+
+git commit -m "CVE-2024-49746
+From 4efacbedf501c6e2eb23fc57c3a4ca54a770d20c Mon Sep 17 00:00:00 2001
+From: Frederick Mayle <fmayle@google.com>
+Date: Mon, 14 Oct 2024 17:12:30 -0700
+Subject: [PATCH] binder: fix FD handling in continueWrite
+
+Only close FDs within the truncated part of the parcel.
+
+This change also fixes a bug where a parcel truncated into the middle of
+an object would not properly free that object. That could have resulted
+in an OOB access in `Parcel::truncateRpcObjects`, so more bounds
+checking is added.
+
+The new tests show how to reproduce the bug by appending to or partially
+truncating Parcels owned by the kernel. Two cases are disabled because
+of a bug in the Parcel fdsan code (b/370824489).
+
+Cherry-pick notes: Add truncateFileDescriptors method instead of
+modifying closeFileDescriptors to avoid API change errors. Large diffs
+in this branch because it didn't have the disruptive RPC FD support,
+main diff is that the closeFileDescriptors call is move out of the
+mOwner implementation. Tweaked the test to support older C++ and
+android-base libs.
+
+Flag: EXEMPT bugfix
+Ignore-AOSP-First: security fix
+Bug: 239222407, 359179312
+Test: atest binderLibTest
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:528cde0d71f6a49cd7b970d3436da472f3a02ce2)
+Merged-In: Iadf7e2e98e3eb97c56ec2fed2b49d1e6492af9a3
+Change-Id: Iadf7e2e98e3eb97c56ec2fed2b49d1e6492af9a3
+"
+@endcode
+
+### Framework04 CVE-2023-40122	A-286235483 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+android-12.0.0_r1/platform/frameworks/base/0002--RESTRICT-AUTOMERGE-Check-permission-of-Autofill-icon-URIs.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0002--RESTRICT-AUTOMERGE-Check-permission-of-Autofill-icon-URIs.bulletin.patch
+fail
+
+@endcode
+
+### Framework05 CVE-2023-40133	A-283264674 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+
+fail
+@endcode
+
+### Framework06 CVE-2023-40134	A-283101289 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+fail
+@endcode
+
+### Framework07 CVE-2023-40135	A-281848557 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+fail
+@endcode
+
+### Framework08 CVE-2023-40136	A-281666022 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+fail
+@endcode
+
+### Framework09 CVE-2023-40137	A-281665050 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+fail
+@endcode
+
+### Framework10 CVE-2023-40138	A-281534749 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+fail
+@endcode
+
+### Framework11 CVE-2023-40139	A-281533566 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+fail
+@endcode
+
+### Framework12 CVE-2024-0037	A-292104015 - Fail
+@code
+android-12.0.0_r1/platform/frameworks/base/0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+android-12.0.0_r1/platform/frameworks/base/0002--RESTRICT-AUTOMERGE-Check-permission-of-Autofill-icon-URIs.bulletin.patch
+patch -p1 < 0001--DO-NOT-MERGE-Verify-URI-Permissions-in-Autofill-RemoteViews.bulletin.patch
+patch -p1 < 0002--RESTRICT-AUTOMERGE-Check-permission-of-Autofill-icon-URIs.bulletin.patch
+fail
+@endcode
+
+### Framework13 CVE-2025-0100	A-372670004	
+@code
+android-12.0.0_r1/platform/frameworks/base/0006-RESTRICT-AUTOMERGE-Use-getLaunchedFromPackage-instead-of-getCall.bulletin.patch
+patch -p1 < 0006-RESTRICT-AUTOMERGE-Use-getLaunchedFromPackage-instead-of-getCall.bulletin.patch
+git add packages/SystemUI/src/com/android/systemui/media/MediaProjectionPermissionActivity.java
+git commit -m "CVE-2024-0100
+From 462715e408cbd64ed67930f472b487e52eb7fd5a Mon Sep 17 00:00:00 2001
+From: Marvin Ramin <marvinramin@google.com>
+Date: Wed, 16 Oct 2024 12:26:02 +0200
+Subject: [PATCH] RESTRICT AUTOMERGE Use getLaunchedFromPackage instead of
+ getCallingPackage
+
+Ensure that MediaProjectionPermissionActivity is doing proper
+attribution and validation of permissions before showing.
+
+Bug: 373581993
+Test: presubmit
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:7ea5bb592ed70fe57414f9bfc471bfbb6cc8735c)
+Merged-In: Ibcc14090ce38a0fac21a394d861d044b9669a8a0
+Change-Id: Ibcc14090ce38a0fac21a394d861d044b9669a8a0
+"
+@endcode
+
+### Framework14 CVE-2024-49741	A-353240784	
+@code
+android-12.0.0_r1/platform/frameworks/base/0003-Enforce-hard-limits-on-hosts-per-package-and-widgets-per-host-.bulletin.patch
+patch -p1 < 0003-Enforce-hard-limits-on-hosts-per-package-and-widgets-per-host-.bulletin.patch
+git add services/appwidget/java/com/android/server/appwidget/AppWidgetServiceImpl.java
+git commit -m "CVE-2024-49741
+From 9096b0c775729d9e2e219fe66a9059ca3d723b68 Mon Sep 17 00:00:00 2001
+From: Pinyao Ting <pinyaoting@google.com>
+Date: Tue, 20 Aug 2024 21:17:13 +0000
+Subject: [PATCH] Enforce hard limits on hosts per package and widgets per
+ host.
+
+Bug: 353240784
+Test: manually verified with PoC app that at most 20 hosts can exists
+Flag: EXEMPT CVE
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:7a7e930875aba78e99b2da922317760a2401a788)
+Merged-In: I60ee7faf57ed719f93cafad212fef24964dec99f
+Change-Id: I60ee7faf57ed719f93cafad212fef24964dec99f
+"
+@endcode
+
+
+## 2) Platform
+> https://source.android.com/docs/security/bulletin/2025-02-01?hl=ko#Platform
+
+@code
+업데이트된 AOSP 버전 12 적용
+CVE					참조		유형	심각도	업데이트된 AOSP 버전
+1.CVE-2025-0094	A-352542820	EoP	높음	12, 12L, 13, 14, 15
+@endcode
+
+### Platform1 CVE-2025-0094	A-352542820	
+@code
+android-12.0.0_r1/platform/packages/apps/Settings/0002-Don-t-let-profiles-open-the-UserSettings-overflow-DO-NOT-MERGE-.bulletin.patch
+patch -p1 < 0002-Don-t-let-profiles-open-the-UserSettings-overflow-DO-NOT-MERGE-.bulletin.patch
+git add src/com/android/settings/users/UserSettings.java
+git commit -m "CVE-2025-0094
+From cf477dc3b554b0f126bd55c12fd0f98a7a6006be Mon Sep 17 00:00:00 2001
+From: Adam Bookatz <bookatz@google.com>
+Date: Mon, 18 Nov 2024 15:53:41 -0800
+Subject: [PATCH] Don't let profiles open the UserSettings overflow [DO NOT
+ MERGE]
+
+Really, profiles aren't expected to open Settings at all. But if they
+do somehow, the overflow shouldn't appear.
+
+Bug: 352542820
+Flag: EXEMPT bugfix
+Test: Try to access the overflow of the work profile by launching its Settings in
+adb shell am start --user 10 'com.android.settings/.Settings\$UserSettingsActivity'
+
+(cherry picked from commit 69c7f5dac580361792bbb189178653b297d06c8a)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:d7085270f6b52864b80dd4590fefd245eaae48bd)
+Merged-In: I5e4c095cda3e19fa5c63c2c550a526f5da8ec5c1
+Change-Id: I5e4c095cda3e19fa5c63c2c550a526f5da8ec5c1
+"
+@endcode
+
+
+## 3) System
+> https://source.android.com/docs/security/bulletin/2025-02-01?hl=ko#System
+
+@code
+업데이트된 AOSP 버전 12 적용
+CVE					참조		유형	심각도	업데이트된 AOSP 버전
+1. CVE-2025-0091	A-366401629	EoP	높음	12, 12L, 13, 14, 15
+2. CVE-2024-49729	A-368069390	ID	높음	12, 12L, 13, 14, 15
+@endcode
+
+### System1 CVE-2025-0091	A-366401629	
+@code
+android-12.0.0_r1/platform/packages/apps/Settings/0001-Block-the-content-scheme-intent-in-AccountTypePreferenceLoader.bulletin.patch
+patch -p1 < 0001-Block-the-content-scheme-intent-in-AccountTypePreferenceLoader.bulletin.patch
+git add src/com/android/settings/accounts/AccountTypePreferenceLoader.java
+git add tests/robotests/src/com/android/settings/accounts/AccountTypePreferenceLoaderTest.java
+
+git commit -m "CVE-2025-0091
+From a4374078fc3e1c41d60606c6bc439f4d39ddafe9 Mon Sep 17 00:00:00 2001
+From: Jason Chiu <chiujason@google.com>
+Date: Thu, 7 Nov 2024 15:33:53 +0800
+Subject: [PATCH] Block the content scheme intent in
+ AccountTypePreferenceLoader
+
+Also prevent intent defined in AccountPreference from leaking access
+
+Bug: 366401629
+Flag: EXEMPT security fix
+Test: atest AccountTypePreferenceLoaderTest, manual
+(cherry picked from commit 841fb3846b25dee4ae5924fd798cd48709c69801)
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:920691fad74f98cc050eed32fda9286f8acba31e)
+Merged-In: Ica87087341cc983df04190919e33dc369fa18619
+Change-Id: Ica87087341cc983df04190919e33dc369fa18619
+"
+@endcode
+
+### System2 CVE-2024-49729	A-368069390	
+@code
+android-12.0.0_r1/platform/system/core/0001-libdm-Redact-keys-from-dm-crypt-targets-when-calling-GetTable-.bulletin.patch
+patch -p1 < 0001-libdm-Redact-keys-from-dm-crypt-targets-when-calling-GetTable-.bulletin.patch
+git add fs_mgr/libdm/dm.cpp
+git add fs_mgr/libdm/dm_test.cpp
+
+git commit -m "CVE-2024-49729
+From 15ec09e037121736fb69e5df49c588ed32e5026c Mon Sep 17 00:00:00 2001
+From: David Anderson <dvander@google.com>
+Date: Tue, 1 Oct 2024 11:01:08 -0700
+Subject: [PATCH] libdm: Redact keys from dm-crypt targets when calling
+ GetTable.
+
+Ignore-AOSP-First: security fix
+Bug: 368069390
+Test: libdm_test
+(cherry picked from https://googleplex-android-review.googlesource.com/q/commit:cf4286fbba25048ed76b59f79d0bd3ecf28a9e1c)
+Merged-In: I40b9a0129e58b1a0f116ca29f0ee66f91a27a73d
+Change-Id: I40b9a0129e58b1a0f116ca29f0ee66f91a27a73d
+"
+@endcode
+
+## 4) PLATFORM_SECURITY_PATCH
+
+@code
+
+vi build/make/core/version_defaults.mk
+PLATFORM_SECURITY_PATCH := 2025-02-01
+git add build/make/core/version_defaults.mk
+git commit -m "PLATFORM_SECURITY_PATCH := 2025-02-01"
+
+@endcode
+
+*/

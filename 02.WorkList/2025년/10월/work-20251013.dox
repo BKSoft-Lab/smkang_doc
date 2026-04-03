@@ -1,0 +1,123 @@
+/*!
+@page work_20251013	2025.10.13
+
+---
+
+# LGHV 2024112200 userdebug 갱이미지 생성
+> 이미지 생성
+> https://confluence.kaonmedia.com/pages/viewpage.action?pageId=115420709
+
+@code
+1. \\10.1.1.61\양산이미지 공유\LGHV\create_gang_image 폴더 pc로 복사
+2. bootloader\Factory_1.60-ATV12 퐇더내 파일 모두 input 폴더에 복사
+3. default 의 폴더 내용울 Input 폴더에 복사
+4. 아래의 파일들은 raw 파일로 변환하여 Input 폴더에 복사 (\\10.1.1.61\가온공유\CM프로젝트\LGHV-K1100UA\생산이미지\2024.11.22-21-CM-v2.0.6\userdebug\imgs\seamless)
+  1) cache.img → cache.raw
+  2) super.ab.img → super.ab.raw
+  3) userdata.img → userdata.raw
+     raw 이미지로의 변경은 빌드서버에서 아래와 같이 변경 가능
+     ../../LGHV/kaon_bcm_androidtv12/out/host/linux-x86/bin/simg2img cache.img cache.raw
+     ../../LGHV/kaon_bcm_androidtv12/out/host/linux-x86/bin/simg2img super.ab.img super.ab.raw
+     ../../LGHV/kaon_bcm_androidtv12/out/host/linux-x86/bin/simg2img userdata.img userdata.raw
+5. 아래의 파일들은 img 파일 그대로 Input 폴더에 복사
+   1) boot.img
+   2) dtbo.K1100UA.img
+   3) vbmeta.img
+
+6. 윈도우 command 창에서 make_emmc.bat 실행
+
+
+PS D:\create_gang_image>
+PS D:\create_gang_image> Get-FileHash "EMMC_2025-10-13_17-03-15.bin" -Algorithm SHA256
+
+Algorithm       Hash                                                                   Path
+---------       ----                                                                   ----
+SHA256          A4311CCC3397EA6167EECE6517D19A6940C16F65BAA0EC0611405F139A37CD8E       D:\create_gang_image\EMMC_2025-10-13_17-03-15.bin 
+ 
+@endcode
+> 이미지 검증 : Input 폴더에 있는 img 파일들을 이용하여 각 파티션에 flash 하여 gang image 확인
+
+@code
+1. 부팅 확인한 시료 준비
+2. OQC S/W를 USB에 복사
+3. USB를 시료에 장착 후 전원 인가
+4. quit 입력하여 OQC S/W 종료
+5. USB 제거 준비
+   umount /mnt/usb
+6. USB 제거
+7. output 폴더내 하기 파일들을 ext4 F/S로 포맷된 USB에 복사 (userdata.bin 용량 문제로 FAT32 사용 불가)
+    cache.bin
+    super.bin
+    boot_a.bin
+    boot_b.bin
+    dtbo_a.bin
+    dtbo_b.bin
+    vbmeta_a.bin
+    vbmeta_b.bin
+    userdata.bin
+    misc.bin
+    metadata.bin
+8. USB 장착 및 사용
+    mkdir -p /mnt/ext4
+    mount -t ext4 /dev/sdb1 /mnt/ext4/
+9. 복사한 파일들을 eMMC에 flash
+    1) MAIN F/W
+        file=/mnt/ext4/dtbo_a.bin
+        dd if=${file} of=/dev/mmcblk0p26 bs=512 # PARTNAME=dtbo_a
+        file=/mnt/ext4/dtbo_b.bin
+        dd if=${file} of=/dev/mmcblk0p27 bs=512 # PARTNAME=dtbo_b
+        file=/mnt/ext4/boot_a.bin
+        dd if=${file} of=/dev/mmcblk0p28 bs=512 # PARTNAME=boot_a
+        file=/mnt/ext4/boot_b.bin
+        dd if=${file} of=/dev/mmcblk0p29 bs=512 # PARTNAME=boot_b
+        file=/mnt/ext4/super.bin
+        dd if=${file} of=/dev/mmcblk0p30 bs=512 # PARTNAME=super
+        file=/mnt/ext4/vbmeta_a.bin
+        dd if=${file} of=/dev/mmcblk0p32 bs=512 # PARTNAME=vbmeta_a
+        file=/mnt/ext4/vbmeta_b.bin
+        dd if=${file} of=/dev/mmcblk0p33 bs=512 # PARTNAME=vbmeta_b
+        sync
+    2) DATA, CACHE
+        file=/mnt/ext4/cache.bin
+        dd if=${file} of=/dev/mmcblk0p25 bs=512 # PARTNAME=cache
+        file=/mnt/ext4/userdata.bin
+        dd if=${file} of=/dev/mmcblk0p34 bs=512 # PARTNAME=userdata
+        sync
+    3) NEED TO CLEAR
+        file=/mnt/ext4/misc.bin
+        dd if=${file} of=/dev/mmcblk0p24 bs=512 # PARTNAME=misc
+        file=/mnt/ext4/metadata.bin
+        dd if=${file} of=/dev/mmcblk0p23 bs=512 # PARTNAME=metadata
+        sync
+
+
+mkdir -p /mnt/ext4
+mount -t ext4 /dev/sdb1 /mnt/ext4/
+file=/mnt/ext4/dtbo_a.bin
+dd if=${file} of=/dev/mmcblk0p26 bs=512
+file=/mnt/ext4/dtbo_b.bin
+dd if=${file} of=/dev/mmcblk0p27 bs=512
+file=/mnt/ext4/boot_a.bin
+dd if=${file} of=/dev/mmcblk0p28 bs=512
+file=/mnt/ext4/boot_b.bin
+dd if=${file} of=/dev/mmcblk0p29 bs=512
+file=/mnt/ext4/super.bin
+dd if=${file} of=/dev/mmcblk0p30 bs=512
+file=/mnt/ext4/vbmeta_a.bin
+dd if=${file} of=/dev/mmcblk0p32 bs=512
+file=/mnt/ext4/vbmeta_b.bin
+dd if=${file} of=/dev/mmcblk0p33 bs=512
+sync
+file=/mnt/ext4/cache.bin
+dd if=${file} of=/dev/mmcblk0p25 bs=512
+file=/mnt/ext4/userdata.bin
+dd if=${file} of=/dev/mmcblk0p34 bs=512
+sync
+file=/mnt/ext4/misc.bin
+dd if=${file} of=/dev/mmcblk0p24 bs=512
+file=/mnt/ext4/metadata.bin
+dd if=${file} of=/dev/mmcblk0p23 bs=512
+sync
+@endcode
+
+*/

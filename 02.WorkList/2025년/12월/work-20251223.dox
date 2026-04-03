@@ -1,0 +1,144 @@
+/*!
+@page work_20251223	2025.12.23
+
+---
+
+# 4M 작업 - 30대 eMMC (Hynix)
+
+# LGHV K1100UA HQA 용 펌웨어 제작 - eMMC (Hynix) 문서 일부참고
+> https://confluence.kaonmedia.com/pages/viewpage.action?pageId=177932161
+
+@code
+보드 35대, 기구체결 2대
+HQA 2대
+
+1.
+pc에 bbs4_bcm97216_4.0.0.8.zip 설치
+BBS 전용 케이블 (4PIN) 을 연결
+BBS4 프로그램 실행
+프로그램을 실행 시키고 STB 전원 On을 하게 되면 Bcm97216 chipset 이 connected 되었다고 표시
+Bcm97216 을 더블 클릭하면
+새로운 창이 생김 → Flash Explorer 클릭
+Hynix eMMC로 설정되어 있는지 확인
+Browse 클릭하여 Factory 용 부트로더를 선택
+k1100ua_factory_bootloader.bin
+Start 버튼을 클리하여 부트로드 다운로드 시작
+다운로드가 완료되면
+Serial Cable 연결 → STB Power Off → ON 해서 
+Bolt 로 부팅되어 있는지 확인
+
+2. 
+Factory_1.60-ATV12.zip
+- alt.bolt-zb.bin
+- android_bsu.elf
+- gpt.bin
+- K1100UA_BCA.BIN
+- smon64.bin
+- splash.bin
+- splash_header.bin
+
+
+!!flash usbdisk0:gpt.bin flash0
+!!reboot
+
+Bolt 재진입
+
+-------------------------------------------------------
+flash usbdisk0:android_bsu.elf flash0.BSU1
+flash usbdisk0:android_bsu.elf flash0.BSU2
+flash usbdisk0:smon64.bin flash0.ams
+flash usbdisk0:splash.bin flash0.splash
+flash usbdisk0:splash_header.bin flash0.splash_header
+
+show devices
+
+맥어드레스 기록
+macprog 94-3B-B1-AB-DE-01
+
+3. 
+K1100UA_FctSW_v2.6_20250627.zip
+- K1100UA_FctSW_v2.6_20250627 USB 장착 후 전원 인가
+- quit 입력하여 S/W 종료
+-  USB 제거 준비
+   umount /mnt/usb
+- USB 제거
+
+- 갱이미지 USB 장착 및 사용
+mkdir -p /mnt/ext4
+mount -t ext4 /dev/sdb1 /mnt/ext4/
+
+- 복사한 파일들을 eMMC에 flash 
+file=/mnt/ext4/dtbo_a.bin
+dd if=${file} of=/dev/mmcblk0p26 bs=4M
+file=/mnt/ext4/dtbo_b.bin
+dd if=${file} of=/dev/mmcblk0p27 bs=4M
+file=/mnt/ext4/boot_a.bin
+dd if=${file} of=/dev/mmcblk0p28 bs=4M
+file=/mnt/ext4/boot_b.bin
+dd if=${file} of=/dev/mmcblk0p29 bs=4M
+file=/mnt/ext4/super.bin
+dd if=${file} of=/dev/mmcblk0p30 bs=4M
+file=/mnt/ext4/vbmeta_a.bin
+dd if=${file} of=/dev/mmcblk0p32 bs=4M
+file=/mnt/ext4/vbmeta_b.bin
+dd if=${file} of=/dev/mmcblk0p33 bs=4M
+file=/mnt/ext4/cache.bin
+dd if=${file} of=/dev/mmcblk0p25 bs=4M
+file=/mnt/ext4/userdata.bin
+dd if=${file} of=/dev/mmcblk0p34 bs=4M
+file=/mnt/ext4/misc.bin
+dd if=${file} of=/dev/mmcblk0p24 bs=4M
+file=/mnt/ext4/metadata.bin
+dd if=${file} of=/dev/mmcblk0p23 bs=4M
+sync
+
+4.
+BP3_OEM_Provisioning.zip 압축푼 USB 연결 후 재부팅
+bp3 작업 수행 (bp3 노트북 이용)
+
+5. 
+pc는 준비된 ap에 연결 가온 vpn 에 접속하여 사내망 DB에 접속가능 상태설정
+KaonManager / KaonFactoryClientTool 설치
+  PC
+    KaonFactoryClientTool.exe 실행
+    STB Model : LG_HelloVison_K1100UA
+    start 버튼 실생
+  STB
+    - K1100UA_FctSW_v2.6_20250627 USB 장착 후 전원 인가
+      (PCB Number input 창에 STB의 pcb라밸 2번 입력 (13자 + A12) (K06445BM10044 + A12 > K06445BM10044A12))
+      팩토리툴 step 1 완료 후 재부팅 
+      팩토리툴 step 2 완료
+
+
+정보 
+
+시료 직업내용
+===================
+K06445BM10044 - BBS/BP3/SecureLock
+K06445BM10043 - BBS/BP3/SecureLock
+K06445BM10028 - BBS/BP3/SecureLock
+K06445BM10027 - BBS/BP3/SecureLock
+K06445BM10046 - BBS/BP3
+K06445BM10031 - BBS
+
+Rpmb 키 write 하는법
+rpmb program-key flash3
+ 
+rpmb 확인하는법 명령어 입력시 에러없으면 키 write 상태임.
+rpmb counter flash3
+
+
+팩토리툴 eMMC Fail발생시 처리
+[Tue Dec 23 15:11:00.249 2025] DINO_Main_P_InitWindow() : DINO_eMainEmmc
+[Tue Dec 23 15:11:00.857 2025] [ERR:857]DINO_Emmc_P_CheckImage() : Image 2 Verify Error!!! config: '0C83FE18' readed: '00000000'
+[Tue Dec 23 15:11:00.864 2025] [ERR:958]DINO_Emmc_P_Test() : DINO_Emmc_Image_Check(2) Error!!!
+[Tue Dec 23 15:11:00.864 2025] [ERR:192]DINO_Emmc_P_Task() : EMMC Error!!
+
+dino_config.ini
+EMMC_CHECK_IMAGE2_VALUE=0C83FE18	# splash_header  offset=0x0
+> 수정
+EMMC_CHECK_IMAGE2_VALUE=00000000	# splash_header  offset=0x0
+
+@endcode
+
+*/

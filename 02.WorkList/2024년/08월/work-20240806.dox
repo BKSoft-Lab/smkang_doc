@@ -1,0 +1,57 @@
+/*!
+@page work_20240806	2024.08.06
+
+# SKB 수원 
+---
+## [필드품질]구글 어시스턴트 검색시 VOD 포스터 노출이 안되는 증상
+
+@code
+
+- bkouc500-ota-kaon2024071509-TS-BT-TvCore_1.1.17
+> 포스터 디폴드 이미지 출력
+> 최신 EPG 설치 시 동일
+- bkouc500-ota-kaon2024072501-TS-BT-TvCore_3.2.1.0002 (현재 버전)
+> 포스터 디폴드 이미지 출력
+
+@ 로그분석 결과 
+Android 9(Pie) 및 그 이후 버전에서 기본적으로 HTTP 연결이 허용되지 않기 때문에 발생합니다. Android는 보안상의 이유로 HTTPS(암호화된 텍스트) 연결만 허용하도록 설정되었습니다.
+1. 보안패치로 인해 katniss_search_ImageInMemoryGraph에서 HTTP로 파일을 접근하지 못함
+2. PFD pipe가 전달되지 못해 EOF에러 발생	: System.err: java.io.EOFException 발생
+3. 이미지 디코터 생성 실패 				: skia    : --- Failed to create image decoder with message 'unimplemented'
+4. 이미지 로딩 실패 						: Glide   : Load failed
+
+08-01 10:32:34.778  3041  3226 E katniss_search_ImageInMemoryGraph: PFD pipe transfer failed
+08-01 10:32:34.778  3041  3226 E katniss_search_ImageInMemoryGraph: hkt: Error code: 660029 | Exception in CronetUrlRequest: net::ERR_CLEARTEXT_NOT_PERMITTED, ErrorCode=11, InternalErrorCode=-29, Retryable=false
+
+08-01 10:32:34.814  3041  5447 W System.err: java.io.EOFException
+08-01 10:32:34.814  3041  5447 W System.err: 	at java.io.DataInputStream.readFully(DataInputStream.java:200)
+08-01 10:32:34.814  3041  5447 W System.err: 	at java.io.DataInputStream.readInt(DataInputStream.java:389)
+
+08-01 10:32:34.815  3041  5447 D skia    : ---- read threw an exception
+08-01 10:32:34.815  3041  5447 D skia    : --- Failed to create image decoder with message 'unimplemented'
+
+08-01 10:32:34.821  3041  3041 W Glide   : Load failed for [http://192.168.250.105:8880/images/api1/pictures/5ad6ec7ed18e361b6c35b77a] with dimensions [-2147483648x-2147483648]
+08-01 10:32:34.821  3041  3041 W Glide   : class dam: Failed to load resource
+
+08-01 10:32:34.778  3041  3226 E katniss_search_ImageInMemoryGraph: PFD pipe transfer failed
+08-01 10:32:34.778  3041  3226 E katniss_search_ImageInMemoryGraph: hkt: Error code: 660029 | Exception in CronetUrlRequest: net::ERR_CLEARTEXT_NOT_PERMITTED, ErrorCode=11, InternalErrorCode=-29, Retryable=false
+
+@endcode		
+---
+
+## Tombstone 다수 발생 로그 분석 요청
+https://jira.kaonmedia.com/browse/K1023-182
+
+[패치파일](../data/sage_tl_patch.zip)
+@code
+
+신호감쇠기 연결 에이징 (16+9+15) - 3vsb 영생재생, QAM 신호미약 팝업 상태, 이너셋 연결 끝김, CM status 3에서 유지
+
+@endcode
+---
+
+<br>
+---
+
+
+*/

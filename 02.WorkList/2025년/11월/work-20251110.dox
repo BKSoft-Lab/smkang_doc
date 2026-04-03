@@ -1,0 +1,99 @@
+/*!
+@page work_20251110	2025.11.10
+
+---
+
+# K1200UA eMMC HQA, 4M 작업 - 50대
+
+> https://jira.kaonmedia.com/browse/K1078-506
+
+> https://confluence.kaonmedia.com/x/ASUaCQ
+
+@code
+
+K10785BM10001A12
+K10785BM10002A12
+
+Aml_Burn_Tool usb - STB usb 연결
+깡통일경우 바로 연결 아니면 다운로드 모드로 변경
+**전원인가시 전원버튼을 누르고 있다가 LED3번 점멸 후 떼고 전원버튼7회 download mode
+
+Setting > check img 해제하고
+Setting > load img 선택
+start 클릭
+
+
+
+FactorySW 최종 버전 : 1.1.5_20241212
+    LGHV_K1200UA_FactorySW_1.1.5_20241212.zip
+
+
+Sample STB 작업 시 주의사항
+sc2_dgpk1_efuse_pattern.bin.efuse.sample
+
+연구소에서 Sample STB 제작 및 MPQA 의뢰시 첨부된 sc2_dgpk1_efuse_pattenr.bin.efuse.sample 파일로 교체하여 사용해야 STB 정상 부팅이 됨
+sc2_dgpk1_efuse_pattenr.bin.efuse.sample → sc2_dgpk1_efuse_pattenr.bin.efuse 
+파일 이름 변경하여 사용
+LGHV_K1200UA_FactorySW_1.1.5_20241212.zip 압축 파일에 있는 sc2_dgpk1_efuse_pattenr.bin.efuse 파일은 다른 이름으로 변경 또는 다른 폴더로 백업하여 사용
+
+FactorySW 진행시 필요한 PC 프로그램
+KaonManagerSetup.exe
+
+ID / Password
+admin/admin
+Server IP : 10.1.1.51
+
+USB의 settings.xml 수정 - 테스트 스킵
+        <av>false</av>
+        <key>false</key>
+        <lanport>false</lanport>
+       
+
+PC ↔ STB 네트워크 환경 구성
+STB IP Address 는 192.168.11.123으로 고정하여 사용
+
+PC의 네트워크 구성은 가온 내부망을 연결하여야 가온 DB와 연결 가능
+
+KaonFactoryClientToolSetup.exe
+
+
+1. STB 
+    FactorySW USB 연결 후 부팅 
+2. PC
+    KaonFactoryClientTool.exe 실행
+3. PC 
+    STB Model : LG_HelloeVison_K1200UA
+    start 버튼 실생
+4. STB
+    PC 시리얼라이징 준비가 되면 리모컨 빨간색 누름
+    (중간에 실패되는 항목이 있으면 #키눌러 재시도)
+5. PC
+    PCB Number input 창에 STB의 pcb라밸 2번 입력 (13자 + A12) (K10785BM10001 + A12 > K10785BM10001A12)
+완료    
+
+
+포멧은 factorytool에서 실행하므로 
+XCAS3 를 ext4로 포맷
+mkfs.ext4 /dev/block/mmcblk0p32
+ 
+LGHV_data 를 ext4로 포맷 :
+mkfs.ext4 /dev/block/mmcblk0p34
+ 
+LGHV_conf 를 ext4로 포맷
+mkfs.ext4 /dev/block/mmcblk0p35
+
+@endcode
+
+
+
+# LGHV K1100UA HQA 용 펌웨어 제작 방법
+
+> https://confluence.kaonmedia.com/pages/viewpage.action?pageId=177932161
+
+@code
+
+
+
+@endcode
+
+*/

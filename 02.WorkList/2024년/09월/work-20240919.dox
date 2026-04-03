@@ -1,0 +1,172 @@
+/*!
+@page work_20240919	2024.09.19
+
+# SKB수원
+---
+
+> Test 
+
+@code
+@echo off
+setlocal enabledelayedexpansion
+
+:: 로그 파일 번호 초기화
+set "fileIndex=1"
+
+:: 파일 이름의 기본 형태
+set "baseLogFileName=log"
+
+:start
+:: 디바이스 연결 대기
+adb wait-for-device
+
+:: 새로운 파일 이름 설정
+set "logFile=%baseLogFileName%%fileIndex%.txt"
+
+:: 새로운 로그 파일 생성
+echo Logging to %logFile%
+adb logcat | findstr echo | tee "%logFile%"
+
+:: 로그 수집이 종료된 후, 파일 인덱스 증가
+set /a fileIndex+=1
+
+:: 잠시 대기 후 반복
+timeout /t 10 /nobreak >nul
+goto start
+
+@endcode
+
+
+> Test 
+
+@code
+ip neigh | grep 'eth0 ' | grep -E 'STALE|REACHABLE'
+logcat | grep networkmonitor
+getprop | grep net.
+setprop net.gateway 10.100.4.100
+ping 10.100.4.100
+logcat | grep echo
+logcat | egrep "echo|smkang|NetworkMonitor"
+logcat | egrep "echo|NetworkMonitor"
+@endcode
+
+logcat | egrep "echo|smkang|NetworkMonitor|SMKANG_DEBUG" &
+
+
+logcat | egrep "SMKANG_DEBUG"
+>  dsgcc service에서 fatal signal 11
+> /vendor/bin/dsgcc (BcmDsgClient::ProcessTunnelPacket(BcmEthernetPacket&)+8) (BuildId: 349a8379a019f9de0b216a39bd281fe2)
+ 
+X:\SKB\kaon_bcm_androidtv12\vendor\broadcom\refsw\BSEAV\cable\docsis\estb\StbHostApps\DsgCC\DsgCC\DsgClientManager.cpp
+void BcmDsgClientManager::ForwardToClient( uint32 tunnelId, uint8* pBuffer, uint16 length, BcmEthernetPacket &tunnelPacket, bool applyClassifierRules  )
+
+X:\SKB\kaon_bcm_androidtv12\vendor\broadcom\refsw\BSEAV\cable\docsis\estb\StbHostApps\DsgCC\DsgCC\ClientInterface\DsgClient.cpp
+int BcmDsgClient::ProcessTunnelPacket(BcmEthernetPacket &ethernetPacket) 
+
+
+> plapi 에서 fatal 11 발생
+> /vendor/bin/hw/kaon.hardware.plapi@1.0-service (registerdsgclient+8) (BuildId: 88c6684477ef95505c307e164841a4ae)
+
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\service\oob\CTunnel.cpp
+int CTunnel::Start()
+
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\service\estb\StbHostApps\DsgCC\DsgCC\ClientInterface\RpcInterface\DsgClient\dsgccClientRegistration_rpcClient.c
+int registerdsgclient(struct dsgClientRegInfo *argp)
+
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\service\estb\StbHostApps\DsgCC\DsgCC\ClientInterface\RpcInterface\DsgClient\dsgccClientRegistration_rpcClient_Stub.c
+int registerdsgclient_1(struct dsgClientRegInfo *argp, CLIENT *clnt)
+
+console:/ $ logcat -g
+main: ring buffer is 256 KiB (236 KiB consumed, 895 KiB readable), max entry is 5120 B, max payload is 4068 B
+system: ring buffer is 256 KiB (154 KiB consumed, 542 KiB readable), max entry is 5120 B, max payload is 4068 B
+crash: ring buffer is 256 KiB (64 KiB consumed, 201 B readable), max entry is 5120 B, max payload is 4068 B
+kernel: ring buffer is 256 KiB (100 KiB consumed, 154 KiB readable), max entry is 5120 B, max payload is 4068 B
+
+logcat -G 1M
+
+logcat  | grep  registerdsgclient
+logcat  | egrep "SMKANG_DEBUG|echo"
+
+logcat  | egrep "Rebooting|registerdsgclient"
+logcat  | egrep "SMKANG_DEBUG Error:"
+su
+setprop net.gateway 10.100.4.10
+
+
+console:/ $ logcat -g
+main: ring buffer is 1 MiB (782 KiB consumed, 3 MiB readable), max entry is 5120 B, max payload is 4068 B
+system: ring buffer is 1 MiB (342 KiB consumed, 616 KiB readable), max entry is 5120 B, max payload is 4068 B
+crash: ring buffer is 1 MiB (256 KiB consumed, 201 B readable), max entry is 5120 B, max payload is 4068 B
+kernel: ring buffer is 1 MiB (100 KiB consumed, 159 KiB readable), max entry is 5120 B, max payload is 4068 B
+
+su
+setprop persist.logd.size 1M
+console:/ # ^C
+130|console:/ # getprop persist.logd.size
+1M
+
+su
+
+
+setprop persist.logd.size.main 512K
+
+su
+setprop persist.logd.size.main 1M
+
+su
+setprop persist.logd.size ""
+setprop persist.logd.size.main 1M
+
+
+
+skb 채널 db 파일 위치 : /mnt/vendor/taurus_data/taurusDb/dbService.db
+
+cp /mnt/vendor/taurus_data/taurusDb/dbService.db /mnt/media_rw/749A-0B6D/
+
+Last operational tx chan set UCID / Tx Power:
+      UCID        Tx Pwr
+      ----   -----------
+         1     52.0 dBmV
+         2     51.0 dBmV
+         3     52.0 dBmV
+         4     50.0 dBmV
+
+
+Last operational tx chan set UCID / Tx Power:
+      UCID        Tx Pwr
+      ----   -----------
+         1     52.0 dBmV
+         2     51.0 dBmV
+         3     52.0 dBmV
+         4     50.0 dBmV
+
+
+
+
+18	
+20	
+23	
+26	
+27	
+28	
+
+
+/snmp/snmp_set 1.3.6.1.2.1.69.1.1.3.0 i 1
+
+
+
+X:\SKB\kaon_bcm_androidtv12\vendor\broadcom\refsw\BSEAV\lib\gpu\vc5\driver\libs\khrn\glsl\glsl_backflow_combine.c
+X:\SKB\kaon_bcm_androidtv12\vendor\broadcom\refsw\BSEAV\lib\gpu\vc5\driver\libs\khrn\glsl\glsl_scheduler.c
+
+
+logcat | grep " : wait "
+
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\sepolicy\treble\networkmonitor.te
+allow networkmonitor powerctl_prop:property_service set;
+
+???? allow networkmonitor_t netif_t:netif { setlink up down };
+---
+<br>
+---
+
+*/

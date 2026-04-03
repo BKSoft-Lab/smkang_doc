@@ -1,0 +1,107 @@
+/*!
+@page tip_log Log 관련
+
+# 커널로그 
+@code
+su 
+dmesg -w 
+dmesg -d 8 
+@endcode
+
+# USB 로그추출 
+SKB / HCN
+> USB 투트 디렉토리에 logcapture_altimedia 생성시 
+
+LGHV
+> USB 투트 디렉토리에 logcapture_alticast 생성시 
+
+HCN 
+@code
+- altimedia에서 지원하는 로그 (kaon-plapi 로그 안 나옴.)
+USB 저장장치/logcapture_altimedia 
+
+빈파일로 생 성후 셋탑에 넣고 부팅하면, logcat_일자_시간_000.log  형태로 파일 생성됨.
+- 가온에서 지원하는 로그 (BTS Warring 발생으로 제거 상태 임  나중에 필요하면, app 소스 git 에서 'kaon_logcatpture 기능 추가' 코드 확인 후 적용하면 됨)
+USB 저장장치/kaon_logcapture 빈 파일을 생성 후 셋탑에 넣고 부팅하면, kaon_logcat_일자_시간.log  형태로 파일 생성됨.
+빈 파일이 아닌 아래 예) 처럼 넣고 저장하면  logcat filter 옵션이 적용 된다.
+logcat_filter=-s StorageManagerService:* -s KaonLog:*  
+@endcode
+
+# 브로드컴 드라이버 로그 활성화
+## A (부팅 이후 특정 동작 확인시 로그 봐야 할 때) 
+@code
+userdebug mode, 추가 빌드 필요 하지 않음. serial/shell root 권한. 모듈 별로 로그 설정 함.
+예) qam 관련 로그 추가 시 
+echo "bads_docsis msg" > /proc/brcm/debug 
+echo "nexus_docsis_priv msg" > /proc/brcm/debug 
+echo 'nexus_docsis msg' > /proc/brcm/debug 
+cat /proc/brcm/debug | egrep -i 'docsis' << 여기서 'wrn' 이 'msg'로 바뀐것 확인가능 
+logcat -s nx-klog:*   
+@endcode
+
+## B (부팅 후 바로 나오는 로그 확인 해야 할 때)
+@code
+코드에 삽입, 빌드 해야 함. 
+vendor/broadcom/refsw/nexus/base/src/nexus_base.c 의 NEXUS_Base_SetModuleDebugLevel() 에 아래 코드 추가 후 build 
+예) qam 관련 로그 추가 시 NEXUS_P_Base_SetModuleDebugLevel("bads_docsis,nexus_docsis_priv,nexus_docsis", BDBG_eMsg); 또는 
+BDBG_SetModuleLevel("bads_docsis",BDBG_eMsg); 
+BDBG_SetModuleLevel("nexus_docsis_priv",BDBG_eMsg); 
+BDBG_SetModuleLevel("nexus_docsis",BDBG_eMsg);        >>> 추가하여 컴파일하기 둘 중 하나만 해도 되겠지만 혹시 몰라 두개 다 넣음.
+@endcode
+
+# CM 로그
+@code
+
+Scan 멈추기
+CM> /doc/scan  
+CM> /doc/scan_stop
+
+CM 지원 snmp 정보 확인하기  ( SNMP는 STB와 통신도 하지만,   서버단과도 직접 통신하기도 함.)
+CM> /snmp/snmp_get 1.3.6.1.2.1.1.5.0                    // MODEL 명 얻기
+CM> /snmp/snmp_set 1.3.6.1.4.1.27069.4.1.8.1.1.5.1.1.0 i 1     //  STB Reset  명령 보내기  주의: Alti_snmp 가 실행된 상태에서  명령 해야 함.  부팅 후 100초 이상 있어야 뜸.
+
+CM 고정 IP 설정하기 
+CM> cd ip_hal
+CM/IpHal> ipconfig static -l 1 10.10.10.11 255.255.255.0 10.10.10.1
+                   yes
+
+CM 이 저장하고 있는  자체 정보  ( 모델 명 등 )
+CM> cd /non/snmp
+CM/NonVol/CM SNMP NonVol>  show
+
+
+CM  저장하고 있는 Network TYPE 확인
+CM> cd /non/estb
+CM/NonVol/ESTB NonVol>  show
+
+CM 에 Network TYPE 설정
+CM> cd /non/estb
+CM/NonVol/ESTB NonVol> ecm_mode 2
+CM/NonVol/ESTB NonVol> network_type 2    (2=2way mode / 1=RF Overlay mode)
+CM/NonVol/ESTB NonVol> write
+
+CM 명령어 생각나면 추가하기.
+
+CM 로그중 Network TYPE 식별로그
+DsgEnableDocsis:: TWO MODE
+DsgEnableDocsis:: ONE MODE
+
+CM 이 정상적으로 네트웍 잡으면 나오는 로그
+rMagNotification: Ecm is Operational!
+
+SNMP 통신 로그 보기  ( 재부팅시 초기화 됨)
+CM> cd /snmp
+CM/SNMP>  log req true
+
+기타 설정 로그
+CM> cd /estb
+CM/estb>  rlog 0x0f                >> 로그가 많다면,  rlog 0x00  로 설정
+
+
+CM>cd /estb    
+CM>rlog 0x0f    
+   로그가 많다면.    
+   rlog 0x02   
+@endcode
+
+*/

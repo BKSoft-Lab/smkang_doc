@@ -1,0 +1,340 @@
+/*!
+@page work_20241107	2024.11.07
+
+# SKB수원
+---
+## VOC 안정성에서 발생한 행업 이슈 관련 브로드컴 패치 적용  
+
+> 요청 사항 Mail
+@code
+안녕하세요. 김원균PM입니다.
+
+@강성민매니저님,
+VOC 안정성에서 발생한 행업 이슈 관련 브로드컴 패치 적용 요청 드립니다.
+https://drive.google.com/file/d/1PK0n36or7QY7ZWZOLx5FNravY4WcTrz0/view?usp=sharing
+
+감사합니다.
+김원균드림
+
+From: support@broadcom.com <support@broadcom.com> 
+Sent: Thursday, November 7, 2024 9:58 AM
+To: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>
+Cc: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>; 이상훈[LEE SANGHOON] <lsh@kaongroup.com>; 김경달[Kim Kyungdal] <kendall.kim@kaonbroadband.com>; 한동우[HAN DONG WOO] <tony.han@kaongroup.com>; 김연호[YEON HO KIM] <yhkim@kaongroup.com>
+Subject: {Case#CS00012376257} ##-  Updated: AV Black and STB hangup while aging (audioserver crash "TimeCheck timeout for IAudioPolicyService command 2")
+
+-begin-
+Update By: Jason Lim(Broadcom Corporation)
+Update Time: 06-November-2024 16:58:21
+
+Latest Response: 
+Hello, Kim WonKyun,
+ 
+Please try the 2024-11-07_bcm_platform.zip. 
+There are many changes, so I replaced the audio hal code with the wanted version and applied the previous patch I delivered and your changes. (replace audio hal code => apply previous patches => apply your changes)
+Please check if Kaon changes are applied properly to the audio hal.  (bout_check_passthrough and bout_set_passthrough_prop)
+2024-11-07_bcm_platform.zip
+├── 2024-11-07_audio_hal.patch   <= You can use this file to apply changes
+├── bcm_platform.new   <= You can see what I changed
+├── bcm_platform.org    <= original file
+└── log_audio_hal.txt      <= You can see what commits are applied.
+ 
+Thanks,
+Jason Lim
+
+
+--- ISSUE SUMMARY ---
+Project: Kaon T-broad Android TV
+Product: BCM72160 
+Item: Kernel
+Status: Open-Assigned
+Requester: Kim WonKyun
+Company: Kaon Media 
+Priority: 1 - Critical
+
+Summary:
+AV Black and STB hangup while aging (audioserver crash "TimeCheck timeout for IAudioPolicyService command 2")
+
+Description:  
+(1) Symptom: AV Black and STB hangup while aging with a scenario
+- Aging Scenario : 대기>동작 / 홈메뉴 네비게이션 / PIP홍보채널 진입 /  vod 재생 / 편성표 네비게이션 / 마이 메뉴 네비게이션 / 설정 메뉴 네비게이션 / 오디오 채널 진입 / 검색 실행 / 사방향 실행 / 각종 핫키입력 / 볼륨 업다운
+- Reproduction Rate : 1 time, it happened on Nov. 2nd since aging is started Oct. 28th
+- Log : 경로,  Memory_info.log : 경로
+11-02 02:00:04.498   715 13004 I ActivityManager: Process com.google.process.gservices (pid 13786) early provider death
+11-02 02:00:04.500   715 13004 I ActivityManager: Process com.google.process.gservices (pid 13786) has died: cch+25 CEM 
+11-02 02:00:31.771   715   755 W Looper  : Slow dispatch took 202ms android.ui h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@25891a0 m=0
+11-02 02:00:32.099   715   715 W Looper  : Slow dispatch took 895ms main h=com.android.server.power.Notifier$NotifierHandler c=com.android.server.power.Notifier$1@a3aeb1d m=0
+11-02 02:00:32.475   715   715 W Looper  : Slow dispatch took 280ms main h=com.android.server.power.Notifier$NotifierHandler c=null m=2
+11-02 02:00:32.740   715   715 W Looper  : Slow dispatch took 257ms main h=android.os.Handler c=com.android.server.hdmi.WorkSourceUidPreservingRunnable@c11c4de m=0
+11-02 02:00:32.935   715   715 W Looper  : Slow dispatch took 174ms main h=com.android.server.job.JobSchedulerService$JobHandler c=null m=4
+11-02 02:00:32.940   715   754 W Looper  : Slow dispatch took 154ms android.fg h=com.android.server.DropBoxManagerService$DropBoxManagerBroadcastHandler c=null m=2
+11-02 02:00:33.307   715   756 W ContentProviderHelper: Slow operation: 143ms so far, now at getContentProviderImpl: after updateOomAdj
+11-02 02:00:33.312   715   756 W ContentProviderHelper: Slow operation: 161ms so far, now at getContentProviderImpl: done!
+11-02 02:00:33.445   715   715 W Looper  : Slow dispatch took 501ms main h=com.android.server.WiredAccessoryManager$1 c=null m=1
+11-02 02:00:35.901   715   715 W Looper  : Slow dispatch took 164ms main h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@591d58d m=0
+--------- beginning of crash
+11-02 02:01:06.087 27055 27055 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+11-02 02:01:06.087 27055 27055 F DEBUG   : Build fingerprint: 'SKB_Cable/bkouc500/K1100UA:12/STT5.221215.001/kaon2024102401:userdebug/release-keys'
+11-02 02:01:06.087 27055 27055 F DEBUG   : Revision: '0'
+11-02 02:01:06.088 27055 27055 F DEBUG   : ABI: 'arm'
+11-02 02:01:06.088 27055 27055 F DEBUG   : Timestamp: 2024-11-02 02:00:50.826519002+0900
+11-02 02:01:06.088 27055 27055 F DEBUG   : Process uptime: 0s
+11-02 02:01:06.088 27055 27055 F DEBUG   : Cmdline: /system/bin/audioserver
+11-02 02:01:06.088 27055 27055 F DEBUG   : pid: 463, tid: 971, name: TimeCheckThread  >>> /system/bin/audioserver <<<
+11-02 02:01:06.088 27055 27055 F DEBUG   : uid: 1041
+11-02 02:01:06.088 27055 27055 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+11-02 02:01:06.088 27055 27055 F DEBUG   : Abort message: 'TimeCheck timeout for IAudioPolicyService command 2'
+11-02 02:01:06.090 27055 27055 F DEBUG   : backtrace:
+11-02 02:01:06.090 27055 27055 F DEBUG   :       #00 pc 000388c0  /apex/com.android.runtime/lib/bionic/libc.so (abort+172) (BuildId: 065f5a7b98a8052e1c4af4e537983a0f)
+11-02 02:01:06.090 27055 27055 F DEBUG   :       #01 pc 000048af  /system/lib/liblog.so (__android_log_default_aborter+6) (BuildId: d932dc5208fd658c2fb827cf5ddb398c)
+
+(2) Refered HW/ SW version name: 
+(3) Upgrade 
+BOLT: ?
+kernel/roofs : ?
+toolchain : ?
+Android TV(version & label) : Android 12, AOSP-STT5.221215.001_PDK-STT5.220617.001
+Build Target (e.g. elfin, elfin_nab, elfin_nvi..) : ?
+Android TV 3PIP package (e.g. refsw_release_unified_20180726_3pip_filtered_kaonmedia.tgz, ...): ? 
+(3) Exact steps to reproduce the problem or defect:
+(4) Reproduced issue on Reference platform/SW? 
+(5) Log file attached?
+(6) Chip Full P/N (with CAS information) : 72160ZBKFEBB00B0T + BCM3383MKFEBG + 59400KMLGB0M
+(7) BP3 part : yes
+
+
+INSTRUCTIONS:
+
+To update this case, click on CS00012376257 and update the case.
+To update the case via email, reply to this email keeping the subject field intact. If you have to modify the subject field, please ensure that subject starts with Re: {Case#CS00012376257}##.
+To avoid cluttering the "Notes" field, please delete the original message text before sending your reply.
+Notification: Case update - External Comments notification to External Users Requestor External
+Click here to Unsubscribe from this Case Notification.
+* All dates/time of the email to be considered as Pacific Time Zone/PT.
+-end-
+
+
+@endcode
+
+> 작업내역
+
+- [2024-11-07_bcm_platform.zip](../data/202411/2024-11-07_bcm_platform.zip)
+
+---
+
+기타작업 임시저장
+
+@code
+count=0
+keyevent_count=0
+while true
+do
+    sleep 1
+    count=$((count + 1))
+    echo "count : $count"
+    
+    # 10초마다 input keyevent 26 실행
+    if [ $((count % 30)) -eq 0 ]; then
+        keyevent_count=$((keyevent_count + 1))  # keyevent 실행 횟수 증가
+		date
+        echo "keyevent 26 : $keyevent_count"
+        input keyevent 26
+        count=0
+    fi
+done
+@endcode
+
+
+3. 결과물 
+ll ./out/target/product/K1100UA/system/priv-app/HiddenMenu/HiddenMenu.apk
+ll ./out/target/product/K1100UA/system/lib/libhiddenmenu.so
+ll ./out/target/product/K1100UA/system/lib/libhiddenmenu_jni.so
+ 
+4. prebuilt에 적용 
+cp -f ./out/target/product/K1100UA/system/priv-app/HiddenMenu/HiddenMenu.apk ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenu/
+cp -f ./out/target/product/K1100UA/system/lib/libhiddenmenu.so ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenuService/
+cp -f ./out/target/product/K1100UA/system/lib/libhiddenmenu_jni.so ./vendor/kaon/prebuilts/bkouc500/KaonHiddenMenu/HiddenMenu_JNI/
+
+
+/storage/749A-0B6D 
+
+./system/lib/libhiddenmenu.so
+./system/lib/libhiddenmenu_jni.so
+
+
+cp -f /storage/749A-0B6D/libhiddenmenu.so /system/lib/
+cp -f /storage/749A-0B6D/libhiddenmenu_jni.so /system/lib/
+cp -f /storage/749A-0B6D/HiddenMenu.apk /data/local/tmp/
+pm install -r /data/local/tmp/HiddenMenu.apk
+
+
+git commit -m "modified : Do not check SPL & timestamp in recovery mode."
+
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\apps\KaonHiddenMenu\HiddenMenu\src\com\kaon\skb\uc500\menu\models
+
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\apps\KaonHiddenMenu/HiddenMenu/res/layout/fragment_cm_firm_settings_menu.xml
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\apps\KaonHiddenMenu/HiddenMenu/src/com/kaon/skb/uc500/menu/databinding/FragmentCmFirmSettingsMenuBinding.java
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\apps\KaonHiddenMenu/HiddenMenu/src/com/kaon/skb/uc500/menu/models/CmFirmMenuConfig.java
+X:\SKB\kaon_bcm_androidtv12\vendor\kaon\apps\KaonHiddenMenu/HiddenMenu/src/com/kaon/skb/uc500/menu/other_info/CmFirmSettingsMenuFragment.java
+
+rm KaonHiddenMenu/HiddenMenu/res/layout/fragment_cm_firm_settings_menu.xml
+rm KaonHiddenMenu/HiddenMenu/src/com/kaon/skb/uc500/menu/databinding/FragmentCmFirmSettingsMenuBinding.java
+rm KaonHiddenMenu/HiddenMenu/src/com/kaon/skb/uc500/menu/models/CmFirmMenuConfig.java
+rm KaonHiddenMenu/HiddenMenu/src/com/kaon/skb/uc500/menu/other_info/CmFirmSettingsMenuFragment.java
+
+
+
+
+
+
+
+\HiddenMenu\res\navigation\nav_graph.xml - 
+    <fragment
+        android:id="@+id/otherInfoMenuFragment"
+        android:name="com.kaon.skb.uc500.menu.other_info.OtherInfoMenuFragment"
+        android:label="OtherInfoMenuFragment"
+        ....
+         /* 7.3. 기타 정보 확인 및 설정에 메뉴에 하단에 7.3.4 추가              */
+		 // \HiddenMenu\src\com\kaon\skb\uc500\menu\models\CmFirmMenuConfig.java 에 구성
+        <action android:id="@+id/action_other_info_to_cm_firm_settings"
+            app:destination="@id/cmFirmSettingsMenuFragment"/>  
+         /////////////////////////////////
+    </fragment>
+....
+ /* 7.3.4 메뉴구성              */
+    <fragment
+        android:id="@+id/cmFirmSettingsMenuFragment"
+        android:name="com.kaon.skb.uc500.menu.other_info.CmFirmSettingsMenuFragment"
+        android:label="CmFirmSettingsMenuFragment"
+        tools:layout="@layout/fragment_cm_firm_settings_menu">
+        // layout 구성은 아래파일에서 구성 (fragment_cm_firm_settings_menu)
+        // \HiddenMenu\src\com\kaon\skb\uc500\menu\databinding\FragmentCmFirmSettingsMenuBinding.java
+         /* 7.3.4.1 메뉴 연결              */
+        <action android:id="@+id/action_cm_firm_settings_to_cm_firm_auto"
+            app:destination="@id/cmFrimAutoFragment"/>
+         /* 7.3.4.2 메뉴 연결              */
+        <action android:id="@+id/action_cm_firm_settings_to_cm_firm_usb"
+            app:destination="@id/cmFrimUsbFragment"/>	
+    </fragment>
+
+...
+ /* 7.3.4.1 메뉴구성              */
+    <fragment
+        android:id="@+id/cmFrimAutoFragment"
+        android:name="com.kaon.skb.uc500.menu.other_info.cm_firm.CmFirmAutoFragment"
+        android:label="CmFirmAutoFragment"
+        tools:layout="@layout/fragment_cm_firm_auto"/>
+        // layout 구성은 아래파일에서 구성 (fragment_cm_firm_auto)
+        // \HiddenMenu\src\com\kaon\skb\uc500\menu\databinding\FragmentCmFirmAutoBinding.java
+		// cmFrimAutoFragment 설정은 아래파일
+		// \HiddenMenu\src\com\kaon\skb\uc500\menu\other_info\cm_firm\CmFirmAutoFragment.java
+		
+ /* 7.3.4.2 메뉴구성              */
+    <fragment
+        android:id="@+id/cmFrimUSBFragment"
+        android:name="com.kaon.skb.uc500.menu.other_info.cm_firm.CmFirmUsbFragment"
+        android:label="CmFirmUsbFragment"
+        tools:layout="@layout/fragment_cm_firm_usb"/>		
+        // layout 구성은 아래파일에서 구성 (fragment_cm_firm_usb)
+        // \HiddenMenu\src\com\kaon\skb\uc500\menu\databinding\FragmentCmFirmUsbBinding.java		
+		// CmFirmUsbFragment 설정은 아래파일
+		// \HiddenMenu\src\com\kaon\skb\uc500\menu\other_info\cm_firm\CmFirmUsbFragment.java		
+/////////////////////////////////
+
+7.3.4 레이아웃 구성
+\HiddenMenu\res\layout\fragment_cm_firm_settings_menu.xml
+
+7.3.4.1 레이아웃 구성
+\HiddenMenu\res\layout\fragment_cm_firm_auto.xml
+
+7.3.4.2 레이아웃 구성
+\HiddenMenu\res\layout\fragment_cm_firm_usb.xml
+
+
+연결
+\HiddenMenu\src\com\kaon\skb\uc500\menu\other_info\CmFirmSettingsMenuFragment.java
+public class CmFirmSettingsMenuFragment extends BaseFragment<FragmentOtherSettingsBinding> implements IOnKeyUpListener {
+
+
+\HiddenMenu\res\values-ko\strings.xml
+
+
+7.3 기타 정보 확인 및 설정 메뉴 구성
+\HiddenMenu\src\com\kaon\skb\uc500\menu\models\OtherMenuConfig.java
+
+7.3.4 CM 펌웨어 업그레이드 메뉴 구성
+\HiddenMenu\src\com\kaon\skb\uc500\menu\models\CmFirmMenuConfig.java
+키관리
+\HiddenMenu\src\com\kaon\skb\uc500\menu\other_info\CmFirmSettingsMenuFragment.java
+
+7.3.4,1 CM 펌웨어 auto 업그레이드 메뉴 구성
+키관리
+\HiddenMenu\src\com\kaon\skb\uc500\menu\other_info\cm_firm\CmFirmAutoFragment.java
+
+7.3.4.2 CM 펌웨어 usb 업그레이드 메뉴 구성
+
+\HiddenMenu\src\com\kaon\skb\uc500\menu\other_info\cm_firm\CmFirmUsbFragment.java
+
+각 메뉴 아이템
+\HiddenMenu\src\com\kaon\skb\uc500\menu\utils\MenuHelper.java
+
+
+
+
+CmFirmUsbFragment.java
+CmFirmUSBFragment.java
+
+
+
+
+
+
+
+
+
+
+
+
+
+CVE-2024-0044 / ANDROID-307532206
+android-12.0.0_r1/platform/frameworks/base/0001-Validate-package-names-passed-to-the-installer-.bulletin.patch
+android-12.0.0_r1/platform/frameworks/base/0005--RESTRICT-AUTOMERGE-Check-whether-installerPackageName-contains.bulletin.patch
+
+CVE-2024-40675 / ANDROID-318683126
+android-12.0.0_r1/platform/frameworks/base/0002-Fail-parseUri-if-end-is-missing.bulletin.patch
+patch -p1 < 0002-Fail-parseUri-if-end-is-missing.bulletin.patch
+
+
+CVE-2024-40676 / ANDROID-349780950B		
+android-12.0.0_r1/platform/frameworks/base/0003-Update-AccountManagerService-checkKeyIntent-.bulletin.patch
+patch -p1 < 0003-Update-AccountManagerService-checkKeyIntent-.bulletin.patch
+
+CVE-2024-40672 / ANDROID-327645387
+android-12.0.0_r1/platform/frameworks/base/0004-Prevent-Sharing-when-FRP-enforcement-is-in-effect.bulletin.patch
+patch -p1 < 0004-Prevent-Sharing-when-FRP-enforcement-is-in-effect.bulletin.patch
+
+CVE-2024-40673 / ANDROID-309938635
+android-12.0.0_r1/platform/libcore/0001-Do-not-accept-zip-files-with-invalid-headers-.bulletin.patch
+patch -p1 < 0001-Do-not-accept-zip-files-with-invalid-headers-.bulletin.patch
+
+CVE-2024-40677 / ANDROID-327748846
+android-12.0.0_r1/platform/packages/apps/Settings/0001-RESTRICT-AUTOMERGE-FRP-bypass-defense-in-App-battery-usage-page.bulletin.patch
+patch -p1 < 0001-RESTRICT-AUTOMERGE-FRP-bypass-defense-in-App-battery-usage-page.bulletin.patch
+
+<br>
+---
+
+
+볼륨관련 테스트 단계 
+        수정함:        frameworks/base/services/core/java/com/android/server/audio/AudioService.java
+        수정함:        frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
+        수정함:        vendor/broadcom/bcm_platform/apks/BcmAudioCapture/src/com/broadcom/BcmAudioCapture/BcmAudioCaptureService.java
+
+cp frameworks/base/services/core/java/com/android/server/audio/AudioService.java ./test1
+cp frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java ./test1
+cp vendor/broadcom/bcm_platform/apks/BcmAudioCapture/src/com/broadcom/BcmAudioCapture/BcmAudioCaptureService.java ./test1
+
+
+*/
+
+
+

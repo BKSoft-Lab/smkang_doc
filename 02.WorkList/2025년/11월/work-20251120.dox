@@ -1,0 +1,184 @@
+/*!
+@page work_20251120	2025.11.20
+
+---
+
+# 종료키 입력시 넷플릭스 종료 검토
+
+> K1200 동작
+
+@code
+
+Z:\K1200UA\k1200ua\vendor\amlogic\common\apps\VendorOverlay\DroidOverlay\res\xml\global_keys.xml
+<key keyCode="KEYCODE_F12" component="com.lghv.atv.iptv.fw.dmsvc/.KaonGlobalKeyReceiver" dispatchWhenNonInteractive="true" />
+
+리모컨 종료키 → meson-ir에서 KEY_ESC(1) → keylayout에서 KEYCODE_F12(142) →
+KaonGlobalKeyReceiver가 F12를 받음 → 이를 KEYCODE_TV(170)로 치환 →
+helloTv 앱에 “TV 키” 글로벌 인텐트 전송 → helloTv가 라이브 TV로 전환하면서
+그 순간 top 이었던 넷플릭스 액티비티가 종료/백그라운드로 내려가서
+“넷플릭스가 종료된 것처럼 보이는” 동작이 로그로 표현된 것.
+
+
+1. 리모컨 종료키 → Android에서 KEYCODE_F12
+2. KaonGlobalKeyReceiver가 F12 UP 이벤트를 받음
+3. F12를 KEYCODE_TV 로 치환
+4. 현재 top 이 넷플릭스(ACTIVITY_NETFLIX_APP) 이면
+   stopOTTAppByForce() 호출 → am force-stop com.netflix.ninja 실행
+5. 동시에 KEYCODE_TV 글로벌 키를 helloTv 앱으로 보내서 HelloTV가 TV 화면으로 전환
+6. 사용자 입장에서는“넷플릭스가 종료되고 TV로 나감”처럼 보이는 동작이 발생
+
+Z:\K1200UA\k1200ua\vendor\kaon\K1200UA\kaonsrc\apps\KaonDeviceManager\src\com\lghv\atv\iptv\fw\dmsvc\KaonGlobalKeyReceiver.java
+
+topActivityName 으로 ACTIVITY_NETFLIX_APP 앱을 강제종료 하고 핼로티비에 KeyEvent.KEYCODE_TV 키를 보낸다.
+
+	//sendBroadcast : '종료'
+	else if((event.getKeyCode() == KeyEvent.KEYCODE_F12)) {
+if(event.getAction() == KeyEvent.ACTION_UP) {
+	if(event.getKeyCode() == KeyEvent.KEYCODE_F12) {
+if(!getTopActivityName(context).contains("android.tungsten.setupwraith") )
+	keyCode = KeyEvent.KEYCODE_TV;
+	}
+	Log.i(TAG, "keycode : " + KeyEvent.keyCodeToString(keyCode) + " up");
+
+	String topActivityName = getTopActivityName(context);
+	if(topActivityName.equals(ACTIVITY_NETFLIX_APP)) {
+stopOTTAppByForce(context);
+	}
+	if(!topActivityName.equals(ACTIVITY_KRMS_FWUPDATER_APP) && 
+!topActivityName.contains("android.tungsten.setupwraith") ) {
+
+lghv_intent.setPackage(PACKAGE_KEYCODE_APP);
+lghv_intent.setAction(ACTION_KEYCODE_APP);
+lghv_intent.putExtra(EXTRA_KEYCODE_APP, keyCode);
+
+// KAON-SYS : using startForegroundService for send Global keys 
+String networkType = SystemProperties.get(PERSIST_PROPERTY_NETWORK_TYPE,"");
+Log.i(TAG,"NETWORK_TYPE: "+(networkType.equals(NETWORK_TYPE_LGHV)?"LGHV":"LGU+"));
+Log.i(TAG,"SEND_GLOBALKEY: startForegroundService(lghv_intent)");
+context.startForegroundService(lghv_intent);
+Log.i(TAG,"SEND_GLOBALKEY: 'KEYCODE_TV' to helloTv app: top("+topActivityName+")");
+	}  
+
+	private void stopOTTAppByForce(Context context) {
+Log.d(TAG,"stopOTTAppByForce .... ####");
+String topActivityName = null;
+String stopCmd = null;
+
+topActivityName = getTopActivityName(context);
+
+// set STOP Command
+switch(topActivityName) {
+	case ACTIVITY_NETFLIX_APP:
+Log.d(TAG,"force stop NETFLIX app");
+stopCmd = FORCE_STOP_NETFLIX;
+break;
+	case ACTIVITY_NAME_YOUTUBE_TV:
+Log.d(TAG,"force stop YOUTUBE TV app");
+stopCmd = FORCE_STOP_YOUTUBE_TV;
+break;
+	case ACTIVITY_DISNEY_APP:
+Log.d(TAG,"force stop DISNEY app");
+stopCmd = FORCE_STOP_DISNEY;
+break;
+	default:
+Log.d(TAG,"there is no app for force-stop ..!!");
+return;
+}
+
+mDeviceManagerActivity.systemCmd(stopCmd);
+	}                    
+
+@endcode
+
+
+@code
+의도대로라면:
+
+F12(종료키) 눌렀을 때, top 이 넷플릭스일 때만 지금처럼 처리(강제종료 + KEYCODE_TV 전송)하고,
+그 외 앱일 때는 KaonGlobalKeyReceiver 에서 아무것도 안 하고 원래 앱으로 F12를 그냥 보내고 싶다
+
+→ 그러면 넷플릭스가 아닐 때 바로 return 해 버리면 됩니다.
+(이 브로드캐스트 리시버에서 아무 추가 동작을 안 하면, 입력 시스템 쪽에서 F12는 그대로 포그라운드 앱으로 전달됩니다.)
+
+예를 들어 아래처럼 수정할 수 있습니다.
+
+else if (event.getKeyCode() == KeyEvent.KEYCODE_F12) {
+    if (event.getAction() == KeyEvent.ACTION_UP) {
+
+        String topActivityName = getTopActivityName(context);
+
+        // ❶ 넷플릭스가 아니면 아무 처리도 하지 않고 리턴
+        if (!topActivityName.equals(ACTIVITY_NETFLIX_APP)) {
+            Log.i(TAG, "F12 up: ignore global handling, top=" + topActivityName);
+            // 여기서 return 하면 key 이벤트는 각 앱에서 정상적으로 처리됨
+            return;
+        }
+
+        // ❷ 여기부터는 "top = 넷플릭스" 인 경우에만 동작
+        if (!topActivityName.contains("android.tungsten.setupwraith")) {
+            keyCode = KeyEvent.KEYCODE_TV;
+        }
+
+        Log.i(TAG, "keycode : " + KeyEvent.keyCodeToString(keyCode) + " up");
+
+        // KSYS : to fix Disney+ app blackout when first time launching
+        // [K1078-272] workaround to fix issue
+        if (KAON_CHK_KEYSKIP_COND) {
+            if (isSkipKeyCondition(keyCode)) return;
+        }
+
+        // top == NETFLIX 로 확정된 상태이므로 넷플릭스 강제 종료
+        stopOTTAppByForce(context);
+
+        // 디즈니 관련 처리는 여기서는 필요 없으므로 제거하거나,
+        // 꼭 필요하다면 별도의 분기에서 처리
+
+        if (!topActivityName.equals(ACTIVITY_KRMS_FWUPDATER_APP) &&
+            !topActivityName.contains("android.tungsten.setupwraith")) {
+
+            lghv_intent.setPackage(PACKAGE_KEYCODE_APP);
+            lghv_intent.setAction(ACTION_KEYCODE_APP);
+            lghv_intent.putExtra(EXTRA_KEYCODE_APP, keyCode);
+
+            String networkType = SystemProperties.get(PERSIST_PROPERTY_NETWORK_TYPE,"");
+            Log.i(TAG,"NETWORK_TYPE: "+(networkType.equals(NETWORK_TYPE_LGHV)?"LGHV":"LGU+"));
+            Log.i(TAG,"SEND_GLOBALKEY: startForegroundService(lghv_intent)");
+            context.startForegroundService(lghv_intent);
+            Log.i(TAG,"SEND_GLOBALKEY: 'KEYCODE_TV' to helloTv app: top("+topActivityName+")");
+        } else {
+            Log.i(TAG,"ignore send 'KEYCODE_TV' to helloTv app: top("+topActivityName+")");
+        }
+    }
+}
+
+정리
+
+변경 포인트 핵심:
+
+if (!topActivityName.equals(ACTIVITY_NETFLIX_APP)) {
+    return;
+}
+
+
+이 한 줄로 “넷플릭스가 아니면 글로벌 처리 안 함”을 보장.
+
+이렇게 하면:
+
+넷플릭스일 때: 지금까지처럼 강제 종료 + helloTv로 KEYCODE_TV 전송
+
+그 외 앱일 때: KaonGlobalKeyReceiver는 로그만 찍고 아무 동작도 하지 않음 → F12는 해당 앱에서 자유롭게 처리 (또는 무시)
+
+원하면 “디즈니일 때만 updateDisneyLoggedInfo() 는 유지하고 싶다” 이런 식으로 추가 분기도 같이 정리해 줄 수 있어요.
+@endcode
+
+> K1100 
+@code
+
+Z:\LGHV\kaon_bcm_androidtv12\vendor\broadcom\bcm_platform\apks\BcmFwksRro\res-K1100UA\xml\global_keys.xml
+Z:\LGHV\kaon_bcm_androidtv12\vendor\broadcom\bcm_platform\apks/BcmCustomizer/src/com/broadcom/customizer/GlobalKeyReceiver.java.K1100UA
+
+@endcode
+
+
+
+*/

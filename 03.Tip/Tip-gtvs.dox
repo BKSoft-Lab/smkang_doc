@@ -1,0 +1,472 @@
+/*!
+@page tip_gtvs GTVS
+
+# GTVS 최신 업데이트
+
+@code
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Android.mk b/vendor/google_gtvs/apps/arm64-v8a/Android.mk
+index 0090ebe2e51..1ceaf7e3576 100644
+--- a/vendor/google_gtvs/apps/arm64-v8a/Android.mk
++++ b/vendor/google_gtvs/apps/arm64-v8a/Android.mk
+@@ -136,7 +136,7 @@ LOCAL_CERTIFICATE := PRESIGNED
+ LOCAL_PRIVILEGED_MODULE := true
+ LOCAL_PRODUCT_MODULE := true
+ LOCAL_USES_LIBRARIES := com.android.media.tv.remoteprovider
+-LOCAL_OPTIONAL_USES_LIBRARIES := com.android.libraries.tv.tvsystem androidx.window.extensions androidx.window.sidecar
++LOCAL_OPTIONAL_USES_LIBRARIES := com.android.libraries.tv.tvsystem
+
+ include $(BUILD_PREBUILT)
+ ##############################
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk b/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk
+index 4f0f967bbc2..4b150e537b0 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk and b/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk b/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk
+index fa5b9e99205..a69b815951e 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk and b/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk b/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk
+index 3f43f73439b..bfe1b419f77 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk and b/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/DfuService.apk b/vendor/google_gtvs/apps/arm64-v8a/DfuService.apk
+old mode 100755
+new mode 100644
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk
+index 0fb6933f3d2..b503e5f6188 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk and b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk b/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk
+index 0d477f5fbde..329052c6d8f 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk and b/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk b/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk
+index e002d16b9c7..b4c52d035a4 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk and b/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk
+index 4b1c599c849..d107cd9beff 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk and b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk
+index c7e83ec10db..a8a5ba45734 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk and b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk b/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk
+index efc6e4ee6b0..746a5f407bf 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk and b/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk b/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk
+index 1e89be56df8..0b0f3afacb3 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk and b/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibraryStub.apk b/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibraryStub.apk
+old mode 100755
+new mode 100644
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk b/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk
+index e38e6e9c8c4..831d7416a3a 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk and b/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogleStub.apk b/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogleStub.apk
+old mode 100755
+new mode 100644
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk b/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk
+index 443f6bd09fc..bf9e0e581ff 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk and b/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/talkback.apk b/vendor/google_gtvs/apps/arm64-v8a/talkback.apk
+index f4256943e9e..3795f92ba3e 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/talkback.apk and b/vendor/google_gtvs/apps/arm64-v8a/talkback.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Android.mk b/vendor/google_gtvs/apps/armeabi-v7a/Android.mk
+index c89cd01c8fb..7aa4653cd1c 100644
+--- a/vendor/google_gtvs/apps/armeabi-v7a/Android.mk
++++ b/vendor/google_gtvs/apps/armeabi-v7a/Android.mk
+@@ -136,7 +136,7 @@ LOCAL_CERTIFICATE := PRESIGNED
+ LOCAL_PRIVILEGED_MODULE := true
+ LOCAL_PRODUCT_MODULE := true
+ LOCAL_USES_LIBRARIES := com.android.media.tv.remoteprovider
+-LOCAL_OPTIONAL_USES_LIBRARIES := com.android.libraries.tv.tvsystem androidx.window.extensions androidx.window.sidecar
++LOCAL_OPTIONAL_USES_LIBRARIES := com.android.libraries.tv.tvsystem
+
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk and b/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk b/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk
+index 3f43f73439b..bfe1b419f77 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk and b/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/DfuService.apk b/vendor/google_gtvs/apps/arm64-v8a/DfuService.apk
+old mode 100755
+new mode 100644
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk
+index 0fb6933f3d2..b503e5f6188 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk and b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk b/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk
+index 0d477f5fbde..329052c6d8f 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk and b/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk b/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk
+index e002d16b9c7..b4c52d035a4 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk and b/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk
+index 4b1c599c849..d107cd9beff 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk and b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk
+index c7e83ec10db..a8a5ba45734 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk and b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk b/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk
+index efc6e4ee6b0..746a5f407bf 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk and b/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk b/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk
+index 1e89be56df8..0b0f3afacb3 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk and b/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibraryStub.apk b/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibraryStub.apk
+old mode 100755
+new mode 100644
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk b/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk
+index e38e6e9c8c4..831d7416a3a 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk and b/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogleStub.apk b/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogleStub.apk
+old mode 100755
+new mode 100644
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk b/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk
+index 443f6bd09fc..bf9e0e581ff 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk and b/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/talkback.apk b/vendor/google_gtvs/apps/arm64-v8a/talkback.apk
+index f4256943e9e..3795f92ba3e 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/talkback.apk and b/vendor/google_gtvs/apps/arm64-v8a/talkback.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Android.mk b/vendor/google_gtvs/apps/armeabi-v7a/Android.mk
+index c89cd01c8fb..7aa4653cd1c 100644
+--- a/vendor/google_gtvs/apps/armeabi-v7a/Android.mk
++++ b/vendor/google_gtvs/apps/armeabi-v7a/Android.mk
+@@ -136,7 +136,7 @@ LOCAL_CERTIFICATE := PRESIGNED
+ LOCAL_PRIVILEGED_MODULE := true
+ LOCAL_PRODUCT_MODULE := true
+ LOCAL_USES_LIBRARIES := com.android.media.tv.remoteprovider
+-LOCAL_OPTIONAL_USES_LIBRARIES := com.android.libraries.tv.tvsystem androidx.window.extensions androidx.window.sidecar
++LOCAL_OPTIONAL_USES_LIBRARIES := com.android.libraries.tv.tvsystem
+
+ include $(BUILD_PREBUILT)
+ ##############################
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/AndroidMediaShell.apk b/vendor/google_gtvs/apps/armeabi-v7a/AndroidMediaShell.apk
+index cc259a148a7..b1463899e79 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/AndroidMediaShell.apk and b/vendor/google_gtvs/apps/armeabi-v7a/AndroidMediaShell.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/AtvAxel.apk b/vendor/google_gtvs/apps/armeabi-v7a/AtvAxel.apk
+index fa5b9e99205..a69b815951e 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/AtvAxel.apk and b/vendor/google_gtvs/apps/armeabi-v7a/AtvAxel.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk b/vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk
+index 3f43f73439b..eb6d607b3b6 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk and b/vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk b/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk
+index 0fb6933f3d2..4b332336182 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk and b/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/PlayGamesPano.apk b/vendor/google_gtvs/apps/armeabi-v7a/PlayGamesPano.apk
+index e6a98e73a89..6f51a6531a9 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/PlayGamesPano.apk and b/vendor/google_gtvs/apps/armeabi-v7a/PlayGamesPano.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/PrebuiltGmsCorePano.apk b/vendor/google_gtvs/apps/armeabi-v7a/PrebuiltGmsCorePano.apk
+index ce6010ca766..b29b96acfcc 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/PrebuiltGmsCorePano.apk and b/vendor/google_gtvs/apps/armeabi-v7a/PrebuiltGmsCorePano.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithBeta.apk b/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithBeta.apk
+index 4b1c599c849..a8a5ba45734 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithBeta.apk and b/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithBeta.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk b/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk
+index c7e83ec10db..a8a5ba45734 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk and b/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/TVLauncher.apk b/vendor/google_gtvs/apps/armeabi-v7a/TVLauncher.apk
+index 8ba8ffff2af..f56581def47 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/TVLauncher.apk and b/vendor/google_gtvs/apps/armeabi-v7a/TVLauncher.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/TVRecommendations.apk b/vendor/google_gtvs/apps/armeabi-v7a/TVRecommendations.apk
+index 38bb1b748b4..3806ff4db5e 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/TVRecommendations.apk and b/vendor/google_gtvs/apps/armeabi-v7a/TVRecommendations.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Tubesky.apk b/vendor/google_gtvs/apps/armeabi-v7a/Tubesky.apk
+index 5c32a3ffcb0..c80fc05843d 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/Tubesky.apk and b/vendor/google_gtvs/apps/armeabi-v7a/Tubesky.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/YouTubeLeanback.apk b/vendor/google_gtvs/apps/armeabi-v7a/YouTubeLeanback.apk
+index c5f4a9e884d..caea188ae78 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/YouTubeLeanback.apk and b/vendor/google_gtvs/apps/armeabi-v7a/YouTubeLeanback.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/talkback.apk b/vendor/google_gtvs/apps/armeabi-v7a/talkback.apk
+index 8220f7bbc4d..0e3803a22b9 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/talkback.apk and b/vendor/google_gtvs/apps/armeabi-v7a/talkback.apk differ
+diff --git a/vendor/google_gtvs/etc/permissions/privapp-permissions-atv-product.xml b/vendor/google_gtvs/etc/permissions/privapp-permissions-atv-product.xml
+index c1629a642be..6e4638e3f73 100644
+--- a/vendor/google_gtvs/etc/permissions/privapp-permissions-atv-product.xml
++++ b/vendor/google_gtvs/etc/permissions/privapp-permissions-atv-product.xml
+@@ -78,6 +78,7 @@
+         <permission name="android.permission.HDMI_CEC"/>
+         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
++        <permission name="android.permission.MANAGE_USERS"/>
+         <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
+         <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
+         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
+
+git add vendor/google_gtvs/apps/arm64-v8a/Android.mk
+git add vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk
+git add vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk
+git add vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk
+git add vendor/google_gtvs/apps/arm64-v8a/DfuService.apk
+git add vendor/google_gtvs/apps/arm64-v8a/GoogleTTS.apk
+git add vendor/google_gtvs/apps/arm64-v8a/Katniss.apk
+git add vendor/google_gtvs/apps/arm64-v8a/LatinIMEGoogleTvPrebuilt.apk
+git add vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk
+git add vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk
+git add vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk
+git add vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk
+git add vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk
+git add vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk
+git add vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk
+git add vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/AndroidMediaShell.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/AtvAxel.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/DfuService.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/GoogleTTS.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/LatinIMEGoogleTvPrebuilt.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/PlayGamesPano.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/PrebuiltGmsCorePano.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/SetupWraithBeta.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/TVLauncher.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/TVRecommendations.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/Tubesky.apk
+git add vendor/google_gtvs/apps/armeabi-v7a/YouTubeLeanback.apk
+
+@endcode
+
+
+
+#LGHV GTVS 이력 정리
+20 Jan, 2025 1 commit
+@code
+강성민(kaongroup)'s avatar
+update GTVS version 244035110
+강성민(kaongroup) authored 4 months ago
+ffa4c6c8
+
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk b/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk
+index 4f0f967bbc2..030449bbab9 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk and b/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk b/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk
+index 137bd5302ae..a69b815951e 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk and b/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk
+index b503e5f6188..71385f17dfe 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk and b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/LatinIMEGoogleTvPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/LatinIMEGoogleTvPrebuilt.apk
+index 24fd54166a9..4cb5ace89a7 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/LatinIMEGoogleTvPrebuilt.apk and b/vendor/google_gtvs/apps/arm64-v8a/LatinIMEGoogleTvPrebuilt.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk b/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk
+index bc412d390d1..329052c6d8f 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk and b/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk b/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk
+index 0a6bd490b53..f4d9333b2d3 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk and b/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk
+index bebf48a8905..d23b4dad66f 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk and b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk
+index 82050f0a219..d23b4dad66f 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk and b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk b/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk
+index 00ef6cb0b47..bf17d2a04b5 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk and b/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk b/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk
+index c1a450b961c..132e742e7bd 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk and b/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibrary.apk b/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibrary.apk
+index dfb94f3e22c..57c1c473dbf 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibrary.apk and b/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibrary.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk b/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk
+index d560cb6eeae..46a637653c5 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk and b/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/VideosPano.apk b/vendor/google_gtvs/apps/arm64-v8a/VideosPano.apk
+index 00088a588b8..0287fc69b77 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/VideosPano.apk and b/vendor/google_gtvs/apps/arm64-v8a/VideosPano.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogle.apk b/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogle.apk
+index c6835d88db3..5e983dddce5 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogle.apk and b/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogle.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk b/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk
+index 4d9e8fa6283..1683a8e4e23 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk and b/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/YouTubeMusicTVPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/YouTubeMusicTVPrebuilt.apk
+index d731a690f7a..d33b4aad0fd 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/YouTubeMusicTVPrebuilt.apk and b/vendor/google_gtvs/apps/arm64-v8a/YouTubeMusicTVPrebuilt.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/talkback.apk b/vendor/google_gtvs/apps/arm64-v8a/talkback.apk
+index d72166fc797..3795f92ba3e 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/talkback.apk and b/vendor/google_gtvs/apps/arm64-v8a/talkback.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Android.mk b/vendor/google_gtvs/apps/armeabi-v7a/Android.mk
+index 90c84d2a998..d078adb39e8 100644
+
+@endcode
+
+25 Oct, 2024 1 commit
+@code
+양승화(가온미디어)'s avatar
+Update GTVS Package v24.26.32 
+양승화(가온미디어) authored 7 months ago
+c2574de9
+
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk b/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk
+index 3f43f73439b..bfe1b419f77 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk and b/vendor/google_gtvs/apps/arm64-v8a/AtvRemoteService.apk differ
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk
+index 0fb6933f3d2..b503e5f6188 100644
+Binary files a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk and b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk differ
+
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk b/vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk
+index 3f43f73439b..eb6d607	b3b6 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk and b/vendor/google_gtvs/apps/armeabi-v7a/AtvRemoteService.apk differ
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk b/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk
+index 0fb6933f3d2..4b332336182 100644
+Binary files a/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk and b/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk differ
+
+
+@endcode
+
+
+
+console:/ $ dumpsys package com.google.android.gms | grep versionCode
+    versionCode=251434118 minSdk=30 targetSdk=36
+
+console:/ $ dumpsys package com.google.android.tungsten.setupwraith | grep versionName
+    versionName=1.0.745298646
+> RF케이블 제거시 "네트워크 없이 진행" 버튼 안나타남
+
+20250424 - 김원균PM에게서 받은 GTV 버전
+ 
+console:/ $ dumpsys package com.google.android.tungsten.setupwraith | grep versionName
+    versionName=1.0.745298646
+
+> RF케이블 제거시 "네트워크 없이 진행" 버튼 안나타남
+
+
+@code 
+
+인천SO OTA이미지
+console:/ $ dumpsys package  com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018114940 minSdk=28 targetSdk=33
+    versionName=1.0.678050481
+    signatures=PackageSignatures{c0e1507 version:3, signatures:[e3ca78d8], past signatures:[]}
+
+
+X:\LGHV\f9161a0c-apps\armeabi-v7a
+console:/ $ dumpsys package  com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018115108 minSdk=28 targetSdk=33
+    versionName=1.0.683016637
+> RF케이블 제거시 "네트워크 없이 진행" 버튼 나타남
+
+1.0.683016637 에서 구글플레이 업데이트시 
+console:/ $ dumpsys package  com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018117928 minSdk=28 targetSdk=33
+    versionName=1.0.759365086
+	versionCode=2018115108 minSdk=28 targetSdk=33
+    versionName=1.0.683016637
+
+다시 공장초기화시
+console:/ $ dumpsys package  com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018115108 minSdk=28 targetSdk=33
+    versionName=1.0.683016637
+> RF케이블 제거시 "네트워크 없이 진행" 버튼 나타남
+
+
+K1200UA:/ $ dumpsys package com.google.android.tungsten.setupwraith | grep versionName
+    versionName=1.0.759365086
+
+@endcode 
+
+@code
+sgkang@lguplus-pc:~/LGHV/kaon_bcm_androidtv12$ git show f9161a0c
+commit f9161a0c3e7aec01467881130c22038f5b77d346
+Author: hyunsoo.kim <hyunsoo.kim@kaongroup.com>
+Date:   Fri Nov 22 20:27:05 2024 +0900
+
+    [SYS] to fix FTI infinite loop issue while call Katniss.apk
+
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk b/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk
+
+@endcode
+
+@code
+
+
+> RF케이블 제거 시 "네트워크 없이 계속 진행" 버튼 O 
+ 
+console:/ $ dumpsys package com.google.android.tungsten.setupwraith | grep versionName
+    versionName=1.0.745298646
+
+> RF케이블 제거시 "네트워크 없이 계속 진행" 버튼 안나타남
+
+
+@code 
+X:\LGHV\f9161a0c-apps\armeabi-v7a
+console:/ $ dumpsys package  com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018115108 minSdk=28 targetSdk=33
+    versionName=1.0.683016637
+> RF케이블 제거시 "네트워크 없이 계속 진행" 버튼 나타남
+
+1.0.683016637 에서 구글플레이 업데이트시 
+console:/ $ dumpsys package  com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018117928 minSdk=28 targetSdk=33
+    versionName=1.0.759365086
+
+
+
+
+
+
+
+로그추출
+$ dumpsys package com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018114940 minSdk=28 targetSdk=33
+    versionName=1.0.678050481
+
+$ dumpsys package com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018117424 minSdk=28 targetSdk=33
+    versionName=1.0.745298646
+    
+
+
+
+인천SO OTA이미지
+console:/ $ dumpsys package  com.google.android.tungsten.setupwraith | grep version
+    versionCode=2018114940 minSdk=28 targetSdk=33
+    versionName=1.0.678050481
+    signatures=PackageSignatures{c0e1507 version:3, signatures:[e3ca78d8], past signatures:[]}
+
+
+@endcode
+
+sgkang@lguplus-pc:~/LGHV/kaon_bcm_androidtv12$ git show ffa4c6c8
+commit ffa4c6c85c99ab38575f4a8aac036ed1faaf5665
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Mon Jan 20 12:14:50 2025 +0900
+
+    update GTVS version 244035110
+
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk b/vendor/google_gtvs/apps/arm64-v8a/AndroidMediaShell.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk b/vendor/google_gtvs/apps/arm64-v8a/AtvAxel.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk b/vendor/google_gtvs/apps/arm64-v8a/Katniss.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/LatinIMEGoogleTvPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/LatinIMEGoogleTvPrebuilt.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk b/vendor/google_gtvs/apps/arm64-v8a/PlayGamesPano.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk b/vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithBeta.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/SetupWraithPrebuilt.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk b/vendor/google_gtvs/apps/arm64-v8a/TVLauncher.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk b/vendor/google_gtvs/apps/arm64-v8a/TVRecommendations.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibrary.apk b/vendor/google_gtvs/apps/arm64-v8a/TrichromeLibrary.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk b/vendor/google_gtvs/apps/arm64-v8a/Tubesky.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/VideosPano.apk b/vendor/google_gtvs/apps/arm64-v8a/VideosPano.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogle.apk b/vendor/google_gtvs/apps/arm64-v8a/WebViewGoogle.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk b/vendor/google_gtvs/apps/arm64-v8a/YouTubeLeanback.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/YouTubeMusicTVPrebuilt.apk b/vendor/google_gtvs/apps/arm64-v8a/YouTubeMusicTVPrebuilt.apk
+diff --git a/vendor/google_gtvs/apps/arm64-v8a/talkback.apk b/vendor/google_gtvs/apps/arm64-v8a/talkback.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Android.mk b/vendor/google_gtvs/apps/armeabi-v7a/Android.mk
+
+
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/AndroidMediaShell.apk b/vendor/google_gtvs/apps/armeabi-v7a/AndroidMediaShell.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/AtvAxel.apk b/vendor/google_gtvs/apps/armeabi-v7a/AtvAxel.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk b/vendor/google_gtvs/apps/armeabi-v7a/Katniss.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/LatinIMEGoogleTvPrebuilt.apk b/vendor/google_gtvs/apps/armeabi-v7a/LatinIMEGoogleTvPrebuilt.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/PlayGamesPano.apk b/vendor/google_gtvs/apps/armeabi-v7a/PlayGamesPano.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/PrebuiltGmsCorePano.apk b/vendor/google_gtvs/apps/armeabi-v7a/PrebuiltGmsCorePano.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithBeta.apk b/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithBeta.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk b/vendor/google_gtvs/apps/armeabi-v7a/SetupWraithPrebuilt.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/TVLauncher.apk b/vendor/google_gtvs/apps/armeabi-v7a/TVLauncher.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/TVRecommendations.apk b/vendor/google_gtvs/apps/armeabi-v7a/TVRecommendations.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/TrichromeLibrary.apk b/vendor/google_gtvs/apps/armeabi-v7a/TrichromeLibrary.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/Tubesky.apk b/vendor/google_gtvs/apps/armeabi-v7a/Tubesky.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/VideosPano.apk b/vendor/google_gtvs/apps/armeabi-v7a/VideosPano.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/WebViewGoogle.apk b/vendor/google_gtvs/apps/armeabi-v7a/WebViewGoogle.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/YouTubeLeanback.apk b/vendor/google_gtvs/apps/armeabi-v7a/YouTubeLeanback.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/YouTubeMusicTVPrebuilt.apk b/vendor/google_gtvs/apps/armeabi-v7a/YouTubeMusicTVPrebuilt.apk
+diff --git a/vendor/google_gtvs/apps/armeabi-v7a/talkback.apk b/vendor/google_gtvs/apps/armeabi-v7a/talkback.apk
+diff --git a/vendor/google_gtvs/etc/permissions/privapp-permissions-google-product.xml b/vendor/google_gtvs/etc/permissions/privapp-permissions-google-product.xml
+
+@endcode
+*/

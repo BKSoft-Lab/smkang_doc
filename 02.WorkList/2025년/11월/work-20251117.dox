@@ -1,0 +1,59 @@
+/*!
+@page work_20251117	2025.11.17
+
+---
+
+# !!
+
+> !!
+
+@code
+Z:\K1200_ATV14\lghv_packages\hiddenmenu\pages\SelfDiagPage.h
+Z:\K1200_ATV14\lghv_packages\hiddenmenu\pages\SelfDiagPage.cpp
+
+
+sgkang@lguplus-pc:~/K1200_ATV14/lghv_k1200ua$ 
+mv ../middleware ./vendor/quber/
+mv ../packages ./vendor/quber/
+
+source build/envsetup.sh;lunch 3
+m -j$(nproc) hiddenmenu
+
+adb push out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/bin/hiddenmenu
+ps -A | grep hidden
+adb push hiddenmenu vendor/bin/hiddenmenu
+
+cp out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/quber/prebuilts/packages/hiddenmenu/
+mv vendor/quber/middleware ../middleware
+mv vendor/quber/packages ../packages
+
+./k1200ua_build.sh ota userdebug
+
+
+@endcode
+
+@code
+
+logcat -b kernel | egrep "meson-ir|custom_id" &
+logcat | egrep "smkang|keycode" &
+
+echo 50 > /sys/devices/platform/fe084040.ir/custom_id
+cat /sys/devices/platform/fe084040.ir/custom_id
+cat /vendor/etc/init/hiddenmenu.rc
+setprop persist.vendor.ir.custom_id 50
+
+
+- userdebug 버전에서 adb로만 가능
+$ adb root
+$ adb disable-verity
+$ adb reboot
+$ adb wait-for-device
+$ adb root
+$ adb remount
+
+K1200UA:/vendor/bin # ls -la hiddenmenu
+-rwxr-xr-x 1 root shell 374196 2025-11-18 17:57 hiddenmenu
+
+@endcode
+
+*/

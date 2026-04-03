@@ -1,0 +1,634 @@
+/*!
+@page work_20250912	2025.09.12
+
+---
+
+# 단기과제 FW2025091200 확인
+
+> https://jira.kaonmedia.com/browse/K0644-388
+
+@code
+
+Alaska git pull 실패로 인한 이전버전으로 이미지생성됨 (vendor/lghellovision/ThirdPartyApps/Android.mk 충돌)
+수정후 Jenkins 재빌드 완료
+
+git pull 전에 git stash 추가하는 방안 고려
+아래 젠킨스 빌드로그 참고하여 git stash 위치 고려
+
+Started by timer
+Running as SYSTEM
+Building in workspace /home/a3team/.jenkins/workspace/LGHV-K1100UA-ALASKA
+[LGHV-K1100UA-ALASKA] $ /bin/sh -xe /tmp/jenkins2192580047933378681.sh
++ cd /home/a3team/work/lghv/alaska
++ bash start.sh
+[1;35mstart.sh  {[0m
+HOST_IP : 172.16.5.201 
+IP      : 172.16.5.201
+[36m===== ===== ===== ===== ===== ===== ===== ===== ===== ===== [0m
+HOSTNAME     : buildserver            
+HOST_IP_ADDR : 172.16.5.201         
+HOST_IP_ID   : 201           
+BS_IP        : 172.16.5.201               
+BS_NAME      : BS-201             
+WORK BASE[0m    : [0;96m/home/a3team/work/lghv/alaska[0m
+[36m===== ===== ===== ===== ===== ===== ===== ===== ===== ===== [0m
+FW_VERSION_PARAMETER : 0000
+RP_PARAMETER : 
+[33mFW_VERSION_PARAMETER : 00.00.0000 - unset this parameter [0m
+[33mFIRMWARE_VERSION : Take Version String from Git TAG [0m
+[1;35mconfig.sh  {[0m
+WB      : /home/a3team/work/lghv/alaska
+IS_NVME : 0
+[1;35mconfig.sh }[0m
+================================================
+Start time : 2025. 09. 12. (금) 10:20:00 KST
+------------------------------------------------
+[36m===== ===== ===== ===== ===== ===== ===== ===== ===== ===== [0m
+[36mStorage Check in start.sh [0m
+===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs            13G   60M   13G   1% /run
+/dev/nvme1n1p2  938G  803G   88G  91% /
+tmpfs            63G     0   63G   0% /dev/shm
+tmpfs           5.0M  4.0K  5.0M   1% /run/lock
+efivarfs        440K  141K  295K  33% /sys/firmware/efi/efivars
+/dev/nvme1n1p1  511M  6.2M  505M   2% /boot/efi
+/dev/sda         15T   13T  1.1T  93% /mnt/sda
+/dev/nvme0n1    1.8T  1.5T  254G  86% /mnt/sda/a3team/nvme
+tmpfs            13G   96K   13G   1% /run/user/1000
+tmpfs            13G   64K   13G   1% /run/user/1002
+----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+USE_SPACE_RATIO : /dev/sda       [31m 93% [0m
+----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+
+USE_SPACE_RATIO : /dev/nvme0n1p1 [36m % [0m
+
+===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+[1;36m===== ===== ===== ===== ===== ===== ===== ===== ===== ===== [0m
+[0;96m-> print_env() by start.sh [0m
+[1;36m----- ----- ----- ----- ----- ----- ----- ----- ----- ----- [0m
+HOSTNAME             : buildserver
+FW_VERSION_PARAMETER : [31m[0m
+ABX_HOST_216         : afu@172.16.5.216
+ABX_HOST_217         : afu@172.16.5.217
+ABX_HOST_218         : afu@172.16.5.218
+[35m----- ----- ----- ----- ----- ----- ----- ----- ----- ----- [0m
+FW_BUILD_SUPPORT     : 1
+FW_BUILD_UNSIGNED    : 1
+FW_BUILD_SIGNED      : 0
+FW_SIGN_SUPPORT      : 0
+FW_GIT_SUPPORT       : 1
+FW_DEPLOY_SUPPORT    : 1
+FW_DAY_SINCE         : 7
+FW_TRANSFER_SUPPORT  : 0
+FW_TRANSFER_QE       : 0
+FW_TRANSFER_216      : 0
+FW_TRANSFER_217      : 0
+FW_TRANSFER_218      : 0
+FW_TRANSFER_REL      : 0
+FW_UPGRADE_SUPPORT   : 0
+FW_TEST_SUPPORT      : 0
+STORAGE_CHECK        : 1
+ABX_HOST_216         : afu@172.16.5.216
+ABX_HOST_217         : afu@172.16.5.217
+[35m----- ----- ----- ----- ----- ----- ----- ----- ----- ----- [0m
+SRC_PATH             : /home/a3team/work/lghv/alaska/kaon_bcm_androidtv12
+OUT_PATH             : 
+OTA_FILE_PATH        : /home/a3team/work/lghv/alaska/kaon_bcm_androidtv12/
+WB                   : /home/a3team/work/lghv/alaska
+RB                   : /mnt/sda/a3team/lghv/alaska
+RF                   : 2025.09.12-10
+RP                   : /mnt/sda/a3team/lghv/alaska/release/2025.09.12-10
+RP_OUT               : /mnt/sda/a3team/lghv/alaska/release/2025.09.12-10-out
+[1;36m===== ===== ===== ===== ===== ===== ===== ===== ===== ===== [0m
+[1;35mdo_release.sh  {[0m
+PWD:/home/a3team/work/lghv/alaska
+[36m===== ===== ===== ===== ===== ===== ===== ===== [0m
+[36m==> Delete 7 days since created     [0m
+[36m----- ----- ----- ----- ----- ----- ----- ----- [0m
+PWD:/home/a3team/work/lghv/alaska/release
+find . -maxdepth 1 -mindepth 1 -mtime +7 -type d -ls
+There is no file to delete
+
+[36m  ------------------------------------[0m
+  start   : 2025.09.12 10:20:00.625460
+  end     : 2025.09.12 10:20:00.640818
+  elapsed : 0h 0m 0s.013000
+[36m  ------------------------------------[0m
+
+PWD:/home/a3team/work/lghv/alaska
+[36m===== ===== ===== ===== ===== =====[0m
+[36m==> git pull                       [0m
+[36m----- ----- ----- ----- ----- -----[0m
+[1;35mgit.sh  {[0m
+[36mmain() {[0m
+PWD:/home/a3team/work/lghv/alaska/kaon_bcm_androidtv12
+[33mFW_GIT_CHECKOUT_FORCE ; not set  [0m
+[33mFW_GIT_BRANCH ; not set  [0m
+[33mFW_GIT_TAURUS_HASH ; e9f165a7e5280884b281f74d2744692cac07548d [0m
+[36m----- ----- ----- ----- ----- -----[0m
+[36m==> git pull -  branch      [0m
+
+@endcode
+
+# CTS 수행
+
+@code
+
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageWrite
+command_line_args: cts -m CtsIntentSignatureTestCases -t android.signature.cts.intent.IntentTest#shouldNotFindUnexpectedIntents
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsIntentSignatureTestCases: 32s
+Total aggregated tests run time: 32s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsIntentSignatureTestCases: 0.03 tests/sec [1 tests / 32325 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsIntentSignatureTestCases => prep = 7467 ms || clean = 1505 ms
+Total preparation time: 7s  ||  Total tear down time: 1s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 24s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsIntentSignatureTestCases -t android.signature.cts.intent.IntentTest#shouldNotFindUnexpectedIntents
+command_line_args: cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageWrite
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 13s
+Total aggregated tests run time: 13s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 0.07 tests/sec [1 tests / 13860 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsAppSecurityHostTestCases => prep = 203 ms || clean = 427 ms
+Total preparation time: 203 ms  ||  Total tear down time: 427 ms
+=======================================================
+=============== Summary ===============
+Total Run time: 56s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageWrite
+command_line_args: cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageWrite
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 13s
+Total aggregated tests run time: 13s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 0.07 tests/sec [1 tests / 13574 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsAppSecurityHostTestCases => prep = 200 ms || clean = 452 ms
+Total preparation time: 200 ms  ||  Total tear down time: 452 ms
+=======================================================
+=============== Summary ===============
+Total Run time: 55s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageRead29
+command_line_args: cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageRead29
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 11s
+Total aggregated tests run time: 11s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 0.08 tests/sec [1 tests / 11828 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsAppSecurityHostTestCases => prep = 201 ms || clean = 480 ms
+Total preparation time: 201 ms  ||  Total tear down time: 480 ms
+=======================================================
+=============== Summary ===============
+Total Run time: 53s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsMultiple
+command_line_args: cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsMultiple
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 22s
+Total aggregated tests run time: 22s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 0.04 tests/sec [1 tests / 22812 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsAppSecurityHostTestCases => prep = 199 ms || clean = 427 ms
+Total preparation time: 199 ms  ||  Total tear down time: 427 ms
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 5s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternal
+command_line_args: cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternal
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 16s
+Total aggregated tests run time: 16s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 0.06 tests/sec [1 tests / 16105 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsAppSecurityHostTestCases => prep = 199 ms || clean = 452 ms
+Total preparation time: 199 ms  ||  Total tear down time: 452 ms
+=======================================================
+=============== Summary ===============
+Total Run time: 58s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternalConsistent
+command_line_args: cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternalConsistent
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 27s
+Total aggregated tests run time: 27s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 0.04 tests/sec [1 tests / 27975 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsAppSecurityHostTestCases => prep = 201 ms || clean = 428 ms
+Total preparation time: 201 ms  ||  Total tear down time: 428 ms
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 9s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStats
+command_line_args: cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStats
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 15s
+Total aggregated tests run time: 15s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 0.06 tests/sec [1 tests / 15977 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsAppSecurityHostTestCases => prep = 199 ms || clean = 452 ms
+Total preparation time: 199 ms  ||  Total tear down time: 452 ms
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 4s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ListeningPortsTest#testNoRemotelyAccessibleListeningTcp6Ports
+command_line_args: cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ListeningPortsTest#testNoRemotelyAccessibleListeningTcp6Ports
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 13s
+Total aggregated tests run time: 13s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsAppSecurityHostTestCases: 0.08 tests/sec [1 tests / 13291 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsAppSecurityHostTestCases => prep = 200 ms || clean = 428 ms
+Total preparation time: 200 ms  ||  Total tear down time: 428 ms
+=======================================================
+=============== Summary ===============
+Total Run time: 55s
+1/1 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Unspecified_EditorDialogLostFocusAfterUnlocked
+command_line_args: cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Unspecified_EditorDialogLostFocusAfterUnlocked
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsInputMethodTestCases: 16s
+    armeabi-v7a CtsInputMethodTestCases[instant]: 7s
+Total aggregated tests run time: 23s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsInputMethodTestCases: 0.06 tests/sec [1 tests / 16788 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsInputMethodTestCases[instant] => prep = 8615 ms || clean = 4849 ms
+    armeabi-v7a CtsInputMethodTestCases => prep = 11583 ms || clean = 5551 ms
+Total preparation time: 20s  ||  Total tear down time: 10s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 28s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+============================================
+
+run cts -m CtsPermissionTestCases -t android.permission.cts.OneTimePermissionTest#testPermissionRevokedOnKill
+command_line_args: cts -m CtsPermissionTestCases -t android.permission.cts.OneTimePermissionTest#testPermissionRevokedOnKill
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsPermissionTestCases[instant]: 18s
+    armeabi-v7a CtsPermissionTestCases: 17s
+Total aggregated tests run time: 35s
+============== TOP 2 Slow Modules ==============
+    armeabi-v7a CtsPermissionTestCases[instant]: 0.05 tests/sec [1 tests / 18288 msec]
+    armeabi-v7a CtsPermissionTestCases: 0.06 tests/sec [1 tests / 17393 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsPermissionTestCases => prep = 10102 ms || clean = 3532 ms
+    armeabi-v7a CtsPermissionTestCases[instant] => prep = 8404 ms || clean = 3214 ms
+Total preparation time: 18s  ||  Total tear down time: 6s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 39s
+2/2 modules completed
+Total Tests       : 2
+PASSED            : 2
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsPermissionTestCases -t android.permission.cts.OneTimePermissionTest#testOneTimePermission
+command_line_args: cts -m CtsPermissionTestCases -t android.permission.cts.OneTimePermissionTest#testOneTimePermission
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsPermissionTestCases[instant]: 17s
+    armeabi-v7a CtsPermissionTestCases: 16s
+Total aggregated tests run time: 33s
+============== TOP 2 Slow Modules ==============
+    armeabi-v7a CtsPermissionTestCases[instant]: 0.06 tests/sec [1 tests / 17029 msec]
+    armeabi-v7a CtsPermissionTestCases: 0.06 tests/sec [1 tests / 16942 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsPermissionTestCases => prep = 10260 ms || clean = 3554 ms
+    armeabi-v7a CtsPermissionTestCases[instant] => prep = 8164 ms || clean = 3198 ms
+Total preparation time: 18s  ||  Total tear down time: 6s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 37s
+2/2 modules completed
+Total Tests       : 2
+PASSED            : 2
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsJniTestCases -t android.jni.cts.JniStaticTest#test_dlopenPublicLibraries
+command_line_args: cts -m CtsJniTestCases -t android.jni.cts.JniStaticTest#test_dlopenPublicLibraries
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsJniTestCases[instant]: 5s
+    armeabi-v7a CtsJniTestCases: 4s
+Total aggregated tests run time: 10s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsJniTestCases[instant]: 0.19 tests/sec [1 tests / 5284 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsJniTestCases[instant] => prep = 1078 ms || clean = 919 ms
+    armeabi-v7a CtsJniTestCases => prep = 2217 ms || clean = 1187 ms
+Total preparation time: 3s  ||  Total tear down time: 2s
+=======================================================
+=============== Summary ===============
+Total Run time: 58s
+2/2 modules completed
+Total Tests       : 2
+PASSED            : 2
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Visible_EditorDialogLostFocusAfterUnlocked
+command_line_args: cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Visible_EditorDialogLostFocusAfterUnlocked
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsInputMethodTestCases: 16s
+    armeabi-v7a CtsInputMethodTestCases[instant]: 6s
+Total aggregated tests run time: 22s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsInputMethodTestCases: 0.06 tests/sec [1 tests / 16094 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsInputMethodTestCases[instant] => prep = 8172 ms || clean = 4534 ms
+    armeabi-v7a CtsInputMethodTestCases => prep = 11192 ms || clean = 5311 ms
+Total preparation time: 19s  ||  Total tear down time: 9s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 27s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysVisible_EditorDialogLostFocusAfterUnlocked
+command_line_args: cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysVisible_EditorDialogLostFocusAfterUnlocked
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsInputMethodTestCases: 16s
+    armeabi-v7a CtsInputMethodTestCases[instant]: 7s
+Total aggregated tests run time: 23s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsInputMethodTestCases: 0.06 tests/sec [1 tests / 16102 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsInputMethodTestCases[instant] => prep = 8125 ms || clean = 4717 ms
+    armeabi-v7a CtsInputMethodTestCases => prep = 11082 ms || clean = 5182 ms
+Total preparation time: 19s  ||  Total tear down time: 9s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 26s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysHidden_EditorDialogLostFocusAfterUnlocked
+command_line_args: cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysHidden_EditorDialogLostFocusAfterUnlocked
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsInputMethodTestCases: 15s
+    armeabi-v7a CtsInputMethodTestCases[instant]: 7s
+Total aggregated tests run time: 22s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsInputMethodTestCases: 0.06 tests/sec [1 tests / 15543 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsInputMethodTestCases[instant] => prep = 8298 ms || clean = 4883 ms
+    armeabi-v7a CtsInputMethodTestCases => prep = 11098 ms || clean = 5149 ms
+Total preparation time: 19s  ||  Total tear down time: 10s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 26s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Hidden_EditorDialogLostFocusAfterUnlocked
+command_line_args: cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Hidden_EditorDialogLostFocusAfterUnlocked
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsInputMethodTestCases: 15s
+    armeabi-v7a CtsInputMethodTestCases[instant]: 6s
+Total aggregated tests run time: 22s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsInputMethodTestCases: 0.06 tests/sec [1 tests / 15764 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsInputMethodTestCases[instant] => prep = 8477 ms || clean = 4541 ms
+    armeabi-v7a CtsInputMethodTestCases => prep = 11054 ms || clean = 5208 ms
+Total preparation time: 19s  ||  Total tear down time: 9s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 26s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsWifiTestCases -t android.net.wifi.cts.WifiManagerTest#testNetworkSetupWizardPermission
+run cts -m CtsWifiTestCases -t android.net.wifi.cts.WifiManagerTest#testNetworkStackPermission
+
+2024-11 
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushAvc
+command_line_args: cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushAvc
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsMediaTestCases: 10s
+    armeabi-v7a CtsMediaTestCases[instant]: 3s
+Total aggregated tests run time: 14s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsMediaTestCases: 0.10 tests/sec [1 tests / 10479 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsMediaTestCases => prep = 17070 ms || clean = 1568 ms
+    armeabi-v7a CtsMediaTestCases[instant] => prep = 240316 ms || clean = 1066 ms
+Total preparation time: 4m 17s  ||  Total tear down time: 2s
+=======================================================
+=============== Summary ===============
+Total Run time: 5m 16s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushHevc
+command_line_args: cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushHevc
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsMediaTestCases: 8s
+    armeabi-v7a CtsMediaTestCases[instant]: 3s
+Total aggregated tests run time: 12s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsMediaTestCases: 0.12 tests/sec [1 tests / 8242 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsMediaTestCases => prep = 18787 ms || clean = 1309 ms
+    armeabi-v7a CtsMediaTestCases[instant] => prep = 19478 ms || clean = 1138 ms
+Total preparation time: 38s  ||  Total tear down time: 2s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 36s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushVp9
+command_line_args: cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoFlushVp9
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsMediaTestCases: 8s
+    armeabi-v7a CtsMediaTestCases[instant]: 3s
+Total aggregated tests run time: 12s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsMediaTestCases: 0.12 tests/sec [1 tests / 8440 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsMediaTestCases => prep = 16875 ms || clean = 1321 ms
+    armeabi-v7a CtsMediaTestCases[instant] => prep = 15047 ms || clean = 1103 ms
+Total preparation time: 31s  ||  Total tear down time: 2s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 30s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+run cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoPlaybackAvc
+command_line_args: cts -m CtsMediaTestCases -t android.media.cts.DecoderTest#testTunneledVideoPlaybackAvc
+
+============================================
+================= Results ==================
+=============== Consumed Time ==============
+    armeabi-v7a CtsMediaTestCases: 18s
+    armeabi-v7a CtsMediaTestCases[instant]: 3s
+Total aggregated tests run time: 22s
+============== TOP 1 Slow Modules ==============
+    armeabi-v7a CtsMediaTestCases: 0.05 tests/sec [1 tests / 18465 msec]
+============== Modules Preparation Times ==============
+    armeabi-v7a CtsMediaTestCases => prep = 17259 ms || clean = 1358 ms
+    armeabi-v7a CtsMediaTestCases[instant] => prep = 15253 ms || clean = 1086 ms
+Total preparation time: 32s  ||  Total tear down time: 2s
+=======================================================
+=============== Summary ===============
+Total Run time: 1m 40s
+2/2 modules completed
+Total Tests       : 1
+PASSED            : 1
+FAILED            : 0
+============== End of Results ==============
+
+@endcode
+
+*/

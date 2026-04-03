@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['g2d_0',['g2d',['../structhwc2__bcm__device__t.html#a75cc93dd353aa8560e289c9e7ba21bea',1,'hwc2_bcm_device_t']]],
+  ['g2dc_1',['g2dc',['../structhwc2__bcm__device__t.html#ab00441102fc7b7b21cdf42214020f08d',1,'hwc2_bcm_device_t']]],
+  ['g2dchk_2',['g2dchk',['../structhwc2__bcm__device__t.html#a0db7a625ac722525fac979a26c043517',1,'hwc2_bcm_device_t']]],
+  ['g_5fhwc2_5fai32_5fmatrix_5fycbcrtorgb_3',['g_hwc2_ai32_Matrix_YCbCrtoRGB',['../hwcomposer__new_8cpp.html#ab9ce5badd3b6d835aadd0029f7b6e23b',1,'hwcomposer_new.cpp']]],
+  ['get_4',['GET',['../work-20240814_8dox.html#a4b127fbe04a7c66957a7a9693060b762',1,'work-20240814.dox']]],
+  ['get_5',['get',['../host__log__374901086722608467_8txt.html#ad43c70295755399ff62d1f08ba7d9f18',1,'get:&#160;host_log_374901086722608467.txt'],['../inv__10240507096585625488_2host__log__374901086722608467_8txt.html#ad43c70295755399ff62d1f08ba7d9f18',1,'get:&#160;host_log_374901086722608467.txt']]],
+  ['getprop_6',['getprop',['../host__log__374901086722608467_8txt.html#a298d6a695c7f7a1431793fb377190224',1,'getprop:&#160;host_log_374901086722608467.txt'],['../inv__10240507096585625488_2host__log__374901086722608467_8txt.html#a298d6a695c7f7a1431793fb377190224',1,'getprop:&#160;host_log_374901086722608467.txt']]],
+  ['git_20명령어_7',['Git 명령어',['../tip_git.html',1,'TipIist']]],
+  ['git_20적용_20수정_8',['자동화 테스트 git 적용 / 수정',['../work_20260120.html#autotoc_md415',1,'']]],
+  ['git_20clone_20하기_9',['새롭게 VS 에서 git clone 하기',['../work_20260120.html#autotoc_md417',1,'']]],
+  ['git_20diff_20명령어로_20생성한_20패치_20파일을_20사용하여_20코드를_20현재_20작업_20디렉토리에_20반영하는_20방법_10',['git diff 명령어로 생성한 패치 파일을 사용하여 코드를 현재 작업 디렉토리에 반영하는 방법',['../tip_git.html#autotoc_md492',1,'']]],
+  ['git_20diff_20patch_20적용_11',['git-diff-patch-적용',['../tip_git.html#autotoc_md493',1,'']]],
+  ['git_20status_12',['git status',['../tip_git.html#autotoc_md479',1,'']]],
+  ['github_13',['# BKSoft Github',['../work_20260120.html#autotoc_md408',1,'']]],
+  ['gitlab_20altimedia_20com_20atv_14',['&lt;a href=&quot;https://gitlab.altimedia.com/atv&quot;&gt;https://gitlab.altimedia.com/atv&lt;/a&gt;',['../tip_account.html#autotoc_md423',1,'']]],
+  ['google_5fgtvs_5f20250902_15',['LGHV K1100UA google_gtvs_20250902',['../work_20250908.html#autotoc_md348',1,'']]],
+  ['grep_16',['grep',['../host__log__374901086722608467_8txt.html#abe35f55a1dfd81b9ccd6f7f8b85bca8e',1,'grep:&#160;host_log_374901086722608467.txt'],['../inv__10240507096585625488_2host__log__374901086722608467_8txt.html#abe35f55a1dfd81b9ccd6f7f8b85bca8e',1,'grep:&#160;host_log_374901086722608467.txt'],['../tip_console.html#autotoc_md464',1,'grep']]],
+  ['gts_17',['GTS',['../tip_xts.html#autotoc_md611',1,'']]],
+  ['gts_20실패_18',['GTS 실패',['../work_20241125.html#autotoc_md188',1,'']]],
+  ['gtvs_19',['GTVS',['../tip_gtvs.html',1,'TipIist']]],
+  ['gtvs_20버전확인_20',['gtvs 버전확인',['../tip_console.html#autotoc_md466',1,'']]],
+  ['gtvs_20정리_21',['gtvs 정리',['../work_20250214.html#autotoc_md198',1,'']]],
+  ['gtvs_20최신_20업데이트_22',['GTVS 최신 업데이트',['../tip_gtvs.html#autotoc_md495',1,'']]],
+  ['gtvs_20250934118_23',['GTVS 250934118',['../work_20250430.html#autotoc_md306',1,'']]]
+];

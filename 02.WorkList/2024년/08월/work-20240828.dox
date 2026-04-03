@@ -1,0 +1,112 @@
+/*!
+@page work_20240828	2024.08.28
+
+# 가온본사
+---
+https://jira.kaonmedia.com/browse/K1010-78
+
+@code
+
+사무실에서  cable 단선인 상태에서 구글설정 > restart 를 수행하면 
+
+아래 로그와 같이 TFTP 서버 접속 재시도를 계속하여 Update를 받은 후 40초 후에 
+
+CM Rebooting 이 실행됩니다.
+
+ [00:02:54 01/01/1970] [SNMP Thread] BcmStbCmDocsisIpThread::StartSoftwareUpdate:  (CmDocsisIpThread) ERROR - IP Initialization hasn't completed successfully!  Can't start s/w update...
+Scanned 215000000 Hz...
+==)Reseting DS1
+Scanned 518000000 Hz...
+==)Reseting DS2
+Scanned 821000000 Hz...
+==)Reseting DS3
+Starting software update...
+[00:02:56 01/01/1970] [CmDocsisIpThread] Tftp Client::GetReply:  (Tftp Client) Timed out on socket select!
+[00:02:56 01/01/1970] [CmDocsisIpThread] Tftp Client::Send:  (Tftp Client) Attempt #(1) Backoff (1) Exp Block #(1) Last Block #(0) Recv'd Block #(0)
+[00:02:58 01/01/1970] [CmDocsisIpThread] Tftp Client::GetReply:  (Tftp Client) Timed out on socket select!
+[00:02:58 01/01/1970] [CmDocsisIpThread] Tftp Client::Send:  (Tftp Client) Attempt #(2) Backoff (2) Exp Block #(1) Last Block #(0) Recv'd Block #(0)
+[00:03:02 01/01/1970] [CmDocsisIpThread] Tftp Client::GetReply:  (Tftp Client) Timed out on socket select!
+[00:03:02 01/01/1970] [CmDocsisIpThread] Tftp Client::Send:  (Tftp Client) Attempt #(3) Backoff (4) Exp Block #(1) Last Block #(0) Recv'd Block #(0)
+[00:03:11 01/01/1970] [CmDocsisIpThread] Tftp Client::GetReply:  (Tftp Client) Timed out on socket select!
+[00:03:11 01/01/1970] [CmDocsisIpThread] Tftp Client::Send:  (Tftp Client) Attempt #(4) Backoff (8) Exp Block #(1) Last Block #(0) Recv'd Block #(0)
+[00:03:28 01/01/1970] [CmDocsisIpThread] Tftp Client::GetReply:  (Tftp Client) Timed out on socket select!
+[00:03:28 01/01/1970] [CmDocsisIpThread] Tftp Client::Send:  (Tftp Client) ERROR - Request Retries > kTftpMaxRequestRetryCount (4) !
+[00:03:30 01/01/1970] [CmDocsisIpThread] BcmEcosIpHalIf::RemoveIpv6Address:  (IP Stack1 HalIf) ERROR - Failed to remove IPv6 address fe80::1a34:afff:feb4:79b5/64 from the stack!
+[00:03:30 01/01/1970] [CmDocsisIpThread] BcmDhcpV6ClientIf::ReleaseAddresses:  (DHCPv6 ClientIf for IP Stack1) ERROR - IA state is initial; there is no address to release.
+[00:03:30 01/01/1970] [CmDocsisCtlThread] BcmDocsisCmHalIf::SetMulticastMode:  (DOCSIS CableModem HalIf) CM HAL Multicast mode = 0
+DefaultSnmpAgentClass::ShutdownPendingEvent for Vendor eSTB CM Factory Agent
+Vendor eSTB CM Factory Agent sending deferred traps...
+Done w/ deferred traps.
+Vendor eSTB CPE Factory Agent disabling management.
+Vendor eSTB CPE Factory Agent deferring traps.
+CmSnmpAgent waiting for packets, events, and traps to clear...
+CM>
+>>rMagNotification: EcmReset!
+WaitForAckLite: Timeout waiting for eStb response! (1000ms)
+>>DsgApiNotification: DocsDevResetNow!
+==)Reseting DS0
+==)Reseting DS1
+==)Reseting DS2
+==)Reseting DS3
+Stopping DHCP/ToD/TFTP (client requested)...
+[00:03:32 01/01/1970] [CmDocsisIpThread] BcmEcosIpHalIf::RemoveIpv6Address:  (IP Stack1 HalIf) ERROR - Failed to remove IPv6 address fe80::1a34:afff:feb4:79b5/64 from the stack!
+[00:03:32 01/01/1970] [CmDocsisIpThread] BcmDhcpV6ClientIf::ReleaseAddresses:  (DHCPv6 ClientIf for IP Stack1) ERROR - IA state is initial; there is no address to release.
+[01/01/1970 00:03:32] [BFCEV] Resetting for unspecified reason.
+[00:03:33 01/01/1970] [tStartup] BcmDocsisCmHalIf::IfAdminStatus:  (DOCSIS CableModem HalIf) CM-MAC ifAdminStatus set to 'down' - disabling US & DS HW assist.
+BcmEcosBfcApplication::DeInitialize():  Rebooting now so we don't trip all over
+
+@endcode
+
+@code
+Yangsuk.Lee 이양석  PL님 
+
+ 대안2 + 대안4 를 반영한 userdebug 펌웨어 입니다. 
+
+https://bigfile.mail.naver.com/download?fid=Hd+81635+6dZKCYwHriTFx2ZFxtwHqUmKotmaAU/KxuZKogmHquXKobdFAvwaxvjMxtdK6UdFAEZKoKdMo2waxUZMoFoMxuqFrFSazKraAb=
+
+
+테스트 내용
+1. 대안2 
+HCN\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\service\estb\StbHostApps\EstbCannedSnmp\EstbCannedSnmp.cpp
+ool BcmEstbCannedSnmp::Set_docsDevResetNow(uint8 docsDevResetNow)
+{
+	// 0714 무조건 하지 않는다.  by PL Park
+	gErrorMsg(fMessageLogSettings, "Set_docsDevResetNow.......  true return!");
+	return true;
+#if 0	
+
+2. 대안4
+HCN\kaon_bcm_androidtv12\frameworks\base\services\core\java\com\android\server\power\ShutdownThread.java
+
+    public void run() {
+        {
+            String reason = (mReboot ? "1" : "0") + (mReason != null ? mReason : "");
+            try {
+				/* remove for test (https://jira.kaonmedia.com/browse/K1010-78)				
+                // kaon modify CM Reset call (  pl_hcn_notifyCmUpgrade 함수에서 체크후 cm reset cmd 호출 루틴 있음. )
+                int timeout = SystemProperties.getInt("persist.odm.shutdown.timeout", 0);
+                if (timeout <= 0)
+                {
+                    int ret = -1;
+                    try {
+                        IPLAPIService service = IPLAPIService.getService();
+                        if (service != null) {
+                            service.android_setProperty("debug.cm.auto.firmware.name", "not_defined");
+                            service.android_setProperty("debug.cm.firmware.name", "not_defined"); 
+                            service.pl_hcn_notifyCmUpgrade( false );
+                        }
+                        service = null;
+                    }
+                    catch (RemoteException e) {
+                        Log.e(TAG, "PLAPIService: RemoteException: " + e.toString());
+                    }
+                }
+                */
+                Thread.sleep(2*1000);
+
+@endcode
+
+---
+<br>
+---
+*/

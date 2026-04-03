@@ -1,0 +1,83 @@
+/*!
+@page work_20250430	2025.04.30
+
+---
+
+# spl 2025-03-01
+@code
+git cherry-pick 182eca70
+git cherry-pick 8e602c3f
+git cherry-pick 5566a4ce
+git cherry-pick b31ed1db
+git cherry-pick fe400ab6
+git cherry-pick b1616cd0
+git cherry-pick 5a49cf0b
+git cherry-pick 7147d23f
+git cherry-pick 074664da
+git cherry-pick 2021c136
+git cherry-pick 50d384d1
+git cherry-pick 0b676355
+@endcode
+
+# spl 2025-04-01
+@code
+git cherry-pick f841e635
+git cherry-pick b84ec9ca
+git cherry-pick f86a971f
+git cherry-pick 76db8714
+git cherry-pick 77fab3f8
+git cherry-pick 4a2120a0
+git cherry-pick 5e11f24c
+git cherry-pick 0d30d2cf
+git cherry-pick bb9054f0
+git cherry-pick 472ef93f
+git cherry-pick 3184b7af
+git cherry-pick 1c865a23
+git cherry-pick fedbcf6f
+git cherry-pick 4d2d9d45
+git cherry-pick 8e51da70
+git cherry-pick bd8ec675
+git cherry-pick 6009f7a7
+git cherry-pick ee6a9cf8
+git cherry-pick 2143d6ac
+git cherry-pick 76693670
+git cherry-pick 945f7293
+git cherry-pick 3124d3e6
+git cherry-pick afbc5d95
+git cherry-pick 1be13d76
+git cherry-pick e2992f91
+git cherry-pick cc73a585
+git cherry-pick 2f3e42c7
+git cherry-pick 94f48bba
+git cherry-pick f497b130
+git cherry-pick f19d6e16
+@endcode
+
+# GTVS 250934118
+@code
+git cherry-pick 182eca70
+@endcode
+
+
+sgkang@lguplus-pc:~/LGHV_TEST/kaon_bcm_androidtv12$ find . -name "logd"
+./system/logging/logd
+./out/target/product/K1100UA/obj/PACKAGING/target_files_intermediates/K1100UA-target_files-kaon2025043043/SYSTEM/bin/logd
+./out/target/product/K1100UA/obj/EXECUTABLES/logd_intermediates/logd
+./out/target/product/K1100UA/system/bin/logd
+./out/target/product/K1100UA/symbols/system/bin/logd
+./out/soong/.intermediates/system/logging/logd
+./out/soong/.intermediates/system/logging/logd/auditctl/android_arm_armv8-a_cortex-a53/obj/system/logging/logd
+./out/soong/.intermediates/system/logging/logd/logd
+./out/soong/.intermediates/system/logging/logd/logd/android_arm_armv8-a_cortex-a53_cfi/unstripped/logd
+./out/soong/.intermediates/system/logging/logd/logd/android_arm_armv8-a_cortex-a53_cfi/obj/system/logging/logd
+./out/soong/.intermediates/system/logging/logd/logd/android_arm_armv8-a_cortex-a53_cfi/logd
+./out/soong/.intermediates/system/logging/logd/liblogd/android_arm_armv8-a_cortex-a53_static_cfi/obj/system/logging/logd
+./out/soong/.intermediates/packages/modules/StatsD/statsd/statsd/android_arm_armv8-a_cortex-a53_com.android.os.statsd/obj/packages/modules/StatsD/statsd/src/logd
+./packages/modules/StatsD/statsd/src/logd
+
+
+
+*/
+
+
+

@@ -1,0 +1,264 @@
+/*!
+@page work_20250407	2025.04.07
+
+---
+
+# (남인천방송)가온 부팅중 멈춤현상 (1way에서 공장초기화)
+
+https://jira.kaonmedia.com/browse/K0644-275
+
+@code
+hb.chohb.cho 조현빈 님이 댓글을 추가했습니다 - 2일 전
+제가 확인할 당시에는 RF 탈부착 하여도 진행되지 않습니다.
+
+하지만 ATV10 의 경우 2번 재부팅할때 팝업 출력 후 재부팅 되는 것으로 확인됐습니다.
+
+"CM NETWORK TYPE 동기화를 위해 재부팅 합니다."
+
+
+tony.choi
+tony.choi 최성훈 님이 댓글을 추가했습니다 - 2일 전
+Sungmin.kang 강성민 hb.cho 조현빈 매니저님, RF신호를 뺐다가 꼽으면 진행한다고 합니다-LGHV
+Sungmin.kang 강성민 관련 디버깅 진행해 주시기 바랍니다.
+
+
+hb.cho
+hb.cho 조현빈 님이 댓글을 추가했습니다 - 2일 전 - 수정됨
+tony.choi 최성훈 PL님 Sungmin.kang 강성민 매니저님
+ 
+
+버전별로 테스트 결과 공유드립니다.
+
+사전 설정 조건
+히든메뉴 - 5. STB 동작 설정 -  EHERNET BYPASS 설정 - 사용(1way 변경) 으로 변경 후 재부팅 -> Factory reset 진행
+ 
+
+1. ATV10 의 경우
+부팅 단계를 2번 하는 것으로 보임
+육안상 확인해본 결과 Android 부팅을 두번 하는 것을 확인했습니다.
+
+ 
+
+2. ATV12 의 경우 (모든 ATV12 FW 동일)
+부팅 단계를 1번만 하며 Android 부팅 단계에 머물러 있습니다.
+
+이후 재부팅시 정상부팅 됩니다.
+
+ + ATV12 추가로그도 공유드립니다. 
+
+@endcode	
+
+# 분석결과
+@code
+
+1way 설정 시
+ - 프로퍼티 값 : 1 way
+ - cm 의 status : 1 way
+
+위 상태에서 공장초기화 시 
+ - 프로퍼티값 삭제 : 2 way  초기값
+ - cm 의 status : 1way
+
+공장초기화 후 첫 부팅 시 : 부팅진행 실패
+ - 프로퍼티값  : 2way
+ - cm status : 1way -> 2way 변경
+             (plapi 에서 부팅 초기 프로퍼티값  과 cm status 이 다르면 프로퍼티값  으로 변경)
+              cm status  변경 후 재부팅 필요하나 재부팅 하지 않음. (ATV10 -> ATV12  시 빠진 것 같음)
+
+다음 부팅 시 : 정상 부팅
+ - 프로퍼티값  : 2way
+ - cm status : 2way 
+
+@endcode
+
+# 테스트
+@code
+
+        pl_cj setnetworktype <type> # pl_cj_setNetworkType
+        pl_cj getnetworktype # pl_cj_getNetworkType
+
+plapiapp-system pl_cj getnetworktype
+plapiapp-system pl_cj setnetworktype
+@endcode
+
+
+
+@code
+강성민[Kang Sung Min]아래 레드마인 새로 생겼는데 FTP 진입 막으면 되는지 가온 JIRA에 소스 베이스로 업데이트 해주세요.
+ 
+
+https://10.10.113.79:18090/issues/12861
+
+@최성훈님 ('25.3.28일, 이메일 : 가온셋탑 회수시료 14대에 대한 세부정보 공유 드립니다.)
+
+기본적으로 운영을 잘 해야겠지만,
+아래와 같은 상황이 발생할 경우에 예외 처리가 필요할 것 같습니다.
+
+내부적으로 검토하셔서 회신 바랍니다.
+
+수고하세요.
+
+---------------------- '25. 3.28(회신) ---------------------------
+임동은님, 김건중님,
+
+본사에서 환경 셋업한뒤 테스트한 결과 다음과 같은 조건에서 해당업데이트 진행이 되는걸로 추정됩니다.
+
+LGHV CMTS ftp서버에 CFG파일과 1.1.0.bin 이 존재할 경우
+그리고 FW CM 업데이트 과정에서 내부SNMP 통신 에러가 발생할 경우 – 일반적인 에러에서는 발생 안함
+A. CM업데이트 모드중 SNMP통신 에러가 발생하는 Edge case에 발생 가능성 있음
+i. 강제로 SNMP 통신 실패 가정하고 해당 루틴으로 진입하게 만들어서 테스트하여 문제 증상 확인
+B. 부천방송에서 테스트시에도 SNMP통신 실패 가정하고 테스트 했으나 CM v1.1.0은 업데이트 안되었음
+i. 담당자가 재현 가능하게 설정했다지만 동일하게 설정이 안되어 이슈 재현 안된것으로 보임 – 부천방송 환경은 임의로 조작 어려워서 한계
+ii. CFG에 맞는 CM v1.1.0 파일이 정확한곳에 없었거나 FTP주소 맞지 않는 가능성으로 재현 안되었을수 있음
+LGHV 각 SO FTP에 조건에 맞는 CFG와 파일이 없으면 이슈가 발생되지 않고,
+파일이 존재하더라도 특정 케이스라 이슈가 발생할 가능성은 낮아 보입니다.
+@endcode
+
+
+
+
+
+DSN 3차, 4차 추가 완료
+1차 - 기존 AP에 전달받은 1차 DNS
+2차 - 기존 AP에 전달받은 2차 DNS
+3차 - 하드코딩된 8.8.8.8(Google)
+4차 - 하드코딩된 8.8.4.4(Google)
+
+타임아웃 시 간격 확인 완료
+1~2차 사이 간격 : 5초
+2~3차 사이 간격 : 2.5초
+3~4차 사이 간격 : 5초
+4차까지 실패 시 대기시간 : 없음
+
+
+"1. 쿼리 주소?
+1차 - kr.pool.ntp.org (프로비저닝 서버부터 입수 1차 NTP) 
+2차 - pool.ntp.org (프로비저닝 서버부터 입수 2차 NTP) 
+3차 - time.android.com(하드코딩)
+
+2. 타임아웃 시 간격
+- NTP 서버 별 타임아웃 간격은 1초,1초 ,2초, 4초
+- 1~3차 사이 간격: 없음
+- 3차까지 실패 시 대기시간: 없음.
+
+3. 1~3차 모두 타임아웃 시 Cycle 횟수: 최대 1회
+
+4.  NTP 서버 모두 타임아웃되는 경우 예시
+- 1차 NTP 1초->1초->2초->4초 - >  2차 NTP 1초->1초->2초->4초
+   -> 3차 NTP 1초->1초->2초->4초"
+
+
+
+쿼리 주소
+1차 - kr.pool.ntp.org (PVSD서버로 부터 입수)
+2차 - pool.ntp.org (PVSD서버로 부터 입수)
+3차 - time.android.com
+
+
+2. 타임아웃 시 간격
+- 1~3차 사이 간격 : 60초
+- 3차까지 실패 시 대기시간: 60초
+
+3. 1~3차 모두 타임아웃 시 Cycle 횟수: 무한 반복 시도"
+
+
+
+
+sungmin.kangSungmin.kang 강성민 님이 댓글을 추가했습니다 - 23/1월/2025 2:44 오후
+ - NTP : 1, 2, 3차 하드코딩
+
+1차 kr.pool.ntp.org
+2차 pool.ntp.org
+3차 time.android.com
+각 차 실패 시 60초 후 다음 차 시도, 무한 반복
+편집
+삭제
+
+
+sungmin.kang
+Sungmin.kang 강성민 님이 댓글을 추가했습니다 - 10/1월/2025 12:30 오후
+1. DSN  3차, 4차 추가 완료 
+
+1차 - 기존 AP에 전달받은 1차 DNS
+2차 - 기존 AP에 전달받은 2차 DNS
+3차 - 하드코딩된 8.8.8.8(Google)
+4차 - 하드코딩된 8.8.4.4(Google)
+2.  타임아웃 시 간격 확인 완료
+
+1~2차 사이 간격 : 5초
+2~3차 사이 간격 : 2.5초
+3~4차 사이 간격 : 5초
+4차까지 실패 시 대기시간 : 없음
+편집
+삭제
+
+
+packages/modules/NetworkStack/src/android/net/dhcp/DhcpClient.java
+ 중복 방지 + 조건부 추가 개선 코드
+java
+복사
+편집
+protected void handlePacket(byte[] recvbuf, int length) {
+    try {
+        final DhcpPacket packet = DhcpPacket.decodeFullPacket(recvbuf, length,
+                DhcpPacket.ENCAP_L2, getOptionsToSkip());
+
+        if (DBG) Log.d(TAG, "Received packet: " + packet);
+
+        // Google DNS IP 주소들
+        Inet4Address dns1 = (Inet4Address) Inet4Address.getByAddress(new byte[]{8, 8, 8, 8});
+        Inet4Address dns2 = (Inet4Address) Inet4Address.getByAddress(new byte[]{8, 8, 4, 4});
+
+        // 현재 DNS 리스트에서 중복 여부 확인
+        boolean hasDns1 = packet.mDnsServers.contains(dns1);
+        boolean hasDns2 = packet.mDnsServers.contains(dns2);
+
+        int dnsCount = packet.mDnsServers.size();
+        if (DBG) Log.d(TAG, "mDnsServers count: " + dnsCount);
+
+        if (!hasDns1) {
+            packet.mDnsServers.add(dns1);
+            if (DBG) Log.d(TAG, "Added Google DNS: 8.8.8.8");
+        }
+
+        if (!hasDns2) {
+            packet.mDnsServers.add(dns2);
+            if (DBG) Log.d(TAG, "Added Google DNS: 8.8.4.4");
+        }
+
+        // 최종 DNS 리스트 로깅
+        for (int i = 0; i < packet.mDnsServers.size(); i++) {
+            if (DBG) Log.d(TAG, "Final mDnsServers [" + i + "] : " + packet.mDnsServers.get(i));
+        }
+
+        sendMessage(CMD_RECEIVED_PACKET, packet);
+
+        if (LGHV_DHCP_SUPPORT) {
+            sendMessage(CMD_RECEIVED_PACKET_LGHV, packet);
+        }
+
+    } catch (IOException e) {
+        Log.e(TAG, "Read error", e);
+    } catch (DhcpPacket.ParseException e) {
+        Log.e(TAG, "Can't parse packet: " + e.getMessage());
+        if (PACKET_DBG) {
+            Log.d(TAG, HexDump.dumpHexString(recvbuf, 0, length));
+        }
+        if (e.errorCode == DhcpErrorEvent.DHCP_NO_COOKIE) {
+            final int snetTagId = 0x534e4554;
+            final String bugId = "31850211";
+            final int uid = -1;
+            final String data = DhcpPacket.ParseException.class.getName();
+            EventLog.writeEvent(snetTagId, bugId, uid, data);
+        }
+        mMetricsLog.log(mIfaceName, new DhcpErrorEvent(e.errorCode));
+        mMetrics.addDhcpErrorCode(e.errorCode);
+    }
+
+
+
+
+*/
+
+
+

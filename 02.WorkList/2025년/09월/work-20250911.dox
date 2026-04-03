@@ -1,0 +1,56 @@
+/*!
+@page work_20250911	2025.09.11
+
+---
+
+# [울산방송]Android recovery 에서 리모컨이 안먹는 이슈
+https://jira.kaonmedia.com/browse/K0644-381
+
+@code
+
+리커버리 모드에서 IR 무응답 간헐 발생 – user 빌드 한정 타이밍 이슈 개선
+
+현상 : 리커버리 진입 시 간헐적으로 입력 무응답. userdebug 빌드에서는 재현 안 됨,
+         user 빌드에서만 재현. (10회 중 1~2회 발생)
+
+원인 : 리커버리 초기화 시점에 /dev/input/event*가 아직 준비되기 전에 초기 스캔이 먼저 실행되어 초기화 시점 불일치(타이밍 문제) 로 장치 인식을 놓침.
+         userdebug 대비 user 빌드가 더 빠르게 동작해 타이밍 불일치가 심화됨.
+
+수정 : minui/events.cpp::ev_init() 초입에 user 빌드에서만 300ms 지연을 추가
+          → 자체 테스트 OK (30회 테스트).
+          
+
+diff --git a/bootable/recovery/minui/events.cpp b/bootable/recovery/minui/events.cpp
+index 863ac74743c..c84afb51b56 100644
+--- a/bootable/recovery/minui/events.cpp
++++ b/bootable/recovery/minui/events.cpp
+@@ -35,6 +35,7 @@
+ #include <android-base/unique_fd.h>
+
+ #include "minui/minui.h"
++#include <android-base/properties.h>
+
+ constexpr const char* INPUT_DEV_DIR = "/dev/input";
+
+@@ -142,6 +143,14 @@ static int inotify_cb(int fd, __unused uint32_t epevents) {
+ }
+
+ int ev_init(ev_callback input_cb, bool allow_touch_inputs) {
++  // --- user build<B8><B8> <C0>Է<C2> <C3>ʱ<E2> <BD><BA>ĵ <C1><F6><BF><AC> ---
++  // --- user build<B8><B8> <C0>Է<C2> <C3>ʱ<E2> <BD><BA>ĵ <C1><F6><BF><AC> ---
++  // ro.debuggable=0 <A1><E6> user <BA><F4><B5><E5>
++  const bool is_user = (android::base::GetIntProperty("ro.debuggable", 0) == 0);
++
++  if (is_user) {
++    usleep(300 * 1000);
++  }
++
+
+
+@endcode
+
+*/
+
+
+
+

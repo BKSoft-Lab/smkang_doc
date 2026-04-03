@@ -1,0 +1,113 @@
+/*!
+@page work_20240812	2024.08.12
+
+# 가온본사
+---
+## Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음
+https://jira.kaonmedia.com/browse/K1023-188
+
+@code
+
+※ \vendor\broadcom\bcm_platform\nxif\nxserver\nxinexus.cpp 빌드시 (넥서스)
+./bcm.bdst.nxl.sh -d K1100UA_bkouc500 -m bkouc500 -c -x -s
+./bcm.ref.sh -d K1100UA_bkouc500 -o
+해야 빌드에 반영되어 이미지 생성됨
+
+==========================================================================
+1차 분석
+// 로그상 "NEXUS_AudioCapture_GetBuffer bufferSize 204800 bytes" 찍히고  memcpy에서 죽음. 204800은 CAPTURED_DATA_SIZE임
+// NEXUS_AudioCapture_GetBuffer()함수가 NEXUS_SUCCESS를 리턴하지만 잘못된 버퍼와 bufferSize의 초기값을 리턴하는 것으로 보임
+// bufferSize를 0으로 바꾸니 
+// "NEXUS_AudioCapture_GetBuffer bufferSize 0 bytes" 찍고 memcpy() 하지 않아 죽지않으나 하단에서 BKNI_Sleep() 하지 않아 음성이 자주 끊김
+
+Return<void> NexusImpl::getDataCaptured(getDataCaptured_cb _hidl_cb)
+{
+	bool result = false;
+	void *pBuffer;
+	size_t bufferSize = CAPTURED_DATA_SIZE;
+	hidl_array<uint8_t, CAPTURED_DATA_SIZE> bytes;
+	NEXUS_Error rc = 0;
+	
+	ALOGD("smkang bufferSize %d bytes", bufferSize);
+	if (mAudioCaptureHandle != NULL)
+		rc = NEXUS_AudioCapture_GetBuffer(mAudioCaptureHandle, (void **)&pBuffer, &bufferSize);
+	
+	
+	ALOGD("smkang NEXUS_AudioCapture_GetBuffer bufferSize %d bytes", bufferSize); 
+	
+    int length = bufferSize > CAPTURED_DATA_SIZE ? CAPTURED_DATA_SIZE : bufferSize ;
+    if (rc == NEXUS_SUCCESS)
+    {
+		//ALOGI("[audio] Capture %d bytes", length);
+		ALOGD("smkang [audio] Capture %d bytes", length);
+		memcpy(bytes.data(), (void*)pBuffer, length);
+		
+
+==========================================================================		
+
+2차 분석
+	
+void NexusImpl::rmlmk_callback(::rmlmk cb) 함수에서 추가된 코드는
+mAudioCaptureHandle = NEXUS_AudioCapture_Open() 를 2번 호출함
+1. mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, NULL);
+2. mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, &openSettings);
+의심되어 1번을 삭제 테스트 진행
+
+    mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, NULL);					<< #1
+
+#if 0 // org code
+    mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, NULL);
+    NEXUS_AudioCaptureStartSettings captureStartSettings;
+    NEXUS_AudioCaptureSettings settings;
+    NEXUS_AudioCaptureStatus status;
+
+    NEXUS_AudioCapture_GetSettings(mAudioCaptureHandle, &settings);
+    settings.format = NEXUS_AudioCaptureFormat_e16BitStereo;
+    settings.threshold = 1920; // NOTE: 2 CHANNELS * 2 BYTES(16BIT) * 48000 = 192000 Bps
+    NEXUS_AudioCapture_SetSettings(mAudioCaptureHandle, &settings);
+
+    NEXUS_AudioCapture_GetDefaultStartSettings(&captureStartSettings);
+
+#else    
+    // av sync modify ( Guide from Jason Lim(Broadcom Corporation) : CSP-CS00012353180 ) 
+    NEXUS_AudioCaptureOpenSettings openSettings;
+    NEXUS_AudioCapture_GetDefaultOpenSettings(&openSettings);
+    openSettings.multichannelFormat = NEXUS_AudioMultichannelFormat_eStereo;
+    openSettings.threshold = allocSettings.audioOutputCapture.bufferSize;
+    mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, &openSettings);			<< #2
+    NEXUS_AudioCaptureStartSettings captureStartSettings;
+    NEXUS_AudioCaptureStatus status;
+
+    NEXUS_AudioCapture_GetDefaultStartSettings(&captureStartSettings);
+
+@endcode
+
+bkouc500-ota-kaon2024080802-DL-BT-test.zip
+>> 로그추가
+
+bkouc500-ota-kaon2024080802-DL-BT-test-1.zip
+>> bufferSize=0,
+
+bkouc500-ota-kaon2024080802-DL-BT-test-2.zip 
+>> bufferSize=0, mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, NULL)  삭제
+
+bkouc500-ota-kaon2024080802-DL-BT-test-3.zip 
+>> bufferSize=CAPTURED_DATA_SIZE, mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, NULL)  삭제
+
+bkouc500-ota-kaon2024080802-DL-BT-test-4.zip 
+>> bufferSize=0, mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, NULL)  삭제,  BcmAudioCaptureService.java Thread.sleep(200) 제거
+
+bkouc500-ota-kaon2024080802-DL-BT-test-5.zip 
+>> bufferSize=0, mAudioCaptureHandle = NEXUS_AudioCapture_Open(mAudioCaptureId, NULL)  삭제,  BcmAudioCaptureService.java Thread.sleep(200) 제거 , 기존로르 정리, BcmAudioCaptureService.java 로그추가
+
+bkouc500-ota-kaon2024080802-DL-BT-test-7 BcmAudioCaptureService.java 
+>> skip audioTrack.write() 
+
+bkouc500-ota-kaon2024080802-DL-BT-test-8 BcmAudioCaptureService.java 
+>> skip audioTrack.write() & audioTrack.write() 
+
+---
+<br>
+---
+
+*/

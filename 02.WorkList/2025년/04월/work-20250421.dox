@@ -1,0 +1,663 @@
+/*!
+@page work_20250421	2025.04.21
+
+---
+
+# Recovery Mode에서 간헐적으로 RCU 키 입력 안됨
+http://kaonqa.duckdns.org/redmine/issues/14730
+IR 리모컨만 동작을 안 하는지
+USB 키보드 연결 시에도 동작을 안 하는지 확인이 필요함.
+
+# 최초 개통 시 AV Black 현상
+http://kaonqa.duckdns.org/redmine/issues/16110
+강성민 매니저님,
+CAS나 EPG쪽 문제로 보이고 로그 확인해 보세요. 해당업체는 가이드가 리셋을 하라고 할겁니다,
+
+# 임의에 연령제한 채널에서 일반채널로 반복 전환 시 연령제한 Video가 잠깐 출력됨
+http://kaonqa.duckdns.org/redmine/issues/14461
+이 이슈는 연령제한 채널 재핑 후 일반채널로 재핑 시
+연령제한 채널의 I프레임이 디코더에 남아있어 잠깐 보이는 이슈로
+
+미들웨어 수정이 필요합니다.
+
+
+
+@code
+
+[   41.183762] init: Encryption policy of /data/per_boot set to 0ad97e64c88a3b7e5cd9b6fb0e4129c9 v2 modes 1/4 flags 0x2
+[   41.195869] init: processing action (sys.boot_completed=1) from (/vendor/etc/init/hw/init.BKO-UC500.rc:153)
+[   41.211739] init: starting service 'exec 27 (/vendor/bin/read_edid)'...
+[   41.225624] init: SVC_EXEC service 'exec 27 (/vendor/bin/read_edid)' pid 1586 (uid 0 gid 0+0 context default) started; waiting...
+[   41.279554] type=1400 audit(1745211160.216:71): avc: denied { dac_override } for comm="read_edid" capability=1 scontext=u:r:read_edid:s0 tcontext=u:r:read_edid:s0 tclass=capability permissive=0
+[   41.472519] type=1400 audit(1745211160.409:72): avc: denied { read } for comm="update_engine" name="bootconfig" dev="proc" ino=4026532090 scontext=u:r:update_engine:s0 tcontext=u:object_r:proc_bootconfig:s0 tclass=file permissive=0
+[   41.495779] type=1400 audit(1745211160.410:73): avc: denied { read } for comm="update_engine" name="bootconfig" dev="proc" ino=4026532090 scontext=u:r:update_engine:s0 tcontext=u:object_r:proc_bootconfig:s0 tclass=file permissive=0
+[   41.518135] init: Service 'exec 27 (/vendor/bin/read_edid)' (pid 1586) exited with status 0 waiting took 0.296000 seconds
+[   41.527732] type=1400 audit(1745211160.439:74): avc: denied { read } for comm="update_engine" name="bootconfig" dev="proc" ino=4026532090 scontext=u:r:update_engine:s0 tcontext=u:object_r:proc_bootconfig:s0 tclass=file permissive=0
+[   41.530176] init: Sending signal 9 to service 'exec 27 (/vendor/bin/read_edid)' (pid 1586) process group...
+[   41.562177] libprocessgroup: Successfully killed process cgroup uid 0 pid 1586 in 1ms
+[   41.574910] init: processing action (sys.boot_completed=1 && sys.bootstat.first_boot_completed=0) from (/system/etc/init/bootstat.rc:77)
+[   41.588886] init: starting service 'exec 28 (/system/bin/bootstat --record_boot_complete --record_boot_reason --record_time_since_factory_reset -l)'...
+[   41.608714] init: processing action (sys.boot_completed=1) from (/system/etc/init/flags_health_check.rc:7)
+[   41.678686] init: processing action (lmkd.reinit=0 && sys.boot_completed=1) from (/system/etc/init/lmkd.rc:14)
+[   41.696711] init: Service 'exec 28 (/system/bin/bootstat --record_boot_complete --record_boot_reason --record_time_since_factory_reset -l)' (pid 1613) exited with status 0 oneshot service took 0.091000 seconds in background
+[   41.717503] init: Sending signal 9 to service 'exec 28 (/system/bin/bootstat --record_boot_complete --record_boot_reason --record_time_since_factory_reset -l)' (pid 1613) process group...
+[   41.735613] libprocessgroup: Successfully killed process cgroup uid 1000 pid 1613 in 0ms
+[   41.745139] init: processing action (sys.boot_completed=1) from (/system/etc/init/logd.rc:33)
+[   41.754636] init: starting service 'logd-auditctl'...
+[   41.766938] init: processing action (sys.boot_completed=1 && sys.wifitracing.started=0) from (/system/etc/init/wifi.rc:28)
+[   41.891516] init: Command 'mkdir /sys/kernel/debug/tracing/instances/wifi 711' action=sys.boot_completed=1 && sys.wifitracing.started=0 (/system/etc/init/wifi.rc:30) took 111ms and succeeded
+[   41.909714] init: Service 'logd-auditctl' (pid 1622) exited with status 0 oneshot service took 0.147000 seconds in background
+[   41.922407] init: Sending signal 9 to service 'logd-auditctl' (pid 1622) process group...
+[   41.931509] libprocessgroup: Successfully killed process cgroup uid 1036 pid 1622 in 0ms
+[   42.017217] init: processing action (sys.boot_completed=1) from (/vendor/etc/init/init.skb_logsystem.rc:17)
+[   42.029667] init: starting service 'skb_logsystem'...
+[   42.035865] init: Created socket '/dev/socket/qsm_server', mode 666, user 1000, group 1000
+[   42.045147] init: Created socket '/dev/socket/logagent_server', mode 666, user 1000, group 1000
+[   42.059085] init: processing action (dev.bootcomplete=1) from (/vendor/etc/init/hw/init.BKO-UC500.rc:149)
+
+console:/ $
+console:/ $
+console:/ $
+console:/ $
+console:/ $
+console:/ $ logcat | egrep "echo|KM_DEBUG"
+[   58.760218] audit: rate limit exceeded
+04-21 13:52:50.859  2729  2729 I echo    : eth0 ip is empty
+04-21 13:52:51.123   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:52:51.127   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:52:52.515  2876  2876 I echo    : eth0 ip is empty
+04-21 13:52:54.072  3025  3025 I echo    : eth0 ip is empty
+04-21 13:52:54.130   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:52:54.133   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:07.503   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:07.508   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:10.510   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:10.513   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:13.536   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[28MHz] txMod[QAM16] txPower[50.0dBmV]
+04-21 13:53:13.536   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:13.540   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:16.544   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:16.547   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:19.549   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:19.555   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:22.571   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[28MHz] txMod[QAM16] txPower[50.0dBmV]
+04-21 13:53:22.571   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:22.575   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:25.577   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:25.581   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:28.584   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:28.587   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:31.603   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[28MHz] txMod[QAM16] txPower[50.0dBmV]
+04-21 13:53:31.603   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:31.607   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:34.609   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:34.612   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:37.615   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:37.618   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:40.634   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[28MHz] txMod[QAM16] txPower[50.0dBmV]
+04-21 13:53:40.635   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:40.638   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:43.640   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:43.643   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:46.645   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:46.648   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[]
+04-21 13:53:49.342  4608  4608 I echo    : Failed ping to '10.238.96.1'
+04-21 13:53:49.376  4610  4610 I echo    : Retry ping to '10.238.96.1' count '59'
+04-21 13:53:49.665   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[28MHz] txMod[QAM16] txPower[50.0dBmV]
+04-21 13:53:49.665   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:49.672   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:52.675   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:52.678   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:55.681   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:55.684   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:58.701   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[28MHz] txMod[QAM16] txPower[50.0dBmV]
+04-21 13:53:58.701   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:53:58.705   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:53:59.435  4626  4626 I echo    : Failed ping to '10.238.96.1'
+04-21 13:53:59.472  4628  4628 I echo    : Retry ping to '10.238.96.1' count '58'
+04-21 13:54:00.894  4631  4631 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:00.934  4633  4633 I echo    : Retry ping to '10.238.96.1' count '57'
+04-21 13:54:01.707   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:54:01.710   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:54:03.321  4636  4636 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:03.359  4638  4638 I echo    : Retry ping to '10.238.96.1' count '56'
+04-21 13:54:04.713   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:54:04.716   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:54:05.630  4653  4653 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:05.666  4655  4655 I echo    : Retry ping to '10.238.96.1' count '55'
+04-21 13:54:07.730   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[28MHz] txMod[QAM16] txPower[50.0dBmV]
+04-21 13:54:07.730   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:54:07.733   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:54:07.932  4660  4660 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:07.968  4662  4662 I echo    : Retry ping to '10.238.96.1' count '54'
+04-21 13:54:10.235  4667  4667 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:10.267  4669  4669 I echo    : Retry ping to '10.238.96.1' count '53'
+04-21 13:54:10.736   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:54:10.739   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:54:12.540  4676  4676 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:12.575  4678  4678 I echo    : Retry ping to '10.238.96.1' count '52'
+04-21 13:54:13.741   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:54:13.744   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:54:14.844  4683  4683 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:14.881  4685  4685 I echo    : Retry ping to '10.238.96.1' count '51'
+04-21 13:54:17.166  4689  4689 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:17.204  4691  4691 I echo    : Retry ping to '10.238.96.1' count '50'
+04-21 13:54:17.406   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[UNKNOWN] rxPower[0.7dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[50.0dBmV]
+04-21 13:54:17.406   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:17.411   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:19.455  4694  4694 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:19.493  4696  4696 I echo    : Retry ping to '10.238.96.1' count '49'
+04-21 13:54:20.413   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:20.413   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 1
+04-21 13:54:20.416   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:21.755  4701  4701 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:21.793  4703  4703 I echo    : Retry ping to '10.238.96.1' count '48'
+04-21 13:54:23.420   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:23.420   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 2
+04-21 13:54:23.423   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:24.063  4707  4707 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:24.106  4709  4709 I echo    : Retry ping to '10.238.96.1' count '47'
+04-21 13:54:26.363  4712  4712 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:26.400  4714  4714 I echo    : Retry ping to '10.238.96.1' count '46'
+04-21 13:54:26.436   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[50.0dBmV]
+04-21 13:54:26.436   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:26.436   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 3
+04-21 13:54:26.439   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:28.671  4717  4717 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:28.706  4719  4719 I echo    : Retry ping to '10.238.96.1' count '45'
+04-21 13:54:29.442   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:29.442   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 4
+04-21 13:54:29.445   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:30.972  4722  4722 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:31.007  4724  4724 I echo    : Retry ping to '10.238.96.1' count '44'
+04-21 13:54:32.448   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:32.448   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 5
+04-21 13:54:32.451   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:33.280  4727  4727 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:33.316  4729  4729 I echo    : Retry ping to '10.238.96.1' count '43'
+04-21 13:54:35.467   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[50.0dBmV]
+04-21 13:54:35.468   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:35.468   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 6
+04-21 13:54:35.472   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:35.582  4738  4738 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:35.620  4740  4740 I echo    : Retry ping to '10.238.96.1' count '42'
+04-21 13:54:37.885  4743  4743 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:37.918  4745  4745 I echo    : Retry ping to '10.238.96.1' count '41'
+04-21 13:54:38.474   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:38.474   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 7
+04-21 13:54:38.477   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:40.188  4748  4748 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:40.222  4750  4750 I echo    : Retry ping to '10.238.96.1' count '40'
+04-21 13:54:41.480   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:41.480   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 8
+04-21 13:54:41.483   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:42.494  4753  4753 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:42.534  4755  4755 I echo    : Retry ping to '10.238.96.1' count '39'
+04-21 13:54:44.499   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[50.0dBmV]
+04-21 13:54:44.499   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:44.499   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 9
+04-21 13:54:44.503   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:44.802  4763  4763 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:44.834  4765  4765 I echo    : Retry ping to '10.238.96.1' count '38'
+04-21 13:54:47.102  4768  4768 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:47.135  4770  4770 I echo    : Retry ping to '10.238.96.1' count '37'
+04-21 13:54:47.505   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=3
+04-21 13:54:47.508   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=3 ipaddr[]
+04-21 13:54:49.403  4773  4773 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:49.437  4775  4775 I echo    : Retry ping to '10.238.96.1' count '36'
+04-21 13:54:50.510   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=3
+04-21 13:54:50.510   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 1
+04-21 13:54:50.513   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=3 ipaddr[]
+04-21 13:54:51.708  4778  4778 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:51.791  4780  4780 I echo    : Retry ping to '10.238.96.1' count '35'
+04-21 13:54:53.529   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[50.2dBmV]
+04-21 13:54:53.529   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:54:53.532   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:54:54.020  4785  4785 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:54.054  4787  4787 I echo    : Retry ping to '10.238.96.1' count '34'
+04-21 13:54:56.314  4796  4796 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:56.349  4798  4798 I echo    : Retry ping to '10.238.96.1' count '33'
+04-21 13:54:56.534   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=22
+04-21 13:54:56.538   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=22 ipaddr[]
+04-21 13:54:58.616  4801  4801 I echo    : Failed ping to '10.238.96.1'
+04-21 13:54:58.654  4803  4803 I echo    : Retry ping to '10.238.96.1' count '32'
+04-21 13:54:59.540   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=22
+04-21 13:54:59.543   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=22 ipaddr[]
+04-21 13:55:00.924  4806  4806 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:00.962  4808  4808 I echo    : Retry ping to '10.238.96.1' count '31'
+04-21 13:55:02.557   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[28MHz] txMod[QAM16] txPower[46.5dBmV]
+04-21 13:55:02.557   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:02.560   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:03.226  4811  4811 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:03.263  4813  4813 I echo    : Retry ping to '10.238.96.1' count '30'
+04-21 13:55:05.534  4823  4823 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:05.563   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:05.563   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 1
+04-21 13:55:05.566   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:05.569  4825  4825 I echo    : Retry ping to '10.238.96.1' count '29'
+04-21 13:55:07.833  4828  4828 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:07.868  4830  4830 I echo    : Retry ping to '10.238.96.1' count '28'
+04-21 13:55:08.568   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:08.568   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 2
+04-21 13:55:08.571   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:10.140  4837  4837 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:10.177  4839  4839 I echo    : Retry ping to '10.238.96.1' count '27'
+04-21 13:55:11.585   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[28MHz] txMod[QAM16] txPower[34.8dBmV]
+04-21 13:55:11.585   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:11.585   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 3
+04-21 13:55:11.589   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:12.440  4845  4845 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:12.473  4847  4847 I echo    : Retry ping to '10.238.96.1' count '26'
+04-21 13:55:14.591   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:14.591   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 4
+04-21 13:55:14.594   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:14.757  4862  4862 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:14.791  4864  4864 I echo    : Retry ping to '10.238.96.1' count '25'
+04-21 13:55:17.082  4869  4869 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:17.115  4871  4871 I echo    : Retry ping to '10.238.96.1' count '24'
+04-21 13:55:17.597   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:17.597   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 5
+04-21 13:55:17.600   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:19.358  4883  4883 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:19.391  4887  4887 I echo    : Retry ping to '10.238.96.1' count '23'
+04-21 13:55:20.615   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[35MHz] txMod[QAM16] txPower[34.8dBmV]
+04-21 13:55:20.615   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:20.615   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 6
+04-21 13:55:20.618   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:21.657  4890  4890 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:21.689  4892  4892 I echo    : Retry ping to '10.238.96.1' count '22'
+04-21 13:55:23.621   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=22
+04-21 13:55:23.624   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=22 ipaddr[]
+04-21 13:55:24.013  4896  4896 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:24.093  4898  4898 I echo    : Retry ping to '10.238.96.1' count '21'
+04-21 13:55:26.268  4901  4901 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:26.303  4903  4903 I echo    : Retry ping to '10.238.96.1' count '20'
+04-21 13:55:26.626   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:26.629   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:28.573  4906  4906 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:28.615  4908  4908 I echo    : Retry ping to '10.238.96.1' count '19'
+04-21 13:55:29.644   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[38MHz] txMod[QAM16] txPower[28.8dBmV]
+04-21 13:55:29.645   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=22
+04-21 13:55:29.648   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=22 ipaddr[]
+04-21 13:55:30.876  4911  4911 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:30.911  4913  4913 I echo    : Retry ping to '10.238.96.1' count '18'
+04-21 13:55:32.651   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:32.653   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:33.181  4916  4916 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:33.219  4918  4918 I echo    : Retry ping to '10.238.96.1' count '17'
+04-21 13:55:35.484  4921  4921 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:35.516  4923  4923 I echo    : Retry ping to '10.238.96.1' count '16'
+04-21 13:55:35.656   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:35.656   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 1
+04-21 13:55:35.659   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:37.788  4926  4926 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:37.821  4928  4928 I echo    : Retry ping to '10.238.96.1' count '15'
+04-21 13:55:38.674   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[38MHz] txMod[QAM16] txPower[58.2dBmV]
+04-21 13:55:38.674   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:38.674   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 2
+04-21 13:55:38.678   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:40.094  4931  4931 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:40.128  4933  4933 I echo    : Retry ping to '10.238.96.1' count '14'
+04-21 13:55:41.680   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=22
+04-21 13:55:41.683   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=22 ipaddr[]
+04-21 13:55:42.398  4947  4947 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:42.432  4949  4949 I echo    : Retry ping to '10.238.96.1' count '13'
+04-21 13:55:44.686   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=22
+04-21 13:55:44.689   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=22 ipaddr[]
+04-21 13:55:44.700  4952  4952 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:44.737  4954  4954 I echo    : Retry ping to '10.238.96.1' count '12'
+04-21 13:55:47.003  4957  4957 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:47.038  4959  4959 I echo    : Retry ping to '10.238.96.1' count '11'
+04-21 13:55:47.705   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[31MHz] txMod[QAM16] txPower[46.5dBmV]
+04-21 13:55:47.705   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:55:47.709   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:55:49.310  4969  4969 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:49.347  4971  4971 I echo    : Retry ping to '10.238.96.1' count '10'
+04-21 13:55:50.711   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:55:50.714   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:55:51.617  4975  4975 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:51.652  4977  4977 I echo    : Retry ping to '10.238.96.1' count '9'
+04-21 13:55:53.717   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:55:53.717   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 1
+04-21 13:55:53.720   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:55:53.918  4982  4982 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:53.953  4984  4984 I echo    : Retry ping to '10.238.96.1' count '8'
+04-21 13:55:56.223  4993  4993 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:56.263  4995  4995 I echo    : Retry ping to '10.238.96.1' count '7'
+04-21 13:55:56.735   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[58.0dBmV]
+04-21 13:55:56.736   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:55:56.736   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 2
+04-21 13:55:56.739   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:55:58.528  4998  4998 I echo    : Failed ping to '10.238.96.1'
+04-21 13:55:58.567  5000  5000 I echo    : Retry ping to '10.238.96.1' count '6'
+04-21 13:55:59.741   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:55:59.742   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 3
+04-21 13:55:59.745   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:56:00.830  5005  5005 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:00.866  5007  5007 I echo    : Retry ping to '10.238.96.1' count '5'
+04-21 13:56:02.747   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:56:02.747   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 4
+04-21 13:56:02.750   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:56:03.132  5010  5010 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:03.169  5012  5012 I echo    : Retry ping to '10.238.96.1' count '4'
+04-21 13:56:05.434  5020  5020 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:05.470  5022  5022 I echo    : Retry ping to '10.238.96.1' count '3'
+04-21 13:56:05.765   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[58.0dBmV]
+04-21 13:56:05.765   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:56:05.765   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 5
+04-21 13:56:05.769   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:56:07.744  5025  5025 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:07.792  5027  5027 I echo    : Retry ping to '10.238.96.1' count '2'
+04-21 13:56:08.771   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:56:08.771   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 6
+04-21 13:56:08.774   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:56:10.047  5033  5033 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:10.080  5035  5035 I echo    : Retry ping to '10.238.96.1' count '1'
+04-21 13:56:11.777   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:56:11.777   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 7
+04-21 13:56:11.780   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:56:12.362  5038  5038 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:12.419  5041  5041 I echo    : Try to network disable
+04-21 13:56:12.486  5044  5044 I echo    : The ping failed, Restarting network interface eth0...
+04-21 13:56:14.787   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[0MHz] rxMod[UNKNOWN] rxPower[10.5dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[0.0dBmV]
+04-21 13:56:14.787   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=0, status=0
+04-21 13:56:14.787   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=0, status=0 ipaddr[]
+04-21 13:56:17.743  5061  5061 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:17.780  5063  5063 I echo    : Retry ping to '10.238.96.1' count '59'
+04-21 13:56:17.790   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=4
+04-21 13:56:17.853  5066  5066 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:17.928  5068  5068 I echo    : Retry ping to '10.238.96.1' count '58'
+04-21 13:56:17.982  5072  5072 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.017  5074  5074 I echo    : Retry ping to '10.238.96.1' count '57'
+04-21 13:56:18.065  5077  5077 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.104  5079  5079 I echo    : Retry ping to '10.238.96.1' count '56'
+04-21 13:56:18.139   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=4 ipaddr[]
+04-21 13:56:18.160  5082  5082 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.194  5084  5084 I echo    : Retry ping to '10.238.96.1' count '55'
+04-21 13:56:18.245  5087  5087 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.282  5089  5089 I echo    : Retry ping to '10.238.96.1' count '54'
+04-21 13:56:18.335  5092  5092 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.371  5094  5094 I echo    : Retry ping to '10.238.96.1' count '53'
+04-21 13:56:18.421  5097  5097 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.455  5099  5099 I echo    : Retry ping to '10.238.96.1' count '52'
+04-21 13:56:18.503  5102  5102 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.539  5104  5104 I echo    : Retry ping to '10.238.96.1' count '51'
+04-21 13:56:18.590  5107  5107 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.626  5109  5109 I echo    : Retry ping to '10.238.96.1' count '50'
+04-21 13:56:18.677  5112  5112 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.713  5114  5114 I echo    : Retry ping to '10.238.96.1' count '49'
+04-21 13:56:18.767  5117  5117 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.800  5119  5119 I echo    : Retry ping to '10.238.96.1' count '48'
+04-21 13:56:18.862  5122  5122 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.905  5124  5124 I echo    : Retry ping to '10.238.96.1' count '47'
+04-21 13:56:18.959  5127  5127 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:18.995  5129  5129 I echo    : Retry ping to '10.238.96.1' count '46'
+04-21 13:56:19.056  5132  5132 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.091  5138  5138 I echo    : Retry ping to '10.238.96.1' count '45'
+04-21 13:56:19.143  5141  5141 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.182  5146  5146 I echo    : Retry ping to '10.238.96.1' count '44'
+04-21 13:56:19.235  5151  5151 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.274  5153  5153 I echo    : Retry ping to '10.238.96.1' count '43'
+04-21 13:56:19.327  5156  5156 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.363  5158  5158 I echo    : Retry ping to '10.238.96.1' count '42'
+04-21 13:56:19.414  5161  5161 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.449  5163  5163 I echo    : Retry ping to '10.238.96.1' count '41'
+04-21 13:56:19.501  5166  5166 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.536  5168  5168 I echo    : Retry ping to '10.238.96.1' count '40'
+04-21 13:56:19.591  5171  5171 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.625  5173  5173 I echo    : Retry ping to '10.238.96.1' count '39'
+04-21 13:56:19.677  5176  5176 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.714  5178  5178 I echo    : Retry ping to '10.238.96.1' count '38'
+04-21 13:56:19.767  5181  5181 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.804  5183  5183 I echo    : Retry ping to '10.238.96.1' count '37'
+04-21 13:56:19.858  5186  5186 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.897  5188  5188 I echo    : Retry ping to '10.238.96.1' count '36'
+04-21 13:56:19.952  5191  5191 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:19.992  5193  5193 I echo    : Retry ping to '10.238.96.1' count '35'
+04-21 13:56:20.048  5196  5196 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.082  5198  5198 I echo    : Retry ping to '10.238.96.1' count '34'
+04-21 13:56:20.143  5201  5201 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.179  5203  5203 I echo    : Retry ping to '10.238.96.1' count '33'
+04-21 13:56:20.230  5206  5206 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.266  5208  5208 I echo    : Retry ping to '10.238.96.1' count '32'
+04-21 13:56:20.323  5211  5211 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.358  5213  5213 I echo    : Retry ping to '10.238.96.1' count '31'
+04-21 13:56:20.415  5216  5216 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.449  5218  5218 I echo    : Retry ping to '10.238.96.1' count '30'
+04-21 13:56:20.505  5221  5221 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.543  5223  5223 I echo    : Retry ping to '10.238.96.1' count '29'
+04-21 13:56:20.596  5226  5226 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.632  5228  5228 I echo    : Retry ping to '10.238.96.1' count '28'
+04-21 13:56:20.687  5231  5231 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.723  5234  5234 I echo    : Retry ping to '10.238.96.1' count '27'
+04-21 13:56:20.774  5237  5237 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.810  5239  5239 I echo    : Retry ping to '10.238.96.1' count '26'
+04-21 13:56:20.858  5242  5242 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.892  5244  5244 I echo    : Retry ping to '10.238.96.1' count '25'
+04-21 13:56:20.947  5247  5247 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:20.983  5249  5249 I echo    : Retry ping to '10.238.96.1' count '24'
+04-21 13:56:21.034  5252  5252 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.068  5254  5254 I echo    : Retry ping to '10.238.96.1' count '23'
+04-21 13:56:21.119  5257  5257 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.142   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=3
+04-21 13:56:21.145   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=3 ipaddr[]
+04-21 13:56:21.153  5259  5259 I echo    : Retry ping to '10.238.96.1' count '22'
+04-21 13:56:21.205  5262  5262 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.243  5264  5264 I echo    : Retry ping to '10.238.96.1' count '21'
+04-21 13:56:21.294  5267  5267 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.330  5269  5269 I echo    : Retry ping to '10.238.96.1' count '20'
+04-21 13:56:21.385  5272  5272 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.423  5274  5274 I echo    : Retry ping to '10.238.96.1' count '19'
+04-21 13:56:21.476  5277  5277 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.509  5279  5279 I echo    : Retry ping to '10.238.96.1' count '18'
+04-21 13:56:21.563  5282  5282 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.601  5284  5284 I echo    : Retry ping to '10.238.96.1' count '17'
+04-21 13:56:21.652  5287  5287 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.687  5289  5289 I echo    : Retry ping to '10.238.96.1' count '16'
+04-21 13:56:21.739  5292  5292 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.777  5294  5294 I echo    : Retry ping to '10.238.96.1' count '15'
+04-21 13:56:21.833  5297  5297 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.870  5299  5299 I echo    : Retry ping to '10.238.96.1' count '14'
+04-21 13:56:21.922  5302  5302 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:21.956  5304  5304 I echo    : Retry ping to '10.238.96.1' count '13'
+04-21 13:56:22.008  5307  5307 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.044  5309  5309 I echo    : Retry ping to '10.238.96.1' count '12'
+04-21 13:56:22.093  5312  5312 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.127  5314  5314 I echo    : Retry ping to '10.238.96.1' count '11'
+04-21 13:56:22.179  5317  5317 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.217  5319  5319 I echo    : Retry ping to '10.238.96.1' count '10'
+04-21 13:56:22.270  5322  5322 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.306  5324  5324 I echo    : Retry ping to '10.238.96.1' count '9'
+04-21 13:56:22.360  5327  5327 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.394  5329  5329 I echo    : Retry ping to '10.238.96.1' count '8'
+04-21 13:56:22.447  5332  5332 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.486  5334  5334 I echo    : Retry ping to '10.238.96.1' count '7'
+04-21 13:56:22.538  5337  5337 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.575  5339  5339 I echo    : Retry ping to '10.238.96.1' count '6'
+04-21 13:56:22.629  5342  5342 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.665  5344  5344 I echo    : Retry ping to '10.238.96.1' count '5'
+04-21 13:56:22.716  5347  5347 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.750  5349  5349 I echo    : Retry ping to '10.238.96.1' count '4'
+04-21 13:56:22.803  5352  5352 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.837  5354  5354 I echo    : Retry ping to '10.238.96.1' count '3'
+04-21 13:56:22.894  5357  5357 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:22.931  5359  5359 I echo    : Retry ping to '10.238.96.1' count '2'
+04-21 13:56:22.981  5362  5362 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:23.017  5364  5364 I echo    : Retry ping to '10.238.96.1' count '1'
+04-21 13:56:23.069  5367  5367 I echo    : Failed ping to '10.238.96.1'
+04-21 13:56:23.123  5370  5370 I echo    : The ping failed, Restarting network interface eth0...
+04-21 13:56:24.146   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[0MHz] rxMod[UNKNOWN] rxPower[10.5dBmV] / txFreq[0MHz] txMod[UNKNOWN] txPower[0.0dBmV]
+04-21 13:56:24.146   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=0, status=0
+04-21 13:56:24.147   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=0, status=0 ipaddr[]
+04-21 13:56:27.147   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=0, status=0
+04-21 13:56:27.147   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 1
+04-21 13:56:27.147   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=0, status=0 ipaddr[]
+04-21 13:56:29.404  5383  5383 I echo    : eth0 ip is empty
+04-21 13:56:30.150   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:30.153   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:30.528  5391  5391 I echo    : eth0 ip is empty
+04-21 13:56:31.628  5399  5399 I echo    : eth0 ip is empty
+04-21 13:56:32.733  5407  5407 I echo    : eth0 ip is empty
+04-21 13:56:33.169   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[28MHz] txMod[QAM16] txPower[46.5dBmV]
+04-21 13:56:33.169   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:33.169   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 1
+04-21 13:56:33.172   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:33.842  5415  5415 I echo    : eth0 ip is empty
+04-21 13:56:34.953  5423  5423 I echo    : eth0 ip is empty
+04-21 13:56:36.061  5432  5432 I echo    : eth0 ip is empty
+04-21 13:56:36.174   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:36.174   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 2
+04-21 13:56:36.177   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:37.175  5440  5440 I echo    : eth0 ip is empty
+04-21 13:56:38.279  5448  5448 I echo    : eth0 ip is empty
+04-21 13:56:39.179   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=22
+04-21 13:56:39.182   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=22 ipaddr[]
+04-21 13:56:39.390  5457  5457 I echo    : eth0 ip is empty
+04-21 13:56:40.496  5465  5465 I echo    : eth0 ip is empty
+04-21 13:56:41.604  5473  5473 I echo    : eth0 ip is empty
+04-21 13:56:42.198   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[31MHz] txMod[QAM16] txPower[52.3dBmV]
+04-21 13:56:42.198   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:42.202   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:42.713  5481  5481 I echo    : eth0 ip is empty
+04-21 13:56:43.818  5489  5489 I echo    : eth0 ip is empty
+04-21 13:56:44.922  5497  5497 I echo    : eth0 ip is empty
+04-21 13:56:45.204   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:45.204   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 1
+04-21 13:56:45.207   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:46.033  5505  5505 I echo    : eth0 ip is empty
+04-21 13:56:47.143  5513  5513 I echo    : eth0 ip is empty
+04-21 13:56:48.209   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:48.209   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 2
+04-21 13:56:48.212   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:48.251  5521  5521 I echo    : eth0 ip is empty
+04-21 13:56:49.366  5529  5529 I echo    : eth0 ip is empty
+04-21 13:56:50.470  5537  5537 I echo    : eth0 ip is empty
+04-21 13:56:51.227   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[31MHz] txMod[QAM16] txPower[58.2dBmV]
+04-21 13:56:51.227   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:51.227   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 3
+04-21 13:56:51.231   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:51.577  5545  5545 I echo    : eth0 ip is empty
+04-21 13:56:52.690  5553  5553 I echo    : eth0 ip is empty
+04-21 13:56:53.800  5561  5561 I echo    : eth0 ip is empty
+04-21 13:56:54.233   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:54.234   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 4
+04-21 13:56:54.237   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:54.917  5575  5575 I echo    : eth0 ip is empty
+04-21 13:56:56.023  5584  5584 I echo    : eth0 ip is empty
+04-21 13:56:57.124  5592  5592 I echo    : eth0 ip is empty
+04-21 13:56:57.239   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:56:57.239   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 5
+04-21 13:56:57.242   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:56:58.228  5600  5600 I echo    : eth0 ip is empty
+04-21 13:56:59.336  5608  5608 I echo    : eth0 ip is empty
+04-21 13:57:00.258   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[35MHz] txMod[QAM16] txPower[28.8dBmV]
+04-21 13:57:00.258   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:57:00.258   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 6
+04-21 13:57:00.262   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:57:00.444  5616  5616 I echo    : eth0 ip is empty
+04-21 13:57:01.554  5624  5624 I echo    : eth0 ip is empty
+04-21 13:57:02.655  5632  5632 I echo    : eth0 ip is empty
+04-21 13:57:03.265   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:57:03.265   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 7
+04-21 13:57:03.268   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:57:03.761  5640  5640 I echo    : eth0 ip is empty
+04-21 13:57:04.864  5652  5652 I echo    : eth0 ip is empty
+04-21 13:57:05.963  5660  5660 I echo    : eth0 ip is empty
+04-21 13:57:06.270   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=5
+04-21 13:57:06.270   454   917 I KM_DEBUG: PLAPIService: .............notReady_cs_count = 8
+04-21 13:57:06.273   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=5 ipaddr[]
+04-21 13:57:07.062  5668  5668 I echo    : eth0 ip is empty
+04-21 13:57:08.165  5676  5676 I echo    : eth0 ip is empty
+04-21 13:57:09.289   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:57:09.289   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=22
+04-21 13:57:09.292   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=22 ipaddr[]
+04-21 13:57:09.302  5689  5689 I echo    : eth0 ip is empty
+04-21 13:57:10.419  5703  5703 I echo    : eth0 ip is empty
+04-21 13:57:11.527  5711  5711 I echo    : eth0 ip is empty
+04-21 13:57:12.295   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=15
+04-21 13:57:12.298   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=15 ipaddr[]
+04-21 13:57:12.640  5719  5719 I echo    : eth0 ip is empty
+04-21 13:57:13.750  5727  5727 I echo    : eth0 ip is empty
+04-21 13:57:14.861  5735  5735 I echo    : eth0 ip is empty
+04-21 13:57:15.300   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=10
+04-21 13:57:15.605   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=10 ipaddr[10.208.226.25]
+04-21 13:57:15.973  5743  5743 I echo    : eth0 ip is empty
+04-21 13:57:17.075  5751  5751 I echo    : eth0 ip is empty
+04-21 13:57:18.189  5759  5759 I echo    : eth0 ip is empty
+04-21 13:57:18.620   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:57:18.620   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=10
+04-21 13:57:18.623   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=10 ipaddr[10.208.226.25]
+04-21 13:57:19.300  5771  5771 I echo    : eth0 ip is empty
+04-21 13:57:20.412  5780  5780 I echo    : eth0 ip is empty
+04-21 13:57:21.530  5788  5788 I echo    : eth0 ip is empty
+04-21 13:57:21.775   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:21.779   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:22.641  5796  5796 I echo    : eth0 ip is empty
+04-21 13:57:23.756  5804  5804 I echo    : eth0 ip is empty
+04-21 13:57:24.781   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:24.784   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:24.865  5816  5816 I echo    : eth0 ip is empty
+04-21 13:57:25.968  5824  5824 I echo    : eth0 ip is empty
+04-21 13:57:27.080  5832  5832 I echo    : eth0 ip is empty
+04-21 13:57:27.799   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:57:27.799   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:27.802   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:28.196  5841  5841 I echo    : eth0 ip is empty
+04-21 13:57:29.298  5849  5849 I echo    : eth0 ip is empty
+04-21 13:57:30.804   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:30.807   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:33.810   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:33.813   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:36.827   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:57:36.827   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:36.831   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:39.834   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:39.837   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:42.840   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:42.843   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:45.858   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.6dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:57:45.858   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:45.861   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:48.863   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:48.866   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:51.869   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:51.872   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:54.890   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:57:54.890   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:54.893   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:57:57.895   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:57:57.898   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:00.901   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:00.904   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:03.919   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:58:03.919   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:03.922   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:06.924   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:06.927   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:09.929   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:09.932   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:12.947   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:58:12.947   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:12.950   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:15.952   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:15.955   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:18.958   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:18.961   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:21.976   454   917 I KM_DEBUG: CmStatusInfo : rxFreq[555MHz] rxMod[QAM256] rxPower[0.7dBmV] / txFreq[35MHz] txMod[QAM16] txPower[50.3dBmV]
+04-21 13:58:21.976   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:21.979   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:24.982   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:24.985   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+04-21 13:58:27.987   454   917 I KM_DEBUG: PLAPIService: 2way!!!! KAON_docsIfCmStatusValue()=1, status=12
+04-21 13:58:27.990   454   917 I KM_DEBUG: PLAPIService: KAON_docsIfCmStatusValue()=1, status=12 ipaddr[10.208.226.25]
+0
+
+
+@endcode
+
+
+
+*/
+
+
+

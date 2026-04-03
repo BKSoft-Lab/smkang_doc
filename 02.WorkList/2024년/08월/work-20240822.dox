@@ -1,0 +1,87 @@
+/*!
+@page work_20240822	2024.08.22~26
+
+# 가온본사
+---
+
+
+> sts / cts 테스트 https://jira.kaonmedia.com/browse/K1023-196
+
+http://172.16.5.75/html/devops_maintenance_xts_20240810.html
+
+1. 환경 설정 <br>
+https://confluence.kaonmedia.com/pages/viewpage.action?pageId=71994414
+@code
+- QE 에 xTS 툴이 들어 있는 USB 를 받아 최신버전으로 변경
+- STB 기본 설정
+	Factory reset
+	Languge : English (United States)
+	Location : On
+	Connect to Wi-Fi 
+	Developer option : On
+	Google settings → Device Preferences → About → Build 7회 선택 → Google settings → Developer option
+		✔ Stay awake : On
+		✔ USB debugging : On
+		✔ Verify apps over USB : Off
+- 공장초기화 수행
+- wifi 테스트시 usb 무선랜을 USB로 연결하고 LAN포트 이용하여 ADB연결 
+  히든메뉴>제조사메뉴>네트워크설정>1way
+  Google settings -> Network & Internet : wifi off / Scanning alwasy available off
+@endcode
+
+2. cts - user 펌웨어<br>
+https://confluence.kaonmedia.com/display/GQE/xTS%29+CTS
+@code
+$ adb devices
+$ adb connect 192.168.0.10:5555
+$ cd android-cts/tools/ 
+$ ./cts-tradefed  
+cts-tf > run cts -m CtsJniTestCases -t android.jni.cts.JniStaticTest#test_dlopenPublicLibraries
+cts-tf > run cts -m CtsWifiTestCases -t android.net.wifi.cts.WifiManagerTest#testNetworkSetupWizardPermission
+cts-tf > run cts -m CtsWifiTestCases -t android.net.wifi.cts.WifiManagerTest#testNetworkStackPermission
+cts-tf > run cts -m CtsIntentSignatureTestCases -t android.signature.cts.intent.IntentTest#shouldNotFindUnexpectedIntents
+cts-tf > run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageWrite
+cts-tf > run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ExternalStorageHostTest#testExternalStorageRead29
+cts-tf > run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsMultiple
+cts-tf > run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternal
+cts-tf > run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStatsExternalConsistent
+cts-tf > run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.StorageHostTest#testVerifyStats
+cts-tf > run cts -m CtsAppSecurityHostTestCases -t android.appsecurity.cts.ListeningPortsTest#testNoRemotelyAccessibleListeningTcp6Ports
+cts-tf > run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Unspecified_EditorDialogLostFocusAfterUnlocked
+cts-tf > run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Visible_EditorDialogLostFocusAfterUnlocked
+cts-tf > run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysVisible_EditorDialogLostFocusAfterUnlocked
+cts-tf > run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_AlwaysHidden_EditorDialogLostFocusAfterUnlocked
+cts-tf > run cts -m CtsInputMethodTestCases -t android.view.inputmethod.cts.KeyboardVisibilityControlTest#testImeState_Hidden_EditorDialogLostFocusAfterUnlocked
+cts-tf > run cts -m CtsPermissionTestCases -t android.permission.cts.OneTimePermissionTest#testPermissionRevokedOnKill
+cts-tf > run cts -m CtsPermissionTestCases -t android.permission.cts.OneTimePermissionTest#testOneTimePermission
+@endcode
+
+3. sts - userdebug 펌웨어<br>
+https://confluence.kaonmedia.com/display/GQE/xTS%29+STS
+@code
+$ adb devices
+$ adb connect 192.168.0.10:5555
+$ cd android-sts/tools/ 
+$ ./sts-tradefed  
+sts-tf > run sts-dynamic-full
+실패항목 재시도
+sts-tf > l r 
+실패항목 세션 확인후 
+sts-tf > run retry --retry #세션번호
+
+sts-tf > l i
+실행중인 테스트확인 명령어 
+
+wifi 관련 실패는 usb 무선랜 이용 retry
+@endcode
+
+> SKB 절전모드 진입 프로세스 파악<br>
+https://jira.kaonmedia.com/browse/K1010-75
+1. 슬립모드 진입시 PhoneWindowManager.java에서 절전모드시간 프로퍼티(persist.odm.shutdown.timeout)읽고 타이머동작
+2. 시간되면 ShutdownThread.java 에서 Sending shutdown broadcast...
+3. 넥서스에서 
+    XCAS    : xcas.cpp(119) eDeepSleep, 
+    nexus   : nxserverlib: Entering standby mode: DeepSleep
+
+
+*/

@@ -1,0 +1,10 @@
+/* Box-drawing 전용 블록 — @code 외부에서도 정렬되게 */
+.boxdraw {
+  display: block;
+  font-family: 'D2Coding', 'Consolas', 'Courier New', monospace !important;
+  white-space: pre;               /* 공백, 줄바꿈 유지 */
+  line-height: 1.0em;
+  font-size: 0.95em;
+  text-rendering: geometricPrecision;
+}
+}

@@ -1,0 +1,134 @@
+/*!
+@page work_20250805	2025.08.05
+
+---
+
+# LGHV
+
+https://jira.kaonmedia.com/browse/K0644-364
+
+
+@code
+
+수정사항 
+
+대기모드 시 리모컨 GA 키 기능 수정
+
+[1] BT Pairing X
+
+대기모드 유지
+[2] BT Pairing O
+
+어시스턴트 사용설정 X
+   Wake up -> 어시스턴트 사용설정 화면
+어시스턴트 사용설정 O
+   Wake up -> 어시스턴트 서비스 화면 
+
+
+diff --git a/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java b/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
+index b74b650ea27..5ac5b52dcf2 100755
+--- a/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
++++ b/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
+@@ -3765,6 +3765,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+                 // Since we're dispatching the input, reset the pending key
+                 mPendingWakeKey = PENDING_KEY_NULL;
+             }
++			
++            /* KEYCODE_PAIRING*/
++            if (!interactive && down && keyCode == KeyEvent.KEYCODE_PAIRING) {
++                Log.d(TAG, "skip key:PAIRING in sleep mode");
++                return 0;
++            }
+ 
+              /* KAON LGHV, Without Netflix, it won't wake up. */
+             boolean availableNetflix = mContext.getPackageManager().isPackageAvailable("com.netflix.ninja");
+@@ -4044,6 +4050,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+             case KeyEvent.KEYCODE_ASSIST: {
+                 final boolean longPressed = event.getRepeatCount() > 0;
+                 if (down && !longPressed) {
++                    if (!interactive)
++                        wakeUpFromWakeKey(event);
+                     Message msg = mHandler.obtainMessage(MSG_LAUNCH_ASSIST, event.getDeviceId(),
+                             0 /* unused */, event.getEventTime() /* eventTime */);
+                     msg.setAsynchronous(true);
+
+
+@endcode
+
+> 추가 고려사항
+
+@code
+
+이슈발생 로그를 보면 GA 키를 누른흔적이 없음
+아마도 슬립모드시 com.google.android.katniss 스스로 어시스턴트 설정메뉴로 이동한 것으로 추정됨.
+아래 수정사항을 추후 적용 검토필요
+- 슬립모드시 com.google.android.katniss 실행방지.
+
+diff --git a/frameworks/base/services/core/java/com/android/server/wm/ActivityStarter.java b/frameworks/base/services/core/java/com/android/server/wm/ActivityStarter.java
+index 885eb60c378..25c2f2fd09c 100644
+--- a/frameworks/base/services/core/java/com/android/server/wm/ActivityStarter.java
++++ b/frameworks/base/services/core/java/com/android/server/wm/ActivityStarter.java
+@@ -98,6 +98,7 @@ import android.content.pm.PackageManagerInternal;
+ import android.content.pm.ResolveInfo;
+ import android.content.pm.UserInfo;
+ import android.content.res.Configuration;
++import android.content.Context;
+ import android.os.Binder;
+ import android.os.Bundle;
+ import android.os.IBinder;
+@@ -106,6 +107,7 @@ import android.os.RemoteException;
+ import android.os.Trace;
+ import android.os.UserHandle;
+ import android.os.UserManager;
++import android.os.PowerManager;
+ import android.service.voice.IVoiceInteractionSession;
+ import android.text.TextUtils;
+ import android.util.ArraySet;
+@@ -1550,6 +1552,12 @@ class ActivityStarter {
+                 : (customCallingUid >= 0 ? customCallingUid : actualCallingUid);
+     }
+
++    private boolean isDeviceInStandbyMode() {
++        PowerManager pm = (PowerManager) mService.mContext.getSystemService(Context.POWER_SERVICE);
++        boolean interactive = pm != null && pm.isInteractive();
++        Slog.d(TAG, "smkang isDeviceInStandbyMode: interactive=" + interactive);
++        return !interactive; // interactive가 false면 대기모드로 간주
++    }
+     /**
+      * Start an activity while most of preliminary checks has been done and caller has been
+      * confirmed that holds necessary permissions to do so.
+@@ -1579,6 +1587,7 @@ class ActivityStarter {
+             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
+             result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
+                     startFlags, doResume, options, inTask, restrictedBgActivity, intentGrants);
++            Slog.d(TAG, "smkang - startActivityInner return " + result);
+         } finally {
+             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+             startedActivityRootTask = handleStartResult(r, result);
+@@ -1707,6 +1716,18 @@ class ActivityStarter {
+         mTargetTask = targetTask;
+
+         computeLaunchParams(r, sourceRecord, targetTask);
++
++        Slog.d(TAG, "smkang - packageName is " + r.packageName);
++
++        if ("com.google.android.katniss".equals(r.packageName)){
++            Slog.d(TAG, "smkang - packageName is com.google.android.katniss!!");
++            if (isDeviceInStandbyMode()) {
++                Slog.d(TAG, "smkang Blocked katniss launch in standby mode from startActivityInner");
++                return START_CANCELED;
++            }
++            else
++                Slog.d(TAG, "smkang katniss launch in standby mode from startActivityInner");
++        }
+
+         // Check if starting activity on given task or on a new task is allowed.
+         int startResult = isAllowedToStart(r, newTask, targetTask);
+
+
+@endcode
+
+*/
+
+
+

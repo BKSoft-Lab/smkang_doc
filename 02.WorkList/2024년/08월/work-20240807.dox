@@ -1,0 +1,63 @@
+/*!
+@page work_20240807	2024.08.07
+
+# SKB 수원 
+---
+## Tombstone 다수 발생 로그 분석 요청
+https://jira.kaonmedia.com/browse/K1023-182
+
+@code
+
+Tombstone 에러 발생 재현테스트
+1. 주파수를 감쇄 필터 42(15+15+12) 사용 후 테스트
+	- LIVE 채널 시청 에이징  : 발생 안함
+	- VOD 재생 에이징 : 네트워크 단절로 VOD 재생불가
+2. widevine이 외부 접속하는  443 포트 차단 후 VOD 재생 테스트
+	- 차단 명령어 
+		su 
+		iptables -A OUTPUT -p tcp --dport 443 -j DROP
+		iptables -A OUTPUT -p udp --dport 443 -j DROP
+	- 차단해제 명령어
+		iptables -D OUTPUT -p tcp --dport 443 -j DROP
+		iptables -D OUTPUT -p udp --dport 443 -j DROP
+	- 차단 후 VOD 재생 시
+		08-07 15:43:13.883  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:18.921  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:23.946  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:28.962  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:33.982  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:39.004  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:44.015  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:49.031  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:54.046  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:43:59.091  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:44:04.114  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:44:09.141  2807  3499 I chromium: [2807:3499:INFO:metrics_recorder.cc(188)] cast event: Cast.WidevineCastAuth.Error.DrmCreateFailed
+		08-07 15:44:12.369  2807  2807 I chromium: [metrics_stat_logger] Cast.WidevineCastAuth.Error.DrmCreateFailed=12
+		
+		Widevine 에러가 5초마다 발생하나 Tomstone 발생하지 않음. 3시간 테스트
+@endcode
+---
+## Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음
+https://jira.kaonmedia.com/browse/K1023-188
+
+@code
+
+증상 : BT 이어폰 페어링 후 화면 깨짐 > reboot bootloader
+
+재현 경로
+1. 안드로이드 설정 > 리모컨 및 액세서리 > 액세서리 추가 > 액세서리 검색 > 페어링 중 > 페어링됨
+2. 화면 깨짐 표시 후 BootLoader 로고 표시됨
+
+분석
+HCN 수정사항 반영시 발생 (BT연결 시 VOD 싱크 맞지 않는 현상 수정  Commit 9d8cc71e)
+
+테스트
+빌드환경, 클린빌드, 넥서스 빌드, 버전별 빌드 
+@endcode
+---
+<br>
+---
+
+
+*/

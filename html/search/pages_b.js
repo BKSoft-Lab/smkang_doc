@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['b_20부팅_20후_20바로_20나오는_20로그_20확인_20해야_20할_20때_0',['B (부팅 후 바로 나오는 로그 확인 해야 할 때)',['../tip_log.html#autotoc_md500',1,'']]],
+  ['bhpa_20broadcom_20patch_20memory_20화면블랙_1',['화면블랙 현상 개선패치 적용 테스트 (BHPA broadcom patch memory 화면블랙)',['../work_20241008.html#autotoc_md149',1,'']]],
+  ['bitbucket_2',['가온 bitbucket',['../tip_account.html#autotoc_md427',1,'']]],
+  ['bitbucket_20키등록_3',['bitbucket 키등록',['../k1200_ATV14_work.html#autotoc_md8',1,'']]],
+  ['bko_20uc500_20이슈_2016988_20신규_20audio_205_201ch_20재생_20후_202_200_20ch_20audio_20묵음_20현상_4',['[SKBB(BKO-UC500) - 이슈 #16988] (신규) Audio 5.1ch 재생 후 2.0 ch Audio 묵음 현상',['../work_20250709.html#autotoc_md328',1,'']]],
+  ['bkouc500_5fota_5fkaon2024072601_20배포_20테스트_5',['bkouc500_ota_kaon2024072601 배포 테스트',['../work_20240726.html#autotoc_md42',1,'']]],
+  ['bkouc500_5fota_5fkaon2024080901_20배포_20테스트_6',['bkouc500_ota_kaon2024080901 배포 테스트',['../work_20240809.html#autotoc_md78',1,'']]],
+  ['bksoft_20멤버_20추가_7',['3단계: 팀원 초대하기 (BKSoft 멤버 추가)',['../work_20260120.html#autotoc_md412',1,'']]],
+  ['bksoft_20github_8',['# BKSoft Github',['../work_20260120.html#autotoc_md408',1,'']]],
+  ['black_20현상_9',['Black 현상',['../work_20250416.html#autotoc_md295',1,'최초 개통 시 AV Black 현상'],['../work_20250421.html#autotoc_md299',1,'최초 개통 시 AV Black 현상']]],
+  ['block_20해제_10',['USB CM 업그레이드 후 block 해제',['../tip_cm.html#autotoc_md450',1,'']]],
+  ['bluetooth_20페어링_20완료시_20셋탑_20리부팅_20bootloader_20로고_20표시에_20머물러_20있음_11',['Bluetooth 페어링 완료시 셋탑 리부팅 Bootloader 로고 표시에 머물러 있음',['../work_20240807.html#autotoc_md66',1,'Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음'],['../work_20240808.html#autotoc_md72',1,'Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음'],['../work_20240809.html#autotoc_md80',1,'Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음'],['../work_20240812.html#autotoc_md86',1,'Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음']]],
+  ['bluetooth_20audio_20device를_20페어링_20후_20채널변경_20할_20때_20tv소리가_201_202초가량_20나오고_20난_20뒤_20audio_20device_20소리_20나오는_20현상_12',['[UI/UX 고도화_SIT1차] Bluetooth audio device를 페어링 후 채널변경 할 때 TV소리가 1~2초가량 나오고 난 뒤 audio device 소리 나오는 현상',['../work_20240726.html#autotoc_md44',1,'']]],
+  ['bootloader_13',['AML bootloader',['../k1200_work.html#autotoc_md10',1,'']]],
+  ['bootloader_20로고_20표시에_20머물러_20있음_14',['Bootloader 로고 표시에 머물러 있음',['../work_20240807.html#autotoc_md66',1,'Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음'],['../work_20240808.html#autotoc_md72',1,'Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음'],['../work_20240809.html#autotoc_md80',1,'Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음'],['../work_20240812.html#autotoc_md86',1,'Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음']]],
+  ['branch_15',['branch',['../tip_git.html#autotoc_md491',1,'']]],
+  ['branch_20정보_20갱신_16',['branch 정보 갱신',['../tip_git.html#autotoc_md486',1,'']]],
+  ['brcm_20정보_17',['brcm 정보',['../tip_console.html#autotoc_md468',1,'']]],
+  ['broadcom의_20hvd_20high_20efficiency_20video_20decoder_20바이너리_20공유_18',['AV Slow 이슈 관련한 Broadcom의 HVD(High-efficiency Video Decoder) 바이너리 공유',['../work_20241025.html#autotoc_md180',1,'']]],
+  ['broadcom_20patch_19',['VOC 안정성 2차 5번 셋탑 리부팅 관련한 Broadcom patch',['../work_20241018.html#autotoc_md161',1,'']]],
+  ['broadcom_20patch_20memory_20화면블랙_20',['화면블랙 현상 개선패치 적용 테스트 (BHPA broadcom patch memory 화면블랙)',['../work_20241008.html#autotoc_md149',1,'']]],
+  ['bsynclib_5falgo_5fmax_5fsupported_5fdelay_5fms_203000_20수정_20후_20테스트_20요청_21',['AV Slow 이슈 관련 : BSYNCLIB_ALGO_MAX_SUPPORTED_DELAY_MS 3000 수정 후 테스트 요청',['../work_20241025.html#autotoc_md181',1,'']]],
+  ['buffer_20size_20변경_22',['logcat buffer size 변경',['../work_20250507.html#autotoc_md308',1,'']]],
+  ['build_23',['Build',['../skb_build.html',1,'skb_work']]],
+  ['build_20script_24',['Build Script',['../skb_build.html#autotoc_md17',1,'']]]
+];

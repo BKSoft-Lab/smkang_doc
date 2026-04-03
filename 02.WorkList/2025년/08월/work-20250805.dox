@@ -1,0 +1,118 @@
+/*!
+@page work_20250805	2025.08.05
+
+---
+
+# LGHV
+
+> 이전+확인키 시 버그리포트 IR 모드에서 안되는 이슈
+
+@code
+NO  기능	               키 조합                              입력 시간     비고	
+1  Un-Pairing          [홈메뉴] + [종료]                     3초간 누름     페어링 정보 삭제	
+                       [상] + [하]
+2  TV 설정(Manual)	    [확인] + [TV 전원] -> 3-digit -[확인] 3초간 누름     숫자키를 사용하여 TV 설정	
+3  TV 설정(Auto Search) [확인] + [TV 전원] -> CH+/- -> [확인]  3초간 누름     CH+/- 키를 사용하여 순차적으로 TV 검색하여 설정	
+4  Code Read Out	   TV: [확인] + [TV 전원] -> [이전]       3초간 누름     설정된 TV 제조사 코드 판독	
+                       STB: [확인] + [셋톱 전원] -> [이전]     3초간 누름     설정된 STB IR custom code 번호 판독	
+5  Factory Default	   [종료] + [셋톱 전원]                   5초간 누름     모든 설정된 데이터 초기화	
+6  Bug Report	       [확인] + [이전]                       0.5초간 누름   IR > 수정	
+7  해상도 변경            [확인] + [종료]                       2초간 누름     RED BOX 는 STB 전원 입력한 상태에서 REW(RED) 버튼 반복 입력	
+8  부저음 테스트	       [홈메뉴 + [0]                        3초간 누름     리모컨 부저음 발생 >> K1100 미해당
+
+logcat | egrep "keycode|KEYCODE"
+
+diff --git a/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java b/frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
+              /* KAON LGHV, Without Netflix, it won't wake up. */
+             boolean availableNetflix = mContext.getPackageManager().isPackageAvailable("com.netflix.ninja");
+@@ -3823,7 +3829,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+                 }
+                 break;
+             }
+-
++            case KeyEvent.KEYCODE_F11: {
++                if (down) {
++                    Log.d(TAG, "KEYCODE_F11 - call interceptBugreportGestureTv()");
++                    interceptBugreportGestureTv();
++                }
++                result &= ~ACTION_PASS_TO_USER;
++                break;
++            }
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_UP:
+
+
+
+
+
+설정에서 입력시
+
+08-07 13:29:53.056  4040  4151 D WindowManager: keycode=23 key_action=0
+08-07 13:29:53.214  4040  4151 D WindowManager: keycode=23 key_action=1
+08-07 13:29:53.231  4040  9756 I ActivityManager: bugreportplus requested by UID 1000
+08-07 13:29:53.250  8142  8142 D BugreportRequestedReceiver: onReceive(): com.android.internal.intent.action.BUGREPORT_REQUESTED extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, no ORIGINAL_INTENT
+08-07 13:29:53.250  8142  8142 D BugreportRequestedReceiver: onReceive() ACTION: null
+08-07 13:29:53.263  8142  8142 V BugreportProgressService: onStartCommand(): com.android.internal.intent.action.BUGREPORT_REQUESTED extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, ORIGINAL_INTENT: com.android.internal.intent.action.BUGREPORT_REQUESTED extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, no ORIGINAL_INTENT
+08-07 13:29:53.264  8142  8158 V BugreportProgressService: handleMessage(): com.android.internal.intent.action.BUGREPORT_REQUESTED extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, no ORIGINAL_INTENT
+08-07 13:29:53.309  8142  8158 I BugreportProgressService: bugreport type = 1 bugreport file fd: {ParcelFileDescriptor: java.io.FileDescriptor@7cef371} screenshot file fd: {ParcelFileDescriptor: java.io.FileDescriptor@bb04556}
+08-07 13:29:53.401 19503 19503 I dumpstate: 'dumpstate' service started and will wait for a call to startBugreport()
+08-07 13:29:53.846  4040  9610 I BugreportManagerService: Waiting to get dumpstate service handle (0ms)
+08-07 13:29:53.847  4040  9610 I BugreportManagerService: Got bugreport service handle.
+08-07 13:29:53.848 19503 19505 I dumpstate: startBugreport() with mode: 1
+08-07 13:29:53.849 19503 19506 I dumpstate: do_vibrate: 1 stream_to_socket: 0 progress_updates_to_socket: 0 do_screenshot: 1 is_remote_mode: 0 show_header_only: 0 telephony_only: 0 wifi_only: 0 do_progress_updates: 1 fd: 9 bugreport_mode: BUGREPORT_INTERACTIVE dumpstate_hal_mode: INTERACTIVE limited_only: 0 args:
+08-07 13:29:53.850 19503 19506 D dumpstate: Loading stats from /bugreports/dumpstate-stats.txt
+08-07 13:29:53.854 19503 19506 I dumpstate: dumpstate info: id=4, args='', bugreport_mode= BUGREPORT_INTERACTIVE bugreport format version: 2.0
+08-07 13:29:53.855 19503 19506 D dumpstate: Bugreport dir: [[fd:9]] Base name: [bugreport-K1100UA-STT5.221215.001] Suffix: [2025-08-07-13-29-53] Log path: [/data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-29-53-dumpstate_log-19503.txt] Temporary path: [/data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-29-53.tmp] Screenshot path: [/data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-29-53-png.tmp]
+08-07 13:29:53.855 19503 19506 D dumpstate: Creating initial .zip file (/data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-29-53-zip.tmp)
+08-07 13:29:53.894  8142  8142 D BugreportProgressService: Progress #4: 0.00%
+08-07 13:29:53.894  8142  8142 D BugreportProgressService: Start running as foreground service on id 4
+08-07 13:29:53.896  4040  9611 I ActivityManager: Background started FGS: Allowed [callingPackage: com.android.shell; callingUid: 2000; uidState: SVC ; intent: Intent { act=com.android.internal.intent.action.BUGREPORT_REQUESTED cmp=com.android.shell/.BugreportProgressService (has extras) }; code:SYSTEM_UID; tempAllowListReason:<,reasonCode:SYSTEM_ALLOW_LISTED,duration:9223372036854775807,callingUid:-1>; targetSdkVersion:31; callerTargetSdkVersion:31; startForegroundCount:3; bindFromPackage:null]
+08-07 13:29:53.912  8142  8142 V BugreportProgressService: onStartCommand(): no action extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, no ORIGINAL_INTENT
+08-07 13:29:53.928  8142  8142 D BugreportProgressService: Progress #4: 0.00%
+08-07 13:29:54.389 19503 19506 E dumpstate: *** command '/system/bin/screencap -p /data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-29-53-png.tmp' failed: exit code 1
+08-07 13:29:54.389 19503 19506 E dumpstate: Failed to take screenshot on /data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-29-53-png.tmp
+08-07 13:29:54.392  8142  8142 D BugreportProgressService: Progress #4: 0.00%
+08-07 13:29:54.409 19531 19531 E perfetto: perfetto_cmd.cc:779     No trace with TraceConfig.bugreport_score > 0 eligible for bug reporting was found
+08-07 13:29:54.411 19503 19506 E dumpstate: *** command 'perfetto --save-for-bugreport' failed: exit code 1
+[ 5175.641662] logd: FrameworkListener: read() failed (Connection reset by peer)
+
+
+bt
+
+08-07 13:32:18.502  4040  4151 D WindowManager: keycode=4 key_action=0
+08-07 13:32:18.502  4040  4151 D WindowManager: keycode=23 key_action=0
+08-07 13:32:19.530  4040  4080 I ActivityManager: bugreportplus requested by UID 1000
+08-07 13:32:19.547  8142  8142 D BugreportRequestedReceiver: onReceive(): com.android.internal.intent.action.BUGREPORT_REQUESTED extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, no ORIGINAL_INTENT
+08-07 13:32:19.547  8142  8142 D BugreportRequestedReceiver: onReceive() ACTION: null
+08-07 13:32:19.555  8142  8142 V BugreportProgressService: onStartCommand(): com.android.internal.intent.action.BUGREPORT_REQUESTED extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, ORIGINAL_INTENT: com.android.internal.intent.action.BUGREPORT_REQUESTED extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, no ORIGINAL_INTENT
+08-07 13:32:19.556  8142  8158 V BugreportProgressService: handleMessage(): com.android.internal.intent.action.BUGREPORT_REQUESTED extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, no ORIGINAL_INTENT
+08-07 13:32:19.569  8142  8158 I BugreportProgressService: bugreport type = 1 bugreport file fd: {ParcelFileDescriptor: java.io.FileDescriptor@fa5e4f4} screenshot file fd: {ParcelFileDescriptor: java.io.FileDescriptor@e1d041d}
+08-07 13:32:19.646 21569 21569 I dumpstate: 'dumpstate' service started and will wait for a call to startBugreport()
+08-07 13:32:20.075  4040  4151 D WindowManager: keycode=4 key_action=1
+08-07 13:32:20.077  4040  4151 D WindowManager: keycode=23 key_action=1
+08-07 13:32:20.088  4040  4065 I BugreportManagerService: Waiting to get dumpstate service handle (0ms)
+08-07 13:32:20.089  4040  4065 I BugreportManagerService: Got bugreport service handle.
+08-07 13:32:20.090 21569 21570 I dumpstate: startBugreport() with mode: 1
+08-07 13:32:20.093 21569 21571 I dumpstate: do_vibrate: 1 stream_to_socket: 0 progress_updates_to_socket: 0 do_screenshot: 1 is_remote_mode: 0 show_header_only: 0 telephony_only: 0 wifi_only: 0 do_progress_updates: 1 fd: 9 bugreport_mode: BUGREPORT_INTERACTIVE dumpstate_hal_mode: INTERACTIVE limited_only: 0 args:
+08-07 13:32:20.094 21569 21571 D dumpstate: Loading stats from /bugreports/dumpstate-stats.txt
+08-07 13:32:20.102 21569 21571 I dumpstate: dumpstate info: id=5, args='', bugreport_mode= BUGREPORT_INTERACTIVE bugreport format version: 2.0
+08-07 13:32:20.103 21569 21571 D dumpstate: Bugreport dir: [[fd:9]] Base name: [bugreport-K1100UA-STT5.221215.001] Suffix: [2025-08-07-13-32-19] Log path: [/data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-32-19-dumpstate_log-21569.txt] Temporary path: [/data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-32-19.tmp] Screenshot path: [/data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-32-19-png.tmp]
+08-07 13:32:20.103 21569 21571 D dumpstate: Creating initial .zip file (/data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-32-19-zip.tmp)
+08-07 13:32:20.166  8142  8142 D BugreportProgressService: Progress #5: 0.00%
+08-07 13:32:20.166  8142  8142 D BugreportProgressService: Start running as foreground service on id 5
+08-07 13:32:20.168  4040  4131 I ActivityManager: Background started FGS: Allowed [callingPackage: com.android.shell; callingUid: 2000; uidState: SVC ; intent: Intent { act=com.android.internal.intent.action.BUGREPORT_REQUESTED cmp=com.android.shell/.BugreportProgressService (has extras) }; code:SYSTEM_UID; tempAllowListReason:<,reasonCode:SYSTEM_ALLOW_LISTED,duration:9223372036854775807,callingUid:-1>; targetSdkVersion:31; callerTargetSdkVersion:31; startForegroundCount:4; bindFromPackage:null]
+08-07 13:32:20.203  8142  8142 V BugreportProgressService: onStartCommand(): no action extras: no ID, no NAME, no DESCRIPTION, no BUGREPORT, no SCREENSHOT, no INFO, no TITLE, no ORIGINAL_INTENT
+08-07 13:32:20.222  8142  8142 D BugreportProgressService: Progress #5: 0.00%
+08-07 13:32:20.815 21569 21571 E dumpstate: *** command '/system/bin/screencap -p /data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-32-19-png.tmp' failed: exit code 1
+08-07 13:32:20.816 21569 21571 E dumpstate: Failed to take screenshot on /data/user_de/0/com.android.shell/files/bugreports/bugreport-K1100UA-STT5.221215.001-2025-08-07-13-32-19-png.tmp
+08-07 13:32:20.818  8142  8142 D BugreportProgressService: Progress #5: 0.00%
+08-07 13:32:20.835 21597 21597 E perfetto: perfetto_cmd.cc:779     No trace with TraceConfig.bugreport_score > 0 eligible for bug reporting was found
+08-07 13:32:20.837 21569 21571 E dumpstate: *** command 'perfetto --save-for-bugreport' failed: exit code 1
+
+
+@endcode
+
+*/
+
+
+

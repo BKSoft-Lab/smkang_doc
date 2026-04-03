@@ -1,0 +1,643 @@
+/*!
+@page work_20250709	2025.07.09
+
+---
+
+# LGHV
+
+@code
+
+/data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+/data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+위 캐시 삭제시 복구
+백업한 캐시 원복시 동일 발생
+
+@endcode
+
+@code
+
+Android ART ClassLoaderContext Mismatch 분석 보고서
+1. 현상 요약
+대상 단말: K1100UA
+앱 패키지: com.alticast.xcas
+문제 증상:
+ 앱 실행 시 반복적으로 크래시 발생
+로그 메시지:
+ java.lang.ClassNotFoundException: Didn't find class "com.alticast.xcas.XcasApplication"
+
+일부 부팅 로그에는 다음과 같은 ClassLoaderContext mismatch 로그 존재:
+ClassLoaderContext classpath element mismatch. 
+expected=/system_ext/framework/taurus.cl_prj.jar, 
+found=/system/system_ext/framework/taurus.cl_prj.jar
+
+2. 원인 분석
+2.1 ART의 캐시 구조
+Android Runtime(ART)은 앱 성능 최적화를 위해 DEX 파일을 OAT/VDEX 캐시로 변환하여 
+/data/dalvik-cache에 저장한다.
+이 캐시는 다음 요소들과 연동되어 생성 및 검증된다:
+DEX 파일 위치 (dex_file_location)
+ClassLoaderContext 정보
+bootclasspath 해시
+ART compiler version 등
+
+2.2 문제의 핵심 원인: 경로 mismatch
+빌드 시 ART는 ClassLoaderContext에 다음 경로를 문자열로 기록:
+/system_ext/framework/taurus.cl_prj.jar
+
+실제 런타임에서는 symlink(/system_ext → /system/system_ext symlink) 가 풀리며 다음 경로로 해석됨:
+/system/system_ext/framework/taurus.cl_prj.ja
+r
+ART는 경로가 문자 단위로 일치하지 않으면 캐시를 무효로 판단
+→ expected != found → 캐시 로딩 거부
+→ fallback 으로 APK 내부 classes.dex 로딩 시도
+그러나 ClassLoaderContext가 여전히 꼬여 있어 fallback 도 실패 → ClassNotFoundException 발생
+
+2.3 심볼릭 링크 삭제의 무의미함
+/system_ext → /system/system_ext symlink 는 시스템 호환성을 위한 구조
+
+이 symlink 를 삭제해도 ClassLoaderContext mismatch 문제는 전혀 해결되지 않음
+
+오히려 부팅 불능, framework jar 탐색 실패 등 치명적 부작용 발생 가능
+
+3. 진단 과정
+XcasApp.apk 내 classes.dex 존재 확인:
+
+perl
+복사
+편집
+unzip -l /system/system_ext/priv-app/XcasApp/XcasApp.apk | grep classes.dex
+oatdump 및 strings 명령으로 VDEX 내부 ClassLoaderContext 확인:
+
+--class-loader-context=PCL[]{PCL[/system_ext/framework/taurus.cl_prj.jar]}
+런타임에서 symlink가 풀린 경로와 mismatch 발생 확인:
+
+/system/system_ext/framework/taurus.cl_prj.jar
+
+4. 해결 방안
+4.1 빌드 플래그 수정
+device.mk 또는 BoardConfig.mk에 아래 설정을 추가:
+PRODUCT_DEX_PREOPT_BOOT_FLAGS := --classpath-dir=/system/system_ext/framework
+해당 설정을 통해 빌드 시 symlink 풀린 경로를 ClassLoaderContext에 기록하도록 유도
+이로써 ART의 문자열 비교에서도 mismatch 없이 통과
+
+4.2 ART 캐시 삭제 및 재생성
+빌드 플래그 적용 후 다음 명령으로 기존 캐시를 삭제:
+adb shell
+su
+rm -rf /data/dalvik-cache/*
+rm -rf /data/resource-cache/*
+rm -rf /data/misc/profiles/*
+reboot
+
+5. 심볼릭 링크 제거에 대한 판단
+항목	내용
+효과	mismatch 문제 해결되지 않음
+위험성	시스템 부팅 실패, OTA 적용 실패 가능성 있음
+결론	symlink 제거는 비권장. 빌드 설정으로만 해결 가능
+
+6. OTA 적용과 ART 캐시 검증 절차
+6.1 OTA 이후 동작 원리
+OTA 적용 후 첫 부팅 시, ART는 기존 캐시가 유효한지 자동으로 검증한다:
+OAT/VDEX 내부의 체크섬, 클래스 로더 경로, bootclasspath 등을 비교
+일치하지 않으면 dex2oat를 통해 캐시를 다시 생성
+
+6.2 캐시 무효화 발생 조건
+조건	              예시
+시스템 이미지 변경	framework.jar, boot.oat 등 변경
+APK 변경	system 앱 교체 등
+symlink 구조 변경	/system_ext 경로 구조 변경
+ART 버전 변경	컴파일러 옵션 변경 등
+
+6.3 OTA 제작 시 주의사항
+작업	권장 여부
+정확한 classpath-dir 설정	✅ 필수
+ART 캐시 사전 생성 (dexpreopt)	✅ 권장
+OTA 후 캐시 강제 삭제	❌ 비권장 (부팅 시간 증가 우려)
+
+7. 결론 및 권장사항
+항목	설명
+문제 핵심	ART ClassLoaderContext 경로 mismatch로 캐시 및 fallback 로딩 실패
+최종 원인	symlink 경로와 실제 경로가 문자열로 달라서 ART가 캐시 무효로 판단
+권장 해결책	빌드 플래그 수정 + 캐시 초기화로 정정된 context 기록 유도
+피해야 할 방법	symlink 삭제, 비표준 경로 강제 변경 등은 시스템 위험 야기 가능
+
+✅ 요약
+ART는 경로가 symlink로 실제 동일해도, 문자열 비교 기준으로 캐시 유효성을 판단한다.
+OTA 후나 초기 부팅 시 mismatch 가 발생하면 앱은 fallback 도 실패하여 ClassNotFoundException 을 유발할 수 있다.
+정확한 classpath-dir 설정과 캐시 초기화만이 이 문제를 확실히 해결할 수 있는 방법이다.
+
+
+
+
+
+
+
+
+    if logcat -d | grep "java.lang.ClassNotFoundException" | grep -q "com.alticast.xcas"; then
+        /system/bin/logwrapper echo "[smkang1] XcasApplication ClassNotFoundException detected."
+
+    else
+        /system/bin/logwrapper echo "[smkang1] No ClassNotFoundException found for XcasApplication."
+    fi
+	
+	
+	logcat | grep echo
+	logcat | egrep "java.lang.ClassNotFoundException|echo"
+	
+	
+	[smkang] XcasApplication ClassNotFoundException detected.
+	
+	
+	logcat -d -T "07-14 14:05:58.559" \
+    | grep "java.lang.ClassNotFoundException" \
+    | grep "com.alticast.xcas.XcasApplication"
+	
+    if logcat -d -T "07-14 14:05:58.559" \
+        | tail -n 2000 \
+        | grep "java.lang.ClassNotFoundException" \
+        | grep -q "com.alticast.xcas.XcasApplication"; then	
+        /system/bin/logwrapper echo "[smkang1] XcasApplication ClassNotFoundException detected."
+
+    else
+        /system/bin/logwrapper echo "[smkang1] No ClassNotFoundException found for XcasApplication."
+    fi	
+	
+	
+	logcat | grep echo
+
+
+
+cmd package compile -m speed -f com.alticast.xcas
+
+ls -l /data/dalvik-cache/arm/*Xcas*
+-rw-r--r-- 1 system all_a74   29336 2025-07-11 17:48 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+-rw-r--r-- 1 system all_a74 1584392 2025-07-11 17:48 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+rm /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+rm /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+
+adb shell
+su
+cp /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex /data/local/tmp/XcasApp.vdex
+cp /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex /data/local/tmp/XcasApp.dex
+
+adb pull /data/local/tmp/XcasApp.vdex D:\platform-tools\
+adb pull /data/local/tmp/XcasApp.dex D:\platform-tools\
+
+
+adb push dalvik/XcasApp_f.vdex /data/local/tmp/
+adb push dalvik/XcasApp_f.dex /data/local/tmp/
+cp /data/local/tmp/XcasApp_f.dex \
+   /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+
+cp /data/local/tmp/XcasApp_f.vdex \
+   /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+
+chown system:all_a75 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+chmod 644 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+restorecon -v /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+
+
+
+adb push dalvik/XcasApp_f.vdex /data/local/tmp/
+adb push dalvik/XcasApp_o_ok.vdex /data/local/tmp/
+
+rm /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+cp /data/local/tmp/XcasApp_f.vdex /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+cp /data/local/tmp/XcasApp_o_ok.vdex /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+chown system:all_a75 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+chmod 644 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+restorecon -v /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+
+ls -l /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+
+
+cp /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex /data/local/tmp/XcasApp_n.vdex
+cp /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex /data/local/tmp/XcasApp_n.dex
+
+adb pull /data/local/tmp/XcasApp_n.vdex D:\platform-tools\
+adb pull /data/local/tmp/XcasApp_n.dex D:\platform-tools\
+
+
+
+
+
+adb push XcasApp_n.vdex /data/local/tmp/
+adb push XcasApp_n.dex /data/local/tmp/
+cp /data/local/tmp/XcasApp_n.dex \
+   /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+
+cp /data/local/tmp/XcasApp_n.vdex \
+   /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+
+chown system:all_a75 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+chmod 644 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+
+restorecon -v /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.*
+
+
+
+
+
+
+1|K1100UA:/data/dalvik-cache # ls -l /data/dalvik-cache/arm/*Xcas*
+-rw-r--r-- 1 system all_a75   29336 2024-11-22 21:56 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+-rw-r--r-- 1 system all_a75 1584392 2024-11-22 21:56 /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+K1100UA:/data/dalvik-cache # cp /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex /data/local/tmp/XcasApp.vdex
+K1100UA:/data/dalvik-cache # cp /data/dalvik-cache/arm/system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex /data/local/tmp/XcasApp.dex
+K1100UA:/data/dalvik-cache # ls -l /data/local/tmp/XcasApp.*
+-rw-r--r-- 1 root root   29336 2025-08-20 16:45 /data/local/tmp/XcasApp.dex
+-rw-r--r-- 1 root root 1584392 2025-08-20 16:45 /data/local/tmp/XcasApp.vdex
+
+adb pull /data/local/tmp/XcasApp.vdex D:\platform-tools\
+adb pull /data/local/tmp/XcasApp.dex D:\platform-tools\
+
+
+K1100UA:/ # ls -l /data/dalvik-cache/arm/
+total 180964
+-rw-r----- 1 system system     21096 2015-01-01 09:00 apex@com.android.appsearch@javalib@service-appsearch.jar@classes.dex
+-rw-r----- 1 system system     15884 2015-01-01 09:00 apex@com.android.appsearch@javalib@service-appsearch.jar@classes.vdex
+-rw-r--r-- 1 system all_a84    25192 2024-11-22 21:55 apex@com.android.extservices@priv-app@GoogleExtServices@GoogleExtServices.apk@classes.dex
+-rw-r--r-- 1 system all_a84    26408 2024-11-22 21:55 apex@com.android.extservices@priv-app@GoogleExtServices@GoogleExtServices.apk@classes.vdex
+-rw-r----- 1 system system     16996 2015-01-01 09:00 apex@com.android.media@javalib@service-media-s.jar@classes.dex
+-rw-r----- 1 system system       320 2015-01-01 09:00 apex@com.android.media@javalib@service-media-s.jar@classes.vdex
+-rw-r--r-- 1 system all_a83    29288 2025-02-27 05:13 apex@com.android.mediaprovider@priv-app@MediaProvider@MediaProvider.apk@classes.dex
+-rw-r--r-- 1 system all_a83    30664 2025-02-27 05:13 apex@com.android.mediaprovider@priv-app@MediaProvider@MediaProvider.apk@classes.vdex
+-rw-r--r-- 1 system system     17000 2025-02-27 05:23 apex@com.android.os.statsd@javalib@service-statsd.jar@classes.dex
+-rw-r--r-- 1 system system       716 2025-02-27 05:23 apex@com.android.os.statsd@javalib@service-statsd.jar@classes.vdex
+-rw-r----- 1 system system     17000 2015-01-01 09:00 apex@com.android.permission@javalib@service-permission.jar@classes.dex
+-rw-r----- 1 system system      1140 2015-01-01 09:00 apex@com.android.permission@javalib@service-permission.jar@classes.vdex
+-rw-r--r-- 1 system all_a82    49768 2024-11-22 21:55 apex@com.android.permission@priv-app@GooglePermissionController@GooglePermissionController.apk@classes.dex
+-rw-r--r-- 1 system all_a82    75168 2024-11-22 21:55 apex@com.android.permission@priv-app@GooglePermissionController@GooglePermissionController.apk@classes.vdex
+-rw-r--r-- 1 system system     17000 2025-02-27 05:23 apex@com.android.scheduling@javalib@service-scheduling.jar@classes.dex
+-rw-r--r-- 1 system system       900 2025-02-27 05:23 apex@com.android.scheduling@javalib@service-scheduling.jar@classes.vdex
+-rw-r--r-- 1 system system     25192 2025-02-27 05:23 apex@com.android.tethering@javalib@service-connectivity.jar@classes.dex
+-rw-r--r-- 1 system system     13732 2025-02-27 05:23 apex@com.android.tethering@javalib@service-connectivity.jar@classes.vdex
+-rw-r--r-- 1 system system     21096 2025-02-27 05:13 apex@com.android.tethering@priv-app@InProcessTethering@InProcessTethering.apk@classes.dex
+-rw-r--r-- 1 system system      7780 2025-02-27 05:13 apex@com.android.tethering@priv-app@InProcessTethering@InProcessTethering.apk@classes.vdex
+-rw-r--r-- 1 system all_a80    17000 2024-11-22 21:56 apex@com.android.wifi@app@OsuLogin@OsuLogin.apk@classes.dex
+-rw-r--r-- 1 system all_a80     3832 2024-11-22 21:56 apex@com.android.wifi@app@OsuLogin@OsuLogin.apk@classes.vdex
+-rw-r--r-- 1 system system     37480 2025-02-27 05:23 apex@com.android.wifi@javalib@service-wifi.jar@classes.dex
+-rw-r--r-- 1 system system     52396 2025-02-27 05:23 apex@com.android.wifi@javalib@service-wifi.jar@classes.vdex
+-rw-r--r-- 1 system all_a27    66200 2024-11-22 21:56 system@app@BookClub@BookClub.apk@classes.dex
+-rw-r--r-- 1 system all_a27  6855900 2024-11-22 21:56 system@app@BookClub@BookClub.apk@classes.vdex
+-rw-r--r-- 1 system all_a39   250564 2024-11-22 21:56 system@app@COUPANG@COUPANG.apk@classes.dex
+-rw-r--r-- 1 system all_a39 27775628 2024-11-22 21:56 system@app@COUPANG@COUPANG.apk@classes.vdex
+-rw-r--r-- 1 system all_a41   443092 2024-11-22 21:56 system@app@DisneyPlus@DisneyPlus.apk@classes.dex
+-rw-r--r-- 1 system all_a41 37981792 2024-11-22 21:56 system@app@DisneyPlus@DisneyPlus.apk@classes.vdex
+-rw-r--r-- 1 system all_a36    16996 2024-11-22 21:55 system@app@GoogleExtShared@GoogleExtShared.apk@classes.dex
+-rw-r--r-- 1 system all_a36      124 2024-11-22 21:55 system@app@GoogleExtShared@GoogleExtShared.apk@classes.vdex
+-rw-r--r-- 1 system all_a25    33432 2025-02-27 05:13 system@app@LGHV_UMP@LGHV_UMP.apk@classes.dex
+-rw-r--r-- 1 system all_a25  1865464 2025-02-27 05:13 system@app@LGHV_UMP@LGHV_UMP.apk@classes.vdex
+-rw-r--r-- 1 system all_a29    74392 2025-02-27 05:13 system@app@Netflix@Netflix.apk@classes.dex
+-rw-r--r-- 1 system all_a29  8008692 2025-02-27 05:13 system@app@Netflix@Netflix.apk@classes.vdex
+-rw-r--r-- 1 system all_a40   201392 2024-11-22 21:56 system@app@TVING@TVING.apk@classes.dex
+-rw-r--r-- 1 system all_a40 17480168 2024-11-22 21:56 system@app@TVING@TVING.apk@classes.vdex
+-rw-r--r-- 1 system all_a26    53912 2024-11-22 21:56 system@app@YBM@YBM.apk@classes.dex
+-rw-r--r-- 1 system all_a26  6664892 2024-11-22 21:56 system@app@YBM@YBM.apk@classes.vdex
+-rw-r--r-- 1 system all_a28    66200 2024-11-22 21:55 system@app@YouTubeKids@YouTubeKids.apk@classes.dex
+-rw-r--r-- 1 system all_a28  4456964 2024-11-22 21:55 system@app@YouTubeKids@YouTubeKids.apk@classes.vdex
+-rw-r--r-- 1 system all_a38   135844 2024-11-22 21:55 system@app@wavve-tv@wavve-tv.apk@classes.dex
+-rw-r--r-- 1 system all_a38 11064380 2024-11-22 21:55 system@app@wavve-tv@wavve-tv.apk@classes.vdex
+-rw-r--r-- 1 system all_a17    29288 2024-11-22 21:56 system@priv-app@GooglePackageInstaller@GooglePackageInstaller.apk@classes.dex
+-rw-r--r-- 1 system all_a17    30804 2024-11-22 21:56 system@priv-app@GooglePackageInstaller@GooglePackageInstaller.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2025-02-27 05:13 system@priv-app@KaonCmAutoUpgrade@KaonCmAutoUpgrade.apk@classes.dex
+-rw-r--r-- 1 system system     26696 2025-02-27 05:13 system@priv-app@KaonCmAutoUpgrade@KaonCmAutoUpgrade.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2025-02-27 05:13 system@priv-app@KaonManagerService@KaonManagerService.apk@classes.dex
+-rw-r--r-- 1 system system     29052 2025-02-27 05:13 system@priv-app@KaonManagerService@KaonManagerService.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2025-02-27 05:13 system@priv-app@KaonTftpService@KaonTftpService.apk@classes.dex
+-rw-r--r-- 1 system system     29932 2025-02-27 05:13 system@priv-app@KaonTftpService@KaonTftpService.apk@classes.vdex
+-rw-r--r-- 1 system all_a10    17048 2024-11-22 21:55 system@priv-app@PlayAutoInstallConfig@PlayAutoInstallConfig.apk@classes.dex
+-rw-r--r-- 1 system all_a10     1184 2024-11-22 21:55 system@priv-app@PlayAutoInstallConfig@PlayAutoInstallConfig.apk@classes.vdex
+-rw-r--r-- 1 system all_a64    53924 2025-02-27 05:13 system@product@app@GoogleCalendarSyncAdapter@GoogleCalendarSyncAdapter.apk@classes.dex
+-rw-r--r-- 1 system all_a64  3835500 2025-02-27 05:13 system@product@app@GoogleCalendarSyncAdapter@GoogleCalendarSyncAdapter.apk@classes.vdex
+-rw-r--r-- 1 system all_a66    82596 2024-11-22 21:56 system@product@app@GoogleTTS@GoogleTTS.apk@classes.dex
+-rw-r--r-- 1 system all_a66  6722620 2024-11-22 21:56 system@product@app@GoogleTTS@GoogleTTS.apk@classes.vdex
+-rw-r--r-- 1 system all_a61    86632 2025-02-27 05:12 system@product@app@LatinIMEGoogleTvPrebuilt@LatinIMEGoogleTvPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a61   235952 2025-02-27 05:12 system@product@app@LatinIMEGoogleTvPrebuilt@LatinIMEGoogleTvPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a59    49768 2025-02-27 05:13 system@product@app@WebViewGoogle@WebViewGoogle.apk@classes.dex
+-rw-r--r-- 1 system all_a59    67260 2025-02-27 05:13 system@product@app@WebViewGoogle@WebViewGoogle.apk@classes.vdex
+-rw-r--r-- 1 system all_a58    37480 2025-02-27 07:05 system@product@app@YouTubeMusicTVPrebuilt@YouTubeMusicTVPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a58    56884 2025-02-27 07:05 system@product@app@YouTubeMusicTVPrebuilt@YouTubeMusicTVPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a67    66212 2024-11-22 21:55 system@product@app@talkback@talkback.apk@classes.dex
+-rw-r--r-- 1 system all_a67  6005576 2024-11-22 21:55 system@product@app@talkback@talkback.apk@classes.vdex
+-rw-r--r-- 1 system all_a51   217788 2024-11-22 21:55 system@product@priv-app@AndroidMediaShell@AndroidMediaShell.apk@classes.dex
+-rw-r--r-- 1 system all_a51 22731852 2024-11-22 21:55 system@product@priv-app@AndroidMediaShell@AndroidMediaShell.apk@classes.vdex
+-rw-r--r-- 1 system all_a48    45672 2024-11-22 21:56 system@product@priv-app@AtvRemoteService@AtvRemoteService.apk@classes.dex
+-rw-r--r-- 1 system all_a48    76940 2024-11-22 21:56 system@product@priv-app@AtvRemoteService@AtvRemoteService.apk@classes.vdex
+-rw-r--r-- 1 system all_a49    17000 2024-11-22 21:55 system@product@priv-app@Backdrop@Backdrop.apk@classes.dex
+-rw-r--r-- 1 system all_a49     2400 2024-11-22 21:55 system@product@priv-app@Backdrop@Backdrop.apk@classes.vdex
+-rw-r--r-- 1 system system     33432 2025-02-27 05:13 system@product@priv-app@BluetoothRCUParing@BluetoothRCUParing.apk@classes.dex
+-rw-r--r-- 1 system system   3350404 2025-02-27 05:13 system@product@priv-app@BluetoothRCUParing@BluetoothRCUParing.apk@classes.vdex
+-rw-r--r-- 1 system all_a52    17000 2024-11-22 21:55 system@product@priv-app@GoogleOneTimeInitializer@GoogleOneTimeInitializer.apk@classes.dex
+-rw-r--r-- 1 system all_a52     3280 2024-11-22 21:55 system@product@priv-app@GoogleOneTimeInitializer@GoogleOneTimeInitializer.apk@classes.vdex
+-rw-r--r-- 1 system system     29336 2024-11-22 21:55 system@product@priv-app@K1100UARcuUpdate@K1100UARcuUpdate.apk@classes.dex
+-rw-r--r-- 1 system system   2400412 2024-11-22 21:55 system@product@priv-app@K1100UARcuUpdate@K1100UARcuUpdate.apk@classes.vdex
+-rw-r--r-- 1 system all_a54   205416 2025-02-27 05:12 system@product@priv-app@Katniss@Katniss.apk@classes.dex
+-rw-r--r-- 1 system all_a54   540880 2025-02-27 05:12 system@product@priv-app@Katniss@Katniss.apk@classes.vdex
+-rw-r--r-- 1 system all_a55   631400 2025-02-27 05:13 system@product@priv-app@PrebuiltGmsCorePano@PrebuiltGmsCorePano.apk@classes.dex
+-rw-r--r-- 1 system all_a55  1652148 2025-02-27 05:13 system@product@priv-app@PrebuiltGmsCorePano@PrebuiltGmsCorePano.apk@classes.vdex
+-rw-r--r-- 1 system all_a53   123496 2025-02-27 05:12 system@product@priv-app@SetupWraithPrebuilt@SetupWraithPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a53   344252 2025-02-27 05:12 system@product@priv-app@SetupWraithPrebuilt@SetupWraithPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a50    66152 2025-02-27 05:13 system@product@priv-app@TVRecommendations@TVRecommendations.apk@classes.dex
+-rw-r--r-- 1 system all_a50   132036 2025-02-27 05:13 system@product@priv-app@TVRecommendations@TVRecommendations.apk@classes.vdex
+-rw-r--r-- 1 system all_a56   250472 2025-02-27 05:13 system@product@priv-app@Tubesky@Tubesky.apk@classes.dex
+-rw-r--r-- 1 system all_a56   796504 2025-02-27 05:13 system@product@priv-app@Tubesky@Tubesky.apk@classes.vdex
+-rw-r--r-- 1 system all_a67    74344 2025-02-27 05:13 system@product@priv-app@talkback@talkback.apk@classes.dex
+-rw-r--r-- 1 system all_a67   143344 2025-02-27 05:13 system@product@priv-app@talkback@talkback.apk@classes.vdex
+-rw-r--r-- 1 system all_a74    25188 2024-11-22 21:55 system@system_ext@priv-app@Alti_DeviceUpdater@Alti_DeviceUpdater.apk@classes.dex
+-rw-r--r-- 1 system all_a74    27392 2024-11-22 21:55 system@system_ext@priv-app@Alti_DeviceUpdater@Alti_DeviceUpdater.apk@classes.vdex
+-rw-r--r-- 1 system all_a73    25240 2025-02-27 05:13 system@system_ext@priv-app@Alti_Snmp@Alti_Snmp.apk@classes.dex
+-rw-r--r-- 1 system all_a73  1193744 2025-02-27 05:13 system@system_ext@priv-app@Alti_Snmp@Alti_Snmp.apk@classes.vdex
+-rw-r--r-- 1 system all_a69    41576 2024-11-22 21:55 system@system_ext@priv-app@Alti_TIS@Alti_TIS.apk@classes.dex
+-rw-r--r-- 1 system all_a69    61404 2024-11-22 21:55 system@system_ext@priv-app@Alti_TIS@Alti_TIS.apk@classes.vdex
+-rw-r--r-- 1 system all_a76    49816 2024-11-22 21:55 system@system_ext@priv-app@Alti_Watchdog@Alti_Watchdog.apk@classes.dex
+-rw-r--r-- 1 system all_a76  5621704 2024-11-22 21:55 system@system_ext@priv-app@Alti_Watchdog@Alti_Watchdog.apk@classes.vdex
+-rw-r--r-- 1 system all_a71    16996 2024-11-22 21:55 system@system_ext@priv-app@CjCustomizer@CjCustomizer.apk@classes.dex
+-rw-r--r-- 1 system all_a71      140 2024-11-22 21:55 system@system_ext@priv-app@CjCustomizer@CjCustomizer.apk@classes.vdex
+-rw-r--r-- 1 system all_a70    21096 2024-11-22 21:56 system@system_ext@priv-app@GoogleFeedback@GoogleFeedback.apk@classes.dex
+-rw-r--r-- 1 system all_a70     8200 2024-11-22 21:56 system@system_ext@priv-app@GoogleFeedback@GoogleFeedback.apk@classes.vdex
+-rw-r--r-- 1 system all_a68    21096 2025-02-27 05:13 system@system_ext@priv-app@GooglePartnerSetup@GooglePartnerSetup.apk@classes.dex
+-rw-r--r-- 1 system all_a68     8912 2025-02-27 05:13 system@system_ext@priv-app@GooglePartnerSetup@GooglePartnerSetup.apk@classes.vdex
+-rw-r--r-- 1 system all_a55    37480 2024-11-22 21:56 system@system_ext@priv-app@GoogleServicesFramework@GoogleServicesFramework.apk@classes.dex
+-rw-r--r-- 1 system all_a55    57924 2024-11-22 21:56 system@system_ext@priv-app@GoogleServicesFramework@GoogleServicesFramework.apk@classes.vdex
+-rw-r--r-- 1 system all_a75    29336 2024-11-22 21:56 system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+-rw-r--r-- 1 system all_a75  1584392 2024-11-22 21:56 system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+-rw-r--r-- 1 system all_a72   160360 2025-02-27 05:13 system@system_ext@priv-app@lghv_uhd2_epg@lghv_uhd2_epg.apk@classes.dex
+-rw-r--r-- 1 system all_a72   377820 2025-02-27 05:13 system@system_ext@priv-app@lghv_uhd2_epg@lghv_uhd2_epg.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2024-11-22 21:56 vendor@app@BcmAudioCapture@BcmAudioCapture.apk@classes.dex
+-rw-r--r-- 1 system system     17880 2024-11-22 21:56 vendor@app@BcmAudioCapture@BcmAudioCapture.apk@classes.vdex
+
+
+
+
+
+
+
+
+
+추가 깨짐
+system@app@DisneyPlus@DisneyPlus.apk@classes.vdex - all 
+system@app@COUPANG@COUPANG.apk@classes.vdex - 0xD2000
+system@app@TVING@TVING.apk@classes.vdex - 0x220000
+system@app@BookClub@BookClub.apk@classes.vdex - 0x56000
+system@app@YBM@YBM.apk@classes.vdex - all
+
+
+
+
+K1100UA:/data/dalvik-cache/arm # ls -l
+total 197408
+-rw-r----- 1 system system     21096 2015-01-01 09:00 apex@com.android.appsearch@javalib@service-appsearch.jar@classes.dex
+-rw-r----- 1 system system     15884 2015-01-01 09:00 apex@com.android.appsearch@javalib@service-appsearch.jar@classes.vdex
+-rw-r--r-- 1 system all_a84    25192 2024-11-22 21:55 apex@com.android.extservices@priv-app@GoogleExtServices@GoogleExtServices.apk@classes.dex
+-rw-r--r-- 1 system all_a84    26408 2024-11-22 21:55 apex@com.android.extservices@priv-app@GoogleExtServices@GoogleExtServices.apk@classes.vdex
+-rw-r----- 1 system system     16996 2015-01-01 09:00 apex@com.android.media@javalib@service-media-s.jar@classes.dex
+-rw-r----- 1 system system       320 2015-01-01 09:00 apex@com.android.media@javalib@service-media-s.jar@classes.vdex
+-rw-r--r-- 1 system all_a83    29288 2025-02-27 05:13 apex@com.android.mediaprovider@priv-app@MediaProvider@MediaProvider.apk@classes.dex
+-rw-r--r-- 1 system all_a83    30664 2025-02-27 05:13 apex@com.android.mediaprovider@priv-app@MediaProvider@MediaProvider.apk@classes.vdex
+-rw-r--r-- 1 system system     17000 2025-02-27 05:23 apex@com.android.os.statsd@javalib@service-statsd.jar@classes.dex
+-rw-r--r-- 1 system system       716 2025-02-27 05:23 apex@com.android.os.statsd@javalib@service-statsd.jar@classes.vdex
+-rw-r----- 1 system system     17000 2015-01-01 09:00 apex@com.android.permission@javalib@service-permission.jar@classes.dex
+-rw-r----- 1 system system      1140 2015-01-01 09:00 apex@com.android.permission@javalib@service-permission.jar@classes.vdex
+-rw-r--r-- 1 system all_a82    49768 2024-11-22 21:55 apex@com.android.permission@priv-app@GooglePermissionController@GooglePermissionController.apk@classes.dex
+-rw-r--r-- 1 system all_a82    75168 2024-11-22 21:55 apex@com.android.permission@priv-app@GooglePermissionController@GooglePermissionController.apk@classes.vdex
+-rw-r--r-- 1 system system     17000 2025-02-27 05:23 apex@com.android.scheduling@javalib@service-scheduling.jar@classes.dex
+-rw-r--r-- 1 system system       900 2025-02-27 05:23 apex@com.android.scheduling@javalib@service-scheduling.jar@classes.vdex
+-rw-r--r-- 1 system system     25192 2025-06-29 03:45 apex@com.android.tethering@javalib@service-connectivity.jar@classes.dex
+-rw-r--r-- 1 system system     13732 2025-06-29 03:45 apex@com.android.tethering@javalib@service-connectivity.jar@classes.vdex
+-rw-r--r-- 1 system system     21096 2025-02-27 05:13 apex@com.android.tethering@priv-app@InProcessTethering@InProcessTethering.apk@classes.dex
+-rw-r--r-- 1 system system      7780 2025-02-27 05:13 apex@com.android.tethering@priv-app@InProcessTethering@InProcessTethering.apk@classes.vdex
+-rw-r--r-- 1 system all_a80    17000 2024-11-22 21:56 apex@com.android.wifi@app@OsuLogin@OsuLogin.apk@classes.dex
+-rw-r--r-- 1 system all_a80     3832 2024-11-22 21:56 apex@com.android.wifi@app@OsuLogin@OsuLogin.apk@classes.vdex
+-rw-r--r-- 1 system system     37480 2025-06-29 03:45 apex@com.android.wifi@javalib@service-wifi.jar@classes.dex
+-rw-r--r-- 1 system system     52396 2025-06-29 03:45 apex@com.android.wifi@javalib@service-wifi.jar@classes.vdex
+-rw-r--r-- 1 system all_a27    66200 2024-11-22 21:56 system@app@BookClub@BookClub.apk@classes.dex
+-rw-r--r-- 1 system all_a27  6855900 2024-11-22 21:56 system@app@BookClub@BookClub.apk@classes.vdex
+-rw-r--r-- 1 system all_a39   250564 2024-11-22 21:56 system@app@COUPANG@COUPANG.apk@classes.dex
+-rw-r--r-- 1 system all_a39 27775628 2024-11-22 21:56 system@app@COUPANG@COUPANG.apk@classes.vdex
+-rw-r--r-- 1 system all_a40   471764 2025-06-29 03:45 system@app@DisneyPlus@DisneyPlus.apk@classes.dex
+-rw-r--r-- 1 system all_a40 39702680 2025-06-29 03:45 system@app@DisneyPlus@DisneyPlus.apk@classes.vdex
+-rw-r--r-- 1 system all_a36    16996 2024-11-22 21:55 system@app@GoogleExtShared@GoogleExtShared.apk@classes.dex
+-rw-r--r-- 1 system all_a36      124 2024-11-22 21:55 system@app@GoogleExtShared@GoogleExtShared.apk@classes.vdex
+-rw-r--r-- 1 system all_a25    33432 2025-02-27 05:13 system@app@LGHV_UMP@LGHV_UMP.apk@classes.dex
+-rw-r--r-- 1 system all_a25  1865464 2025-02-27 05:13 system@app@LGHV_UMP@LGHV_UMP.apk@classes.vdex
+-rw-r--r-- 1 system all_a29    74392 2025-02-27 05:13 system@app@Netflix@Netflix.apk@classes.dex
+-rw-r--r-- 1 system all_a29  8008692 2025-02-27 05:13 system@app@Netflix@Netflix.apk@classes.vdex
+-rw-r--r-- 1 system all_a38   217776 2025-06-29 03:45 system@app@TVING@TVING.apk@classes.dex
+-rw-r--r-- 1 system all_a38 19152616 2025-06-29 03:45 system@app@TVING@TVING.apk@classes.vdex
+-rw-r--r-- 1 system all_a28    53912 2025-06-29 03:45 system@app@YBM@YBM.apk@classes.dex
+-rw-r--r-- 1 system all_a28  6664892 2025-06-29 03:45 system@app@YBM@YBM.apk@classes.vdex
+-rw-r--r-- 1 system all_a28    66200 2024-11-22 21:55 system@app@YouTubeKids@YouTubeKids.apk@classes.dex
+-rw-r--r-- 1 system all_a28  4456964 2024-11-22 21:55 system@app@YouTubeKids@YouTubeKids.apk@classes.vdex
+-rw-r--r-- 1 system all_a39   234160 2025-06-29 03:45 system@app@wavve-tv@wavve-tv.apk@classes.dex
+-rw-r--r-- 1 system all_a39 23806396 2025-06-29 03:45 system@app@wavve-tv@wavve-tv.apk@classes.vdex
+-rw-r--r-- 1 system all_a17    29288 2024-11-22 21:56 system@priv-app@GooglePackageInstaller@GooglePackageInstaller.apk@classes.dex
+-rw-r--r-- 1 system all_a17    30804 2024-11-22 21:56 system@priv-app@GooglePackageInstaller@GooglePackageInstaller.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2025-02-27 05:13 system@priv-app@KaonCmAutoUpgrade@KaonCmAutoUpgrade.apk@classes.dex
+-rw-r--r-- 1 system system     26696 2025-02-27 05:13 system@priv-app@KaonCmAutoUpgrade@KaonCmAutoUpgrade.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2025-02-27 05:13 system@priv-app@KaonManagerService@KaonManagerService.apk@classes.dex
+-rw-r--r-- 1 system system     29052 2025-02-27 05:13 system@priv-app@KaonManagerService@KaonManagerService.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2025-02-27 05:13 system@priv-app@KaonTftpService@KaonTftpService.apk@classes.dex
+-rw-r--r-- 1 system system     29932 2025-02-27 05:13 system@priv-app@KaonTftpService@KaonTftpService.apk@classes.vdex
+-rw-r--r-- 1 system all_a10    17048 2024-11-22 21:55 system@priv-app@PlayAutoInstallConfig@PlayAutoInstallConfig.apk@classes.dex
+-rw-r--r-- 1 system all_a10     1184 2024-11-22 21:55 system@priv-app@PlayAutoInstallConfig@PlayAutoInstallConfig.apk@classes.vdex
+-rw-r--r-- 1 system all_a64    53924 2025-02-27 05:13 system@product@app@GoogleCalendarSyncAdapter@GoogleCalendarSyncAdapter.apk@classes.dex
+-rw-r--r-- 1 system all_a64  3835500 2025-02-27 05:13 system@product@app@GoogleCalendarSyncAdapter@GoogleCalendarSyncAdapter.apk@classes.vdex
+-rw-r--r-- 1 system all_a66    82596 2024-11-22 21:56 system@product@app@GoogleTTS@GoogleTTS.apk@classes.dex
+-rw-r--r-- 1 system all_a66  6722620 2024-11-22 21:56 system@product@app@GoogleTTS@GoogleTTS.apk@classes.vdex
+-rw-r--r-- 1 system all_a61    86632 2025-02-27 05:12 system@product@app@LatinIMEGoogleTvPrebuilt@LatinIMEGoogleTvPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a61   235952 2025-02-27 05:12 system@product@app@LatinIMEGoogleTvPrebuilt@LatinIMEGoogleTvPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a59    49768 2025-02-27 05:13 system@product@app@WebViewGoogle@WebViewGoogle.apk@classes.dex
+-rw-r--r-- 1 system all_a59    67260 2025-02-27 05:13 system@product@app@WebViewGoogle@WebViewGoogle.apk@classes.vdex
+-rw-r--r-- 1 system all_a58    21144 2025-06-29 03:45 system@product@app@YouTubeMusicTVPrebuilt@YouTubeMusicTVPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a58   542452 2025-06-29 03:45 system@product@app@YouTubeMusicTVPrebuilt@YouTubeMusicTVPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a67    66212 2024-11-22 21:55 system@product@app@talkback@talkback.apk@classes.dex
+-rw-r--r-- 1 system all_a67  6005576 2024-11-22 21:55 system@product@app@talkback@talkback.apk@classes.vdex
+-rw-r--r-- 1 system all_a51   217788 2024-11-22 21:55 system@product@priv-app@AndroidMediaShell@AndroidMediaShell.apk@classes.dex
+-rw-r--r-- 1 system all_a51 22731852 2024-11-22 21:55 system@product@priv-app@AndroidMediaShell@AndroidMediaShell.apk@classes.vdex
+-rw-r--r-- 1 system all_a48    45672 2024-11-22 21:56 system@product@priv-app@AtvRemoteService@AtvRemoteService.apk@classes.dex
+-rw-r--r-- 1 system all_a48    76940 2024-11-22 21:56 system@product@priv-app@AtvRemoteService@AtvRemoteService.apk@classes.vdex
+-rw-r--r-- 1 system all_a49    17000 2024-11-22 21:55 system@product@priv-app@Backdrop@Backdrop.apk@classes.dex
+-rw-r--r-- 1 system all_a49     2400 2024-11-22 21:55 system@product@priv-app@Backdrop@Backdrop.apk@classes.vdex
+-rw-r--r-- 1 system system     33432 2025-02-27 05:13 system@product@priv-app@BluetoothRCUParing@BluetoothRCUParing.apk@classes.dex
+-rw-r--r-- 1 system system   3350404 2025-02-27 05:13 system@product@priv-app@BluetoothRCUParing@BluetoothRCUParing.apk@classes.vdex
+-rw-r--r-- 1 system all_a52    17000 2024-11-22 21:55 system@product@priv-app@GoogleOneTimeInitializer@GoogleOneTimeInitializer.apk@classes.dex
+-rw-r--r-- 1 system all_a52     3280 2024-11-22 21:55 system@product@priv-app@GoogleOneTimeInitializer@GoogleOneTimeInitializer.apk@classes.vdex
+-rw-r--r-- 1 system system     29336 2024-11-22 21:55 system@product@priv-app@K1100UARcuUpdate@K1100UARcuUpdate.apk@classes.dex
+-rw-r--r-- 1 system system   2400412 2024-11-22 21:55 system@product@priv-app@K1100UARcuUpdate@K1100UARcuUpdate.apk@classes.vdex
+-rw-r--r-- 1 system all_a54   205416 2025-02-27 05:12 system@product@priv-app@Katniss@Katniss.apk@classes.dex
+-rw-r--r-- 1 system all_a54   540880 2025-02-27 05:12 system@product@priv-app@Katniss@Katniss.apk@classes.vdex
+-rw-r--r-- 1 system all_a55   631400 2025-02-27 05:13 system@product@priv-app@PrebuiltGmsCorePano@PrebuiltGmsCorePano.apk@classes.dex
+-rw-r--r-- 1 system all_a55  1652148 2025-02-27 05:13 system@product@priv-app@PrebuiltGmsCorePano@PrebuiltGmsCorePano.apk@classes.vdex
+-rw-r--r-- 1 system all_a53   123496 2025-02-27 05:12 system@product@priv-app@SetupWraithPrebuilt@SetupWraithPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a53   344252 2025-02-27 05:12 system@product@priv-app@SetupWraithPrebuilt@SetupWraithPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a50    66152 2025-02-27 05:13 system@product@priv-app@TVRecommendations@TVRecommendations.apk@classes.dex
+-rw-r--r-- 1 system all_a50   132036 2025-02-27 05:13 system@product@priv-app@TVRecommendations@TVRecommendations.apk@classes.vdex
+-rw-r--r-- 1 system all_a56   250472 2025-02-27 05:13 system@product@priv-app@Tubesky@Tubesky.apk@classes.dex
+-rw-r--r-- 1 system all_a56   796504 2025-02-27 05:13 system@product@priv-app@Tubesky@Tubesky.apk@classes.vdex
+-rw-r--r-- 1 system all_a67    74344 2025-02-27 05:13 system@product@priv-app@talkback@talkback.apk@classes.dex
+-rw-r--r-- 1 system all_a67   143344 2025-02-27 05:13 system@product@priv-app@talkback@talkback.apk@classes.vdex
+-rw-r--r-- 1 system all_a74    25188 2024-11-22 21:55 system@system_ext@priv-app@Alti_DeviceUpdater@Alti_DeviceUpdater.apk@classes.dex
+-rw-r--r-- 1 system all_a74    27392 2024-11-22 21:55 system@system_ext@priv-app@Alti_DeviceUpdater@Alti_DeviceUpdater.apk@classes.vdex
+-rw-r--r-- 1 system all_a73    25240 2025-02-27 05:13 system@system_ext@priv-app@Alti_Snmp@Alti_Snmp.apk@classes.dex
+-rw-r--r-- 1 system all_a73  1193744 2025-02-27 05:13 system@system_ext@priv-app@Alti_Snmp@Alti_Snmp.apk@classes.vdex
+-rw-r--r-- 1 system all_a69    41576 2024-11-22 21:55 system@system_ext@priv-app@Alti_TIS@Alti_TIS.apk@classes.dex
+-rw-r--r-- 1 system all_a69    61404 2024-11-22 21:55 system@system_ext@priv-app@Alti_TIS@Alti_TIS.apk@classes.vdex
+-rw-r--r-- 1 system all_a76    49816 2024-11-22 21:55 system@system_ext@priv-app@Alti_Watchdog@Alti_Watchdog.apk@classes.dex
+-rw-r--r-- 1 system all_a76  5621704 2024-11-22 21:55 system@system_ext@priv-app@Alti_Watchdog@Alti_Watchdog.apk@classes.vdex
+-rw-r--r-- 1 system all_a71    16996 2024-11-22 21:55 system@system_ext@priv-app@CjCustomizer@CjCustomizer.apk@classes.dex
+-rw-r--r-- 1 system all_a71      140 2024-11-22 21:55 system@system_ext@priv-app@CjCustomizer@CjCustomizer.apk@classes.vdex
+-rw-r--r-- 1 system all_a70    21096 2024-11-22 21:56 system@system_ext@priv-app@GoogleFeedback@GoogleFeedback.apk@classes.dex
+-rw-r--r-- 1 system all_a70     8200 2024-11-22 21:56 system@system_ext@priv-app@GoogleFeedback@GoogleFeedback.apk@classes.vdex
+-rw-r--r-- 1 system all_a68    21096 2025-02-27 05:13 system@system_ext@priv-app@GooglePartnerSetup@GooglePartnerSetup.apk@classes.dex
+-rw-r--r-- 1 system all_a68     8912 2025-02-27 05:13 system@system_ext@priv-app@GooglePartnerSetup@GooglePartnerSetup.apk@classes.vdex
+-rw-r--r-- 1 system all_a55    37480 2024-11-22 21:56 system@system_ext@priv-app@GoogleServicesFramework@GoogleServicesFramework.apk@classes.dex
+-rw-r--r-- 1 system all_a55    57924 2024-11-22 21:56 system@system_ext@priv-app@GoogleServicesFramework@GoogleServicesFramework.apk@classes.vdex
+-rw-r--r-- 1 system all_a75    29336 2024-11-22 21:56 system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+-rw-r--r-- 1 system all_a75  1584392 2024-11-22 21:56 system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+-rw-r--r-- 1 system all_a72   180840 2025-06-29 03:45 system@system_ext@priv-app@lghv_uhd2_epg@lghv_uhd2_epg.apk@classes.dex
+-rw-r--r-- 1 system all_a72   428408 2025-06-29 03:45 system@system_ext@priv-app@lghv_uhd2_epg@lghv_uhd2_epg.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2024-11-22 21:56 vendor@app@BcmAudioCapture@BcmAudioCapture.apk@classes.dex
+-rw-r--r-- 1 system system     17880 2024-11-22 21:56 vendor@app@BcmAudioCapture@BcmAudioCapture.apk@classes.vdex
+
+
+
+
+
+
+
+목요일 퀵수신 STB
+K1100UA:/data/dalvik-cache/arm # ls -l
+total 170824
+-rw-r----- 1 system system     21096 2015-01-01 09:00 apex@com.android.appsearch@javalib@service-appsearch.jar@classes.dex
+-rw-r----- 1 system system     15884 2015-01-01 09:00 apex@com.android.appsearch@javalib@service-appsearch.jar@classes.vdex
+-rw-r--r-- 1 system all_a84    25192 2024-11-22 21:55 apex@com.android.extservices@priv-app@GoogleExtServices@GoogleExtServices.apk@classes.dex
+-rw-r--r-- 1 system all_a84    26408 2024-11-22 21:55 apex@com.android.extservices@priv-app@GoogleExtServices@GoogleExtServices.apk@classes.vdex
+-rw-r----- 1 system system     16996 2015-01-01 09:00 apex@com.android.media@javalib@service-media-s.jar@classes.dex
+-rw-r----- 1 system system       320 2015-01-01 09:00 apex@com.android.media@javalib@service-media-s.jar@classes.vdex
+-rw-r--r-- 1 system all_a83    29288 2024-11-22 22:51 apex@com.android.mediaprovider@priv-app@MediaProvider@MediaProvider.apk@classes.dex
+-rw-r--r-- 1 system all_a83    22100 2024-11-22 22:51 apex@com.android.mediaprovider@priv-app@MediaProvider@MediaProvider.apk@classes.vdex
+-rw-r--r-- 1 system system     17000 2024-11-22 22:06 apex@com.android.os.statsd@javalib@service-statsd.jar@classes.dex
+-rw-r--r-- 1 system system       716 2024-11-22 22:06 apex@com.android.os.statsd@javalib@service-statsd.jar@classes.vdex
+-rw-r----- 1 system system     17000 2015-01-01 09:00 apex@com.android.permission@javalib@service-permission.jar@classes.dex
+-rw-r----- 1 system system      1140 2015-01-01 09:00 apex@com.android.permission@javalib@service-permission.jar@classes.vdex
+-rw-r--r-- 1 system all_a82    49768 2024-11-22 21:55 apex@com.android.permission@priv-app@GooglePermissionController@GooglePermissionController.apk@classes.dex
+-rw-r--r-- 1 system all_a82    75168 2024-11-22 21:55 apex@com.android.permission@priv-app@GooglePermissionController@GooglePermissionController.apk@classes.vdex
+-rw-r--r-- 1 system system     17000 2024-11-22 22:06 apex@com.android.scheduling@javalib@service-scheduling.jar@classes.dex
+-rw-r--r-- 1 system system       900 2024-11-22 22:06 apex@com.android.scheduling@javalib@service-scheduling.jar@classes.vdex
+-rw-r--r-- 1 system system     25192 2024-11-22 22:06 apex@com.android.tethering@javalib@service-connectivity.jar@classes.dex
+-rw-r--r-- 1 system system     13732 2024-11-22 22:06 apex@com.android.tethering@javalib@service-connectivity.jar@classes.vdex
+-rw-r--r-- 1 system system     21096 2024-11-22 22:51 apex@com.android.tethering@priv-app@InProcessTethering@InProcessTethering.apk@classes.dex
+-rw-r--r-- 1 system system      5636 2024-11-22 22:51 apex@com.android.tethering@priv-app@InProcessTethering@InProcessTethering.apk@classes.vdex
+-rw-r--r-- 1 system all_a80    17000 2024-11-22 22:51 apex@com.android.wifi@app@OsuLogin@OsuLogin.apk@classes.dex
+-rw-r--r-- 1 system all_a80     2860 2024-11-22 22:51 apex@com.android.wifi@app@OsuLogin@OsuLogin.apk@classes.vdex
+-rw-r--r-- 1 system system     37480 2024-11-22 22:06 apex@com.android.wifi@javalib@service-wifi.jar@classes.dex
+-rw-r--r-- 1 system system     52396 2024-11-22 22:06 apex@com.android.wifi@javalib@service-wifi.jar@classes.vdex
+-rw-r--r-- 1 system all_a27    66200 2024-11-22 22:51 system@app@BookClub@BookClub.apk@classes.dex
+-rw-r--r-- 1 system all_a27  6821136 2024-11-22 22:51 system@app@BookClub@BookClub.apk@classes.vdex
+-rw-r--r-- 1 system all_a41   443092 2024-11-22 22:52 system@app@DisneyPlus@DisneyPlus.apk@classes.dex
+-rw-r--r-- 1 system all_a41 37981792 2024-11-22 22:52 system@app@DisneyPlus@DisneyPlus.apk@classes.vdex
+-rw-r--r-- 1 system all_a36    16996 2024-11-22 21:55 system@app@GoogleExtShared@GoogleExtShared.apk@classes.dex
+-rw-r--r-- 1 system all_a36      124 2024-11-22 21:55 system@app@GoogleExtShared@GoogleExtShared.apk@classes.vdex
+-rw-r--r-- 1 system all_a26    33432 2024-11-22 22:51 system@app@LGHV_UMP@LGHV_UMP.apk@classes.dex
+-rw-r--r-- 1 system all_a26  1856200 2024-11-22 22:51 system@app@LGHV_UMP@LGHV_UMP.apk@classes.vdex
+-rw-r--r-- 1 system all_a29    74392 2024-11-22 22:51 system@app@Netflix@Netflix.apk@classes.dex
+-rw-r--r-- 1 system all_a29  8008692 2024-11-22 22:51 system@app@Netflix@Netflix.apk@classes.vdex
+-rw-r--r-- 1 system all_a40   201392 2024-11-22 22:51 system@app@TVING@TVING.apk@classes.dex
+-rw-r--r-- 1 system all_a40 17480168 2024-11-22 22:51 system@app@TVING@TVING.apk@classes.vdex
+-rw-r--r-- 1 system all_a25    53912 2024-11-22 22:51 system@app@YBM@YBM.apk@classes.dex
+-rw-r--r-- 1 system all_a25  6642108 2024-11-22 22:51 system@app@YBM@YBM.apk@classes.vdex
+-rw-r--r-- 1 system all_a28    66200 2024-11-22 21:55 system@app@YouTubeKids@YouTubeKids.apk@classes.dex
+-rw-r--r-- 1 system all_a28  4456964 2024-11-22 21:55 system@app@YouTubeKids@YouTubeKids.apk@classes.vdex
+-rw-r--r-- 1 system all_a38   135844 2024-11-22 22:51 system@app@wavve-tv@wavve-tv.apk@classes.dex
+-rw-r--r-- 1 system all_a38 11064380 2024-11-22 22:51 system@app@wavve-tv@wavve-tv.apk@classes.vdex
+-rw-r--r-- 1 system all_a17    29288 2024-11-22 21:55 system@priv-app@GooglePackageInstaller@GooglePackageInstaller.apk@classes.dex
+-rw-r--r-- 1 system all_a17    30804 2024-11-22 21:55 system@priv-app@GooglePackageInstaller@GooglePackageInstaller.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2024-11-22 22:51 system@priv-app@KaonCmAutoUpgrade@KaonCmAutoUpgrade.apk@classes.dex
+-rw-r--r-- 1 system system     26596 2024-11-22 22:51 system@priv-app@KaonCmAutoUpgrade@KaonCmAutoUpgrade.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2024-11-22 22:51 system@priv-app@KaonManagerService@KaonManagerService.apk@classes.dex
+-rw-r--r-- 1 system system     28872 2024-11-22 22:51 system@priv-app@KaonManagerService@KaonManagerService.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2024-11-22 22:51 system@priv-app@KaonTftpService@KaonTftpService.apk@classes.dex
+-rw-r--r-- 1 system system     29652 2024-11-22 22:51 system@priv-app@KaonTftpService@KaonTftpService.apk@classes.vdex
+-rw-r--r-- 1 system all_a12    17048 2024-11-22 21:55 system@priv-app@PlayAutoInstallConfig@PlayAutoInstallConfig.apk@classes.dex
+-rw-r--r-- 1 system all_a12     1184 2024-11-22 21:55 system@priv-app@PlayAutoInstallConfig@PlayAutoInstallConfig.apk@classes.vdex
+-rw-r--r-- 1 system all_a63    53924 2024-11-22 22:51 system@product@app@GoogleCalendarSyncAdapter@GoogleCalendarSyncAdapter.apk@classes.dex
+-rw-r--r-- 1 system all_a63  3801820 2024-11-22 22:51 system@product@app@GoogleCalendarSyncAdapter@GoogleCalendarSyncAdapter.apk@classes.vdex
+-rw-r--r-- 1 system all_a66    82596 2024-11-22 22:51 system@product@app@GoogleTTS@GoogleTTS.apk@classes.dex
+-rw-r--r-- 1 system all_a66  6670820 2024-11-22 22:51 system@product@app@GoogleTTS@GoogleTTS.apk@classes.vdex
+-rw-r--r-- 1 system all_a64    90788 2024-11-22 21:55 system@product@app@LatinIMEGoogleTvPrebuilt@LatinIMEGoogleTvPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a64  7261528 2024-11-22 21:55 system@product@app@LatinIMEGoogleTvPrebuilt@LatinIMEGoogleTvPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a57   119400 2024-11-22 22:51 system@product@app@PlayGamesPano@PlayGamesPano.apk@classes.dex
+-rw-r--r-- 1 system all_a57   261756 2024-11-22 22:51 system@product@app@PlayGamesPano@PlayGamesPano.apk@classes.vdex
+-rw-r--r-- 1 system all_a61   103084 2024-11-22 22:51 system@product@app@VideosPano@VideosPano.apk@classes.dex
+-rw-r--r-- 1 system all_a61  9700720 2024-11-22 22:51 system@product@app@VideosPano@VideosPano.apk@classes.vdex
+-rw-r--r-- 1 system all_a58    70248 2024-11-22 21:55 system@product@app@WebViewGoogle@WebViewGoogle.apk@classes.dex
+-rw-r--r-- 1 system all_a58   126812 2024-11-22 21:55 system@product@app@WebViewGoogle@WebViewGoogle.apk@classes.vdex
+-rw-r--r-- 1 system all_a65    74344 2024-11-22 22:51 system@product@app@YouTubeLeanback@YouTubeLeanback.apk@classes.dex
+-rw-r--r-- 1 system all_a65   156936 2024-11-22 22:51 system@product@app@YouTubeLeanback@YouTubeLeanback.apk@classes.vdex
+-rw-r--r-- 1 system all_a59    21144 2024-11-22 22:51 system@product@app@YouTubeMusicTVPrebuilt@YouTubeMusicTVPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a59   542452 2024-11-22 22:51 system@product@app@YouTubeMusicTVPrebuilt@YouTubeMusicTVPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a67    66212 2024-11-22 21:55 system@product@app@talkback@talkback.apk@classes.dex
+-rw-r--r-- 1 system all_a67  6005576 2024-11-22 21:55 system@product@app@talkback@talkback.apk@classes.vdex
+-rw-r--r-- 1 system all_a51   217788 2024-11-22 21:55 system@product@priv-app@AndroidMediaShell@AndroidMediaShell.apk@classes.dex
+-rw-r--r-- 1 system all_a51 22731852 2024-11-22 21:55 system@product@priv-app@AndroidMediaShell@AndroidMediaShell.apk@classes.vdex
+-rw-r--r-- 1 system all_a49    45672 2024-11-22 22:51 system@product@priv-app@AtvRemoteService@AtvRemoteService.apk@classes.dex
+-rw-r--r-- 1 system all_a49    50516 2024-11-22 22:51 system@product@priv-app@AtvRemoteService@AtvRemoteService.apk@classes.vdex
+-rw-r--r-- 1 system all_a48    17000 2024-11-22 21:55 system@product@priv-app@Backdrop@Backdrop.apk@classes.dex
+-rw-r--r-- 1 system all_a48     2400 2024-11-22 21:55 system@product@priv-app@Backdrop@Backdrop.apk@classes.vdex
+-rw-r--r-- 1 system system     33432 2024-11-22 22:51 system@product@priv-app@BluetoothRCUParing@BluetoothRCUParing.apk@classes.dex
+-rw-r--r-- 1 system system   3343244 2024-11-22 22:51 system@product@priv-app@BluetoothRCUParing@BluetoothRCUParing.apk@classes.vdex
+-rw-r--r-- 1 system all_a52    17000 2024-11-22 21:55 system@product@priv-app@GoogleOneTimeInitializer@GoogleOneTimeInitializer.apk@classes.dex
+-rw-r--r-- 1 system all_a52     3280 2024-11-22 21:55 system@product@priv-app@GoogleOneTimeInitializer@GoogleOneTimeInitializer.apk@classes.vdex
+-rw-r--r-- 1 system system     29336 2024-11-22 21:55 system@product@priv-app@K1100UARcuUpdate@K1100UARcuUpdate.apk@classes.dex
+-rw-r--r-- 1 system system   2400412 2024-11-22 21:55 system@product@priv-app@K1100UARcuUpdate@K1100UARcuUpdate.apk@classes.vdex
+-rw-r--r-- 1 system all_a54   205416 2024-11-22 21:55 system@product@priv-app@Katniss@Katniss.apk@classes.dex
+-rw-r--r-- 1 system all_a54   538032 2024-11-22 21:55 system@product@priv-app@Katniss@Katniss.apk@classes.vdex
+-rw-r--r-- 1 system all_a55   606824 2024-11-22 21:56 system@product@priv-app@PrebuiltGmsCorePano@PrebuiltGmsCorePano.apk@classes.dex
+-rw-r--r-- 1 system all_a55  1619552 2024-11-22 21:56 system@product@priv-app@PrebuiltGmsCorePano@PrebuiltGmsCorePano.apk@classes.vdex
+-rw-r--r-- 1 system all_a53   143976 2024-11-22 21:55 system@product@priv-app@SetupWraithPrebuilt@SetupWraithPrebuilt.apk@classes.dex
+-rw-r--r-- 1 system all_a53   433140 2024-11-22 21:55 system@product@priv-app@SetupWraithPrebuilt@SetupWraithPrebuilt.apk@classes.vdex
+-rw-r--r-- 1 system all_a50    62056 2024-11-22 21:55 system@product@priv-app@TVRecommendations@TVRecommendations.apk@classes.dex
+-rw-r--r-- 1 system all_a50   127820 2024-11-22 21:55 system@product@priv-app@TVRecommendations@TVRecommendations.apk@classes.vdex
+-rw-r--r-- 1 system all_a56   242280 2024-11-22 21:55 system@product@priv-app@Tubesky@Tubesky.apk@classes.dex
+-rw-r--r-- 1 system all_a56   718552 2024-11-22 21:55 system@product@priv-app@Tubesky@Tubesky.apk@classes.vdex
+-rw-r--r-- 1 system all_a74    25188 2024-11-22 21:55 system@system_ext@priv-app@Alti_DeviceUpdater@Alti_DeviceUpdater.apk@classes.dex
+-rw-r--r-- 1 system all_a74    27392 2024-11-22 21:55 system@system_ext@priv-app@Alti_DeviceUpdater@Alti_DeviceUpdater.apk@classes.vdex
+-rw-r--r-- 1 system all_a73    25240 2024-11-22 22:51 system@system_ext@priv-app@Alti_Snmp@Alti_Snmp.apk@classes.dex
+-rw-r--r-- 1 system all_a73  1188152 2024-11-22 22:51 system@system_ext@priv-app@Alti_Snmp@Alti_Snmp.apk@classes.vdex
+-rw-r--r-- 1 system all_a69    41576 2024-11-22 21:55 system@system_ext@priv-app@Alti_TIS@Alti_TIS.apk@classes.dex
+-rw-r--r-- 1 system all_a69    61404 2024-11-22 21:55 system@system_ext@priv-app@Alti_TIS@Alti_TIS.apk@classes.vdex
+-rw-r--r-- 1 system all_a76    49816 2024-11-22 21:55 system@system_ext@priv-app@Alti_Watchdog@Alti_Watchdog.apk@classes.dex
+-rw-r--r-- 1 system all_a76  5621704 2024-11-22 21:55 system@system_ext@priv-app@Alti_Watchdog@Alti_Watchdog.apk@classes.vdex
+-rw-r--r-- 1 system all_a71    16996 2024-11-22 21:55 system@system_ext@priv-app@CjCustomizer@CjCustomizer.apk@classes.dex
+-rw-r--r-- 1 system all_a71      140 2024-11-22 21:55 system@system_ext@priv-app@CjCustomizer@CjCustomizer.apk@classes.vdex
+-rw-r--r-- 1 system all_a70    21096 2024-11-22 21:56 system@system_ext@priv-app@GoogleFeedback@GoogleFeedback.apk@classes.dex
+-rw-r--r-- 1 system all_a70     8200 2024-11-22 21:56 system@system_ext@priv-app@GoogleFeedback@GoogleFeedback.apk@classes.vdex
+-rw-r--r-- 1 system all_a68    21096 2024-11-22 22:51 system@system_ext@priv-app@GooglePartnerSetup@GooglePartnerSetup.apk@classes.dex
+-rw-r--r-- 1 system all_a68     6032 2024-11-22 22:51 system@system_ext@priv-app@GooglePartnerSetup@GooglePartnerSetup.apk@classes.vdex
+-rw-r--r-- 1 system all_a55    37480 2024-11-22 21:56 system@system_ext@priv-app@GoogleServicesFramework@GoogleServicesFramework.apk@classes.dex
+-rw-r--r-- 1 system all_a55    57924 2024-11-22 21:56 system@system_ext@priv-app@GoogleServicesFramework@GoogleServicesFramework.apk@classes.vdex
+-rw-r--r-- 1 system all_a75    29336 2024-11-22 21:56 system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.dex
+-rw-r--r-- 1 system all_a75  1584392 2024-11-22 21:56 system@system_ext@priv-app@XcasApp@XcasApp.apk@classes.vdex
+-rw-r--r-- 1 system all_a72   197224 2024-11-22 21:55 system@system_ext@priv-app@lghv_uhd2_epg@lghv_uhd2_epg.apk@classes.dex
+-rw-r--r-- 1 system all_a72   465336 2024-11-22 21:55 system@system_ext@priv-app@lghv_uhd2_epg@lghv_uhd2_epg.apk@classes.vdex
+-rw-r--r-- 1 system system     17048 2024-11-22 22:51 vendor@app@BcmAudioCapture@BcmAudioCapture.apk@classes.dex
+-rw-r--r-- 1 system system     17804 2024-11-22 22:51 vendor@app@BcmAudioCapture@BcmAudioCapture.apk@classes.vdex
+K1100UA:/data/dalvik-cache/arm #
+
+rm apex@com.android.appsearch@javalib@service-appsearch.jar@classes.vdex
+rm apex@com.android.media@javalib@service-media-s.jar@classes.vdex
+rm apex@com.android.permission@javalib@service-permission.jar@classes.vdex
+
+
+초기화
+구글로고후 1:30 쯤 로딩바 끝나고 검은화면
+이시점에 cache 생성완료
+K1100UA:/data/dalvik-cache/arm # ls -l
+total 173152
+
+@endcode
+*/
+
+
+

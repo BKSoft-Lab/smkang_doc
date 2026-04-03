@@ -1,0 +1,27 @@
+/*!
+@page work_20240827	2024.08.27
+
+# 가온본사
+---
+
+
+> 1. sts / cts 테스트결과 정리 https://jira.kaonmedia.com/browse/K1023-196
+
+안녕하세요. 강성민입니다.<br>
+테스트 결과 모두 Pass 하였습니다
+
+bkouc500_ota_kaon2024082301 펌웨어 STS(full test), CTS(fail 항목 test)
+
+<img src="../data/sts-2024-08-27.jpg" alt="sts" width="90%"/>
+
+<img src="../data/cts-2024-08-27.jpg" alt="cts" width="90%"/>
+
+
+
+> 2. STB에서 SW Reboot시 CM Reset의 동기화 문제로 인한 오류 대책회의 참석 https://jira.kaonmedia.com/browse/K1010-78
+<img src="../data/Screenshot from 2024-08-27 10-33-48.jpg" alt="회의" width="90%"/>
+
+---
+<br>
+---
+*/

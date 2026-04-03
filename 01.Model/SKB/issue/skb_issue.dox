@@ -1,0 +1,121 @@
+/*!
+@page skb_issue	SKB Issue 수정사항
+
+# 볼륨관련 이슈
+
+---
+
+### 볼륨키 이미지 상이함 : C2001538-8  
+> 이미지 위치 수정반영  
+> 특이사항 :  볼륨텍스트 폰트다름 "Rix헤드 B" 없음 > 박종서 PL에게 통보  
+24 May, 2023 1 commit  
+[Commit 20637c92](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/20637c922261ab6daa6977f3fe00ca3501f00d32)  
+[diff-file](../data/20637c922261ab6daa6977f3fe00ca3501f00d32.diff)
+
+---
+
+### 최대 음량이 20이 아닌 15까지 밖에 없는 현상 : C2001538-18
+> max volume 변경, volume up/down 로직 변경  
+> 특이사항 : 볼륨텍스트 실제 음량 조절필요  
+23 Jun, 2023 1 commit  
+[Commit eb101a4e](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/eb101a4e01a7dc471083de45f3a36da4308da681)  
+[diff-file](../data/eb101a4e01a7dc471083de45f3a36da4308da681.diff)
+
+---
+
+### 디폴트 볼륨 7을 10으로 변경 : C2001538-56
+[Commit ba9f3920](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/ba9f39207a979d00ff4142719b4cb8871ee2ab2c)
+@code
+device/broadcom/common/bcm.mk 
+@@ -185,7 +185,7 @@ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+# in STREAM_VOLUME_ALIAS_TELEVISION.
+#
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+-   ro.config.media_vol_default=7
++   ro.config.media_vol_default=10
+@endcode
+
+---
+
+### youtube 음량 높임
+[Commit dacac92e](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/dacac92ee017eb9087905aa72897e37b07b48ce3)
+@code
+frameworks/av/services/audiopolicy/config/default_volume_tables.xml
+@@ -34,10 +34,11 @@
+     </reference>
+     <reference name="DEFAULT_MEDIA_VOLUME_CURVE">
+     <!-- Default Media reference Volume Curve -->
+-        <point>1,-5800</point>
+-        <point>20,-4000</point>
+-        <point>60,-1700</point>
+-        <point>100,0</point>
++	<!-- kaon modify  youtube 볼륨 작다요청으로 수정. ref.숫자 작을수록 소리 큼-->
++        <point>1,-2400</point>
++        <point>33,-1800</point>
++        <point>66,-1200</point>
++        <point>100,-600</point>
+     </reference>
+     <reference name="DEFAULT_DEVICE_CATEGORY_HEADSET_VOLUME_CURVE">
+     <!--Default Volume Curve -->
+@endcode
+
+---
+---
+<br>
+# LED 관련 이슈
+
+---
+
+### 부팅 중 LED 패널 중 케이블 모뎀의 등의 변화가 느린 녹색 점멸 뿐인 현상 : C2001538-28
+> U400 모델과 같은 형상으로 변경  
+
+[Commit d4909709](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/d4909709590d3de253f205085bd9a07f10ba42c5)
+[Commit 9e8bbbb4](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/9e8bbbb49af2d73f889852313e66a475aabc54fb)
+[Commit 83ab0990](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/83ab099013807752e7d87b4a5529cb96b5d42f49)
+[Commit 5d09a5b3](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/5d09a5b32d2b3ad811223fe93c72509d356bd710)
+[Commit 719578ee](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/719578eee25ee88937d9d3f606a1f9b3b8d28e23)
+
+---
+---
+<br>
+# 키처리 관련 이슈
+
+---
+
+### 대기모드 No Action 중 로컬 앱 리로딩 발생 : C2001538-74
+
+> 대기모드에서 '나가기'키 입력시 최종 app에서 ANR 발생되어 app이 재시작됨
+>> 대기모드시 키처리를 하지 않도록 수정 <br>
+>> '나가기'키 10초 입력시 리부팅 동작 로직 변경
+
+[Commit 51f608ae](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/51f608ae3b12c353986473b8cfef066dc908365c)
+[diff-file](../data/51f608ae3b12c353986473b8cfef066dc908365c.diff) 
+
+---
+
+### SIT 1차_단말 패널의 해상도 버튼을 입력하여도 아무런 동작하지 않는 현상 : C2001538-33
+
+> gpio 58 이벤트를 callback으로 받아 display_changeNextResolution() 호출 하도록 추가 
+> 특이사항
+>> 토스트팝업이 일찍사라짐 
+>> Toast.LENGTH_SHORT(1초)  -> Toast.LENGTH_LONG(3.5초) 수정 
+>> \vendor\kaon\apps\KaonManagerService\src\com\kaonmedia\kaonmanagerservice\HdmiOutputResolutionReceiver.java 
+
+[Commit 6ca50e26](https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/6ca50e26a059dc015c9b01d35b386c5e8b5efff6)
+[Commit ceb0caec](http://kkms.kaonmedia.com/gitlab/hcn/kstb1157_hals/commit/ceb0caec5859afc29545326094d79431abbee76b)
+
+---
+
+---
+<br>
+
+
+
+
+
+
+
+
+
+
+*/

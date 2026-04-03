@@ -1,0 +1,102 @@
+/*!
+@page work_20241025	2024.10.25
+
+# SKB수원
+---
+## AV Slow 이슈 관련한 Broadcom의 HVD(High-efficiency Video Decoder) 바이너리 공유 
+
+> 요청 사항 Mail
+@code
+안녕하세요. 김원균PM입니다.
+
+@강성민매니저님,
+AV Slow 이슈 관련한 Broadcom의 HVD(High-efficiency Video Decoder) 바이너리 공유 받았습니다.
+지라 공유된 Directory에 적용 요청 드립니다.
+
+감사합니다.
+김원균드림
+
+@endcode
+
+> 작업내역
+
+- [SVPFW_HVD_2_28_16_0_7216B0_ZB_E1_KaonMed_16007.tar.gz](../data/20241025/SVPFW_HVD_2_28_16_0_7216B0_ZB_E1_KaonMed_16007.tar.gz)
+
+@code
+1. 파일 복사
+   \kaon_bcm_androidtv12\vendor\broadcom\prebuilts\sage\BKO-UC500\zb\suif\hvd
+   svpfw_hvd_polaris_inner.bin
+   svpfw_hvd_polaris_outer.bin
+2. 클린빌드 (클린빌드 하지 않으면 적용 안됨)
+3. 이후 테스트 결과 동일
+@endcode
+
+## AV Slow 이슈 관련 : BSYNCLIB_ALGO_MAX_SUPPORTED_DELAY_MS 3000 수정 후 테스트 요청
+
+> 요청 사항 Mail
+@code
+@강성민매니저님,
+아래 패치 확인 요청드립니다.
+
+감사합니다.
+김원균드림
+
+From: support@broadcom.com <support@broadcom.com> 
+Sent: Friday, October 25, 2024 2:25 PM
+To: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>
+Cc: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>; 이상훈[LEE SANGHOON] <lsh@kaongroup.com>; 김경달[Kim Kyungdal] <kendall.kim@kaonbroadband.com>; 한동우[HAN DONG WOO] <tony.han@kaongroup.com>; 김연호[YEON HO KIM] <yhkim@kaongroup.com>
+Subject: {Case#CS00012374407} ##-  Updated: Slow AV playback with double channel up/down
+
+-begin-
+Update By: Jason Lim(Broadcom Corporation)
+Update Time: 24-October-2024 22:24:42
+
+Latest Response: 
+Hello, Kim WonKyun,
+ 
+Please try the following fix if you don't have this patch.
+From cb575163793572db2dd2dbe0dc1cb6213985abda Mon Sep 17 00:00:00 2001
+From: Brett Andrews <bandrews@broadcom.com>
+Date: Mon, 23 May 2022 17:22:19 -0700
+Subject: SWSTB-22631: update max supported algo delay to accommodate larger
+ video primer offsets
+
+Change-Id: If35331d2f0cd0476422749ad776d1374d5cc9977
+---
+ magnum/syslib/synclib/src/bsynclib_algo.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/magnum/syslib/synclib/src/bsynclib_algo.h b/magnum/syslib/synclib/src/bsynclib_algo.h
+index 2d5216ce591..32a7c0bfde6 100644
+--- a/magnum/syslib/synclib/src/bsynclib_algo.h
++++ b/magnum/syslib/synclib/src/bsynclib_algo.h
+@@ -50,7 +50,8 @@
+ #include "bsynclib_channel_priv.h"
+ 
+ /* needs to be >150 ms due to possible primer pts offset, but normally we expect in 150 ms range */
+-#define BSYNCLIB_ALGO_MAX_SUPPORTED_DELAY_MS 1000
++/* updated to 3 seconds to allow for larger video primer delay offsets, which are now GOP-length-in-time-sized */
++#define BSYNCLIB_ALGO_MAX_SUPPORTED_DELAY_MS 3000
+ 
+ typedef BSYNClib_DelayElement *(*BSYNClib_Algo_ElementAccessor)(void *pvSource);
+ typedef BERR_Code (*BSYNClib_Algo_SourceAllocator)(BSYNClib_Channel_PathSet *psPathSet, BSYNClib_Channel_Results *psResults, void *pvSource);
+-- 
+cgit v1.1-15-g51cc
+ 
+Thanks,
+Jason Lim
+
+@endcode
+
+> 작업내역
+
+@code
+\kaon_bcm_androidtv12\vendor\broadcom\refsw\magnum\syslib\synclib\src\bsynclib_algo.h
+#define BSYNCLIB_ALGO_MAX_SUPPORTED_DELAY_MS 3000
+
+@endcode
+---
+<br>
+---
+
+*/

@@ -1,0 +1,64 @@
+/*!
+@page work_20240808	2024.08.08
+
+# SKB 수원 
+---
+## Tombstone 다수 발생 로그 분석 요청
+https://jira.kaonmedia.com/browse/K1023-182
+
+@code
+
+패치적용후 VOD, 유튜브 안정성테스트
+> 이상없음
+
+@endcode
+---
+## Bluetooth 페어링 완료시 셋탑 리부팅, Bootloader 로고 표시에 머물러 있음
+https://jira.kaonmedia.com/browse/K1023-188
+
+@code
+
+클린빌드, 넥서스 빌드, 버전별 빌드 테스트
+
+@endcode
+---
+## 음소거 상태에서 다른 채널 이동 시, 볼륨 출력되는 현상
+https://jira.kaonmedia.com/browse/K1023-191
+
+@code
+
+증상 : 서비스 설정에서 음성안내 설정을 "사용"으로 설정 후 음소거 한 후 채널재핑시 음소거 풀림 UI는 음소거 상태
+
+재현 경로
+1. 설정 > 서비스 설정 > 음성 안내 > 사용 
+2. 볼륨 출력상태에서 음소거 설정 > 다른 채널로 Tune
+
+분석 결과
+
+아래 로그는 /taurus/lib/vendor/libpl.so 에서 찍고 있습니다.
+
+/SKB/kaon_bcm_androidtv12/vendor/taurus$ grep -r pli_dec_setAudioDecoderVolumeForTTS
+lib/vendor/libpl.so 바이너리 파일 일치함
+ 
+08-08 16:21:16.118   763 17037 D PL_DECODER: [pl_decoder.c][pl_dec_ttsAudio][2899]isStart 1 , tts vol : 20
+08-08 16:21:16.118   763 17037 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2850][++pli_dec_setAudioDecoderVolumeForTTS] level : 0
+08-08 16:21:16.118   763 17037 W PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2860][pli_dec_setAudioDecoderVolumeForTTS] pli, realVolume for NEXUS 0
+08-08 16:21:16.118   763 17037 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2873]VOLUME SET:muted!! for passthrough
+08-08 16:21:16.118   763 17037 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2886][pli_dec_setAudioDecoderVolumeForTTS] Call audio decoder SetSettings handle : 0x1b6b4
+08-08 16:21:16.118   763 17037 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2893][--pli_dec_setAudioDecoderVolumeForTTS] Return audio decoder SetSettings handle : 0x1b6b4
+08-08 16:21:16.120   456 11689 D AF::TrackHandle: OpPlayAudio: track:109 usage:1 not muted
+[ 2932.313051] audit: rate limit exceeded
+08-08 16:21:17.858   763 17065 D PL_DECODER: [pl_decoder.c][pl_dec_ttsAudio][2899]isStart 0 , tts vol : 20
+08-08 16:21:17.858   763 17065 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2850][++pli_dec_setAudioDecoderVolumeForTTS] level : 20
+08-08 16:21:17.859   763 17065 W PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2860][pli_dec_setAudioDecoderVolumeForTTS] pli, realVolume for NEXUS 8388600
+08-08 16:21:17.859   763 17065 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2882]VOLUME SET:unmuted!! for passthrough
+08-08 16:21:17.859   763 17065 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2886][pli_dec_setAudioDecoderVolumeForTTS] Call audio decoder SetSettings handle : 0x1b6b4
+08-08 16:21:17.859   763 17065 D PL_DECODER: [pl_decoder.c][pli_dec_setAudioDecoderVolumeForTTS][2893][--pli_dec_setAudioDecoderVolumeForTTS] Return audio decoder SetSettings handle : 0x1b6b4
+
+@endcode
+---
+<br>
+---
+
+
+*/

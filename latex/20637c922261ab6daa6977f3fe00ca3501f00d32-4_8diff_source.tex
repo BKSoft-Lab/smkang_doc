@@ -1,0 +1,28 @@
+\doxysection{20637c922261ab6daa6977f3fe00ca3501f00d32-\/4.diff}
+\hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source}{}\label{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source}\index{CM Model/SKB/issue/20637c922261ab6daa6977f3fe00ca3501f00d32-\/4.diff@{CM Model/SKB/issue/20637c922261ab6daa6977f3fe00ca3501f00d32-\/4.diff}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00001}00001\ diff\ -\/-\/git\ a/frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogControllerImpl.java\ b/frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogControllerImpl.java}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00002}00002\ index\ cd6a778363045fc02b0bc39a258d37dd9c58d343..90e1e85f6da392da69c3fc7a03529ae51793cd01\ 100644}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00003}00003\ -\/-\/-\/\ a/frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogControllerImpl.java}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00004}00004\ +++\ b/frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogControllerImpl.java}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00005}00005\ @@\ -\/1108,7\ +1108,7\ @@\ public\ class\ VolumeDialogControllerImpl\ implements\ VolumeDialogController,\ Dumpa}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00006}00006\ \ \ \ \ \ \ \ \ \ public\ void\ onReceive(Context\ context,\ Intent\ intent)\ \{}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00007}00007\ \ \ \ \ \ \ \ \ \ \ \ \ \ final\ String\ action\ =\ intent.getAction();}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00008}00008\ \ \ \ \ \ \ \ \ \ \ \ \ \ boolean\ changed\ =\ false;}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00009}00009\ -\/\ \ \ \ \ \ \ \ \ \ \ \ if\ (action.equals(AudioManager.VOLUME\_CHANGED\_ACTION))\ \{}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00010}00010\ +\ \ \ \ \ \ \ \ \ \ \ \ /*if\ (action.equals(AudioManager.VOLUME\_CHANGED\_ACTION))\ \{}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00011}00011\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ final\ int\ stream\ =\ intent.getIntExtra(AudioManager.EXTRA\_VOLUME\_STREAM\_TYPE,\ -\/1);}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00012}00012\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ final\ int\ level\ =\ intent.getIntExtra(AudioManager.EXTRA\_VOLUME\_STREAM\_VALUE,\ -\/1);}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00013}00013\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ final\ int\ oldLevel\ =\ intent}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00014}00014\ @@\ -\/1116,7\ +1116,7\ @@\ public\ class\ VolumeDialogControllerImpl\ implements\ VolumeDialogController,\ Dumpa}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00015}00015\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if\ (D.BUG)\ Log.d(TAG,\ "{}onReceive\ VOLUME\_CHANGED\_ACTION\ stream="{}\ +\ stream}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00016}00016\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ "{}\ level="{}\ +\ level\ +\ "{}\ oldLevel="{}\ +\ oldLevel);}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00017}00017\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ changed\ =\ updateStreamLevelW(stream,\ level);}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00018}00018\ -\/\ \ \ \ \ \ \ \ \ \ \ \ \}\ else\ if\ (action.equals(AudioManager.STREAM\_DEVICES\_CHANGED\_ACTION))\ \{}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00019}00019\ +\ \ \ \ \ \ \ \ \ \ \ \ \}\ else\ */if\ (action.equals(AudioManager.STREAM\_DEVICES\_CHANGED\_ACTION))\ \{}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00020}00020\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ final\ int\ stream\ =\ intent.getIntExtra(AudioManager.EXTRA\_VOLUME\_STREAM\_TYPE,\ -\/1);}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00021}00021\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ final\ int\ devices\ =\ intent}
+\DoxyCodeLine{\Hypertarget{20637c922261ab6daa6977f3fe00ca3501f00d32-4_8diff_source_l00022}00022\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .getIntExtra(AudioManager.EXTRA\_VOLUME\_STREAM\_DEVICES,\ -\/1);}
+
+\end{DoxyCode}

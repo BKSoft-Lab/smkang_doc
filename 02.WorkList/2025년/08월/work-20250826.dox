@@ -1,0 +1,97 @@
+/*!
+@page work_20250826	2025.08.26
+
+---
+
+# LGHV K1200 히든메뉴 수정
+
+> work
+
+@code
+
+
+
+
+172.20.0.252
+
+$source build/envsetup.sh;lunch 3
+
+backup_src\lghv_packages\StbApi\StbApi.cpp
+StbApi/StbApi.cpp
+void StbApi::androidUserDataReset(void)
+{
+    LOGD("SMKANG androidUserDataReset");
+#if 0
+    android::AString errorMessage;
+    android::sp<android::AMessage> resultMessage = mProxy.command("DeviceManagerService", "doFactoryReset", NULL, NULL);
+    if (!resultMessage)
+    {
+        LOGE("Cannot send commd to module(DeviceManagerService)\n");
+    }
+#else
+    // LGU+의 경우 dropbear(cli) rc 에서 on property 동작으로 --wipe_data 하는 커맨드실행 되도록함.
+    // LGHV의 경우 dropbear(cli) 이 없기 때문에 pvsd.rc에서 on property 동작으로 --wipe_data 하는 커맨드실행 되도록함.
+ #if defined(__STBAPI_SYSTEM__)
+    property_set("sys.hiddenmenu.factoryreset", "1");
+    LOGD("SMKANG sys.hiddenmenu.factoryreset 1");    
+ #else
+    property_set("vendor.hiddenmenu.factoryreset", "1");
+    LOGD("SMKANG vendor.hiddenmenu.factoryreset 1");
+ #endif
+    LOGD("SMKANG sleep 1s start");
+    usleep(1 * 1000 * 1000);
+    LOGD("SMKANG sleep 1s end");
+
+    system("sync");
+
+    if (android_reboot(ANDROID_RB_RESTART2, 0, "recovery") == -1)
+    {
+        LOGE("Failed to reboot.");
+    }
+#endif
+}
+
+
+m -j$(nproc) libstbapi.system libstbapi.vendor
+
+adb push out/target/product/K1200UA/vendor/lib/libstbapi.vendor.so vendor/lib/libstbapi.vendor.so
+adb push out/target/product/K1200UA/system/lib/libstbapi.system.so system/lib/libstbapi.system.so
+
+adb push libstbapi.vendor.so vendor/lib/libstbapi.vendor.so
+adb push libstbapi.system.so system/lib/libstbapi.system.so
+
+
+
+08-26 14:18:58.232   600   600 D STBAPI  : (stbFactoryReset) SMKANG stbFactoryReset()
+08-26 14:18:58.469   600   600 D STBAPI  : (stbFactoryReset) SMKANG +androidUserDataReset()
+08-26 14:18:58.469   600   600 D STBAPI  : (androidUserDataReset) SMKANG androidUserDataReset
+08-26 14:18:58.473   600   600 D STBAPI  : (androidUserDataReset) SMKANG vendor.hiddenmenu.factoryreset 1
+08-26 14:18:58.473   600   600 D STBAPI  : (androidUserDataReset) SMKANG sleep 1s start
+08-26 14:18:59.473   600   600 D STBAPI  : (androidUserDataReset) SMKANG sleep 1s end
+08-26 14:18:59.916   600   600 D STBAPI  : (stbFactoryReset) SMKANG -androidUserDataReset()
+
+
+hiddenmenu/pages/HiddenMenuPage.cpp
+m -j$(nproc) hiddenmenu
+adb push out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/bin/hiddenmenu
+adb push hiddenmenu vendor/bin/hiddenmenu
+
+
+
+logcat | egrep "smkang|KEY"
+logcat | egrep "smkang|SMKANG|HiddenMenu|hiddenmenu"
+
+
+08-25 11:29:49.860   627   627 E HiddenMenu: [input_manager.cpp:97] quber::InputDevice::loadAttrib() Cannot get Input Device Name
+
+
+
+am force-stop com.cisco.epg.cjh.android
+
+@endcode
+
+*/
+
+
+
+`   

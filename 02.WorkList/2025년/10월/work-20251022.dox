@@ -1,0 +1,64 @@
+/*!
+@page work_20251022	2025.10.22
+
+---
+
+# K1100 - XcasApp만 pre-opt 적용
+
+@code
+vendor/taurus/Android.mk 를 수정해야하나 알티미디어 업로드 전용 git이라 수정 불가
+빌드때 마다 빌드 스크립트에서 vendor/taurus/Android.mk를 수정해서 빌드하고 다시 원복 
+vendor/broadcom/bcm_platform/tools/bdist/bcm.ref.sh
+
+추가 코드 시작
+
+# === XcasApp preopt one-off patch (begin) ===
+TAURUS_MK="${TOP}/vendor/taurus/Android.mk"
+BACKUP_MK="${TAURUS_MK}.bak.$$"
+TMP_MK="${TAURUS_MK}.tmp.$$"
+
+if [ -f "${TAURUS_MK}" ]; then
+  echo "[INFO] Patching XcasApp preopt flags in ${TAURUS_MK}"
+
+  # 원본 백업 + 임시 사본 생성
+  cp -f "${TAURUS_MK}" "${BACKUP_MK}"
+  cp -f "${TAURUS_MK}" "${TMP_MK}"
+
+  # 1) XcasApp 모듈 블록에서 LOCAL_DEX_PREOPT := true 로 강제
+  # 2) 기존 LOCAL_DEX_PREOPT_FLAGS 줄 삭제(중복 방지)
+  sed -i -e '/LOCAL_MODULE[[:space:]]*:=[[:space:]]*XcasApp/,/include[[:space:]]*(\$\?[(]BUILD_PREBUILT[)]\|\$[({]BUILD_PREBUILT[})])/{ 
+    s/^\([[:space:]]*LOCAL_DEX_PREOPT[[:space:]]*:=\).*/\1 true/ 
+    /^[[:space:]]*LOCAL_DEX_PREOPT_FLAGS[[:space:]]*:=/d 
+  }' "${TMP_MK}"
+
+  # BUILD_PREBUILT 직전에 FLAGS 삽입
+  sed -i -e '/LOCAL_MODULE[[:space:]]*:=[[:space:]]*XcasApp/,/include[[:space:]]*(\$\?[(]BUILD_PREBUILT[)]\|\$[({]BUILD_PREBUILT[})])/{ 
+    /^[[:space:]]*include[[:space:]]*\(\$[(]BUILD_PREBUILT[)]\|\${BUILD_PREBUILT}\)/ i \
+LOCAL_DEX_PREOPT_FLAGS := --compiler-filter=speed
+  }' "${TMP_MK}"
+
+  # 임시본을 실제 파일로 교체
+  mv -f "${TMP_MK}" "${TAURUS_MK}"
+
+  # 어떤 종료 케이스에도 원복
+  restore_vendor_taurus_mk() {
+    if [ -f "${BACKUP_MK}" ]; then
+      echo "[INFO] Restoring original ${TAURUS_MK}"
+      mv -f "${BACKUP_MK}" "${TAURUS_MK}"
+    fi
+  }
+  trap restore_vendor_taurus_mk EXIT
+else
+  echo "[WARN] ${TAURUS_MK} not found; skip XcasApp preopt patch"
+fi
+# === XcasApp preopt one-off patch (end) ===
+
+추가 코드 끝
+
+if [ $SKIP_A -eq 0 ]; then
+	source $(dirname $0)/build/envsetup.sh
+	echo "----- envsetup.sh DONE ";
+
+@endcode
+
+*/

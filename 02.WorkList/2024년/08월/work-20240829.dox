@@ -1,0 +1,62 @@
+/*!
+@page work_20240829	2024.08.29
+
+# 가온본사
+---
+https://jira.kaonmedia.com/browse/K1010-80
+
+@code
+[증상]
+  Cisco CMTS (cBR) MDF 설정으로 인해 S/W 리부팅 시 CM이 정상 동작되지 않는 증상발생함
+
+[현상] 
+ -Cisco CMTS (cBR) MDF Enable 설정환경에서 stb reboot 시 cm과 multicast용 터널6개중 3개 정도만 성공하는 증상 발생
+ -이로인해 EPG정보 못받는등 서비스에 차질이 발생함
+
+[빈도] 랜덤하게 발생
+
+[분석]
+ -성공시 : OK로그 보면 온라인 이후 6개 터널링 요청 들어옴
+ -실패시: 온라인되기 이전에 3개가 들어오고 -> 온라인 되어 reinstall하며 기존 터널 clear동작 -> 이후 3개 수신되어 최종 3개만 등록
+ *MDF (Modulation Domain Filter) 설정
+  DOCSIS 환경에서 MDF는 모듈레이션 도메인에서의 신호 품질을 최적화하기 위한 필터링 설정을 의미합니다. 
+  CMTS에서 전송되는 신호의 특정 대역을 필터링하여 불필요한 잡음을 제거하여 전송품질을 높이는 데 도움을 줍니다.
+
+[작업]
+테스트 펌웨어 작성 서초HCN 방문 준비
+
+\HCN\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\service\oob\CTunnel.cpp
+int CTunnel::Start()
+예외처리 추가 / close(sockfd) 빠진부분 추가
+
+\HCN\kaon_bcm_androidtv12\vendor\kaon\hals\plapi\1.0\service\oob\kaon_oob_manager.cpp
+bool CkaonOobManager::init(android::sp<PLAPIService::OOB_Callback> _mOOB_Callback)
+6개 터널링 코드에 retry, sleep 1초, 로그 추가
+
+/* OOB Data Push Thread */
+/* BASE SI */
+if(tunnelEnableAll || tunnelEnableBaseSi){
+	if(tunnelBaseSi == nullptr)
+	{
+		tunnelBaseSi = new CTunnel(2222, "00:50:4D:00:00:01", &buff);
+		iRet = tunnelBaseSi->Start();
+		PLOGI("smkang : tunnelBaseSi start() - ret[%d]", iRet);
+		PLOGI("smkang : wait 1sec");
+		usleep(1000 * 1000);
+		if (iRet < 0) {
+			iRet = tunnelBaseSi->Start();
+			PLOGI("smkang : tunnelBaseSi restart() - ret[%d]", iRet);
+		}
+	}
+	else
+		PLOGI("smkang : tunnelBaseSi is nullptr");
+}
+usleep(200 * 1000);
+
+
+@endcode
+
+---
+<br>
+---
+*/

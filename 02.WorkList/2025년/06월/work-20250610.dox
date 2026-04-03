@@ -1,0 +1,55 @@
+/*!
+@page work_20250610	2025.06.10
+
+---
+
+# 부팅시 cm에 AdsAcquire를 못 보내는 이슈
+@code
+부팅시 네트워크 관련 절차
+system/netd/server/NetlinkHandler.cpp:
+void NetlinkHandler::onEvent(NetlinkEvent *evt) {
+    if (!strcmp(subsys, "net")) {
+        NetlinkEvent::Action action = evt->getAction();
+        const char *iface = evt->findParam("INTERFACE");
+        if ( (iface != NULL) && (strcmp(iface, "eth0")== 0) )
+        {
+            if (strcmp(iface, "eth0") != 0 && strcmp(iface, "tun0") != 0)
+                return;
+            if (strcmp(iface, "eth0") == 0)
+            {
+                if (action == NetlinkEvent::Action::kLinkUp)
+                {
+                    char value[PROPERTY_VALUE_MAX] = {0};
+                    property_get("dev.eth0.init", value, "0");
+                    if (value[0] == '0')
+                    {
+                        property_set("dev.eth0.init", "1");
+                    }
+                }
+
+
+X:\LGHV_TEST\kaon_bcm_androidtv12\device\broadcom\K1100UA\rcs\init.rmag.rc
+property:dev.eth0.init
+property:dev.cm.ni.init 
+property:dev.cm.ni.type
+에 따라 cmconnectioncheck, networkmonitor를 실행하며
+
+setprop vendor.nx.fe.state 1를 세팅함.
+
+X:\LGHV_TEST\kaon_bcm_androidtv12\vendor\broadcom\bcm_platform\nxif\nxserver\nxserver.cpp
+vendor.nx.fe.state 1 이면 
+NEXUS_Platform_InitFrontend 수행
+
+
+
+
+@endcode
+
+
+
+
+
+*/
+
+
+

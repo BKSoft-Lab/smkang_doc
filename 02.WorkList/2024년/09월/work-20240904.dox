@@ -1,0 +1,29 @@
+/*!
+@page work_20240904	2024.09.04~05
+
+# 가온본사
+---
+https://jira.kaonmedia.com/browse/K1023-201
+
+> HDMI-CEC 개선시나리오 적용
+
+1. 구글설정 > 기기환경설정 > 입력 > TV전원제어(on/off) 만 유지 - 설정메뉴 삭제/수정
+2. TV전원제어(off)시 에도 active source 기능 활성화 - 기존 동작 유지
+3. cold boot / reboot 시에는 전원제어/active source 기능 off - 기존 동작 유지
+4. TV전원제어(off)면 TV on/off 시 tv로 부터 전달되는 메시지 skip - 기능 일부추가
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/30d9db1dbeaee1b7417e59c5790c9a6b646bdac4
+
+
+
+> TV 전원제어 Off 설정에서 STB sleep->awake시  TV 켜지는 문제 수정
+
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/a5083db88950c33b63e731e5b5b65cef5e998e15
+
+> HDMI-CEC 개선시나리오 테스트
+<img src="../data/20240905.jpg" alt="회의" width="60%"/>
+
+---
+<br>
+---
+*/

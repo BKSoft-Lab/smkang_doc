@@ -1,0 +1,60 @@
+/*!
+@page work_20250410	2025.04.10
+
+---
+
+# 
+
+@code
+
+commit fec3caad3119f2ec48af096e449895170216bfa5 (HEAD)
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Thu Apr 10 09:48:49 2025 +0900
+
+    Revert "fix ro.vendor.nx.hdmi.spd.desc property setting issue"
+
+    This reverts commit 03f456e40b072d48b0b29fbcba844ccfe2e086ad.
+
+commit 607e62bdde891ba2ec3679336ebb8056656ca907
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Apr 2 12:18:21 2025 +0900
+
+    updated CM Firmware 1.1.6
+
+commit 03f456e40b072d48b0b29fbcba844ccfe2e086ad
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Tue Mar 11 11:30:13 2025 +0900
+
+    fix ro.vendor.nx.hdmi.spd.desc property setting issue
+
+commit 8d4793d7be8056408e0e20972a5d6bf0a6ec4a99
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Thu Mar 6 10:00:58 2025 +0900
+
+    Google Play Movies & TV 삭제
+
+commit a45c549bd831c1ad3fe24a2b2231b3cd30a635f6
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Tue Mar 4 12:46:31 2025 +0900
+
+    updated CM Firmware 1.1.5
+
+commit 7bd7249396cb61f47cd7d0bb0d052eb0354e75d2
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Feb 26 16:58:42 2025 +0900
+
+    PLATFORM_SECURITY_PATCH := 2025-03-01
+
+commit b735b714ac32edfe2ae30bf2f3fb417d58e12fdb
+Author: sungmin.kang <sungmin.kang@kaongroup.com>
+Date:   Wed Feb 26 16:57:34 2025 +0900
+
+
+@endcode
+
+
+
+*/
+
+
+

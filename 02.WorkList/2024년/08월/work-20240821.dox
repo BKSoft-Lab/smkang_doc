@@ -1,0 +1,51 @@
+/*!
+@page work_20240821	2024.08.21
+
+# 가온본사
+---
+
+> xts 환경 구축 <br>
+http://172.16.5.75/html/devops_maintenance_xts_20240810.html
+
+> Voc 로그분석 <br>
+https://jira.kaonmedia.com/browse/K1023-195
+- voc #38번
+@code
+
+@강성민매니저님,
+이전 메일 VOC 37번은 무시해 주시고 38번 확인이 필요합니다.
+소리 안나옴 이슈 로그에 ‘UNKNOWN_STREAM-1’이 어떨 때 뜨는지 확인 요청 드립니다.
+
+-------------------
+
+안녕하세요. 강성민입니다.
+로그로 보아 망이상 으로 스트림이 들어오고 있지 않거나, 스틸화면인 채널에서 볼륨 키를 누른 것으로 판단됩니다.
+
+08-09 11:04:46.002   904  1210 I vol.Events: writeEvent active_stream_changed STREAM_MUSIC
+08-09 11:04:46.030   904  1210 I vol.Events: writeEvent level_changed STREAM_MUSIC 2
+08-09 11:04:46.035   904  1210 I vol.Events: writeEvent key STREAM_MUSIC 2                               >>>> 볼륨키로 볼륨 2로 변환
+08-09 11:04:46.092   904   904 I vol.Events: writeEvent show_dialog volume_changed keyguard=false        >>>> 볼륨 UI Show
+08-09 11:04:46.102   904  1210 I vol.Events: writeEvent active_stream_changed UNKNOWN_STREAM_-1          >>>> 실제 재생 중 인 active stream 이 없는 경우
+08-09 11:04:46.102   904   904 I vol.Events: writeEvent show_dialog volume_changed keyguard=false
+08-09 11:04:48.121   904   904 I vol.Events: writeEvent dismiss_dialog timeout                           >>>> 볼륨 UI Hide
+
+@endcode
+
+- voc #41
+@code
+@강성민매니저님,
+VOC 41번 신호없음 이슈 관련 로그에, safeboot 로그가 보입니다.
+어떤 경우에 뜨는지 확인 요청 드립니다.
+
+@김원균PM님
+Safeboot: Checking safeboot...
+로그는 STB부팅시 안전모드 부팅으로 진입할 가능성이 있는지 체크하는 루틴으로 보입니다.
+이전에 비정상적인 시스템종료가 있었을 것 같습니다.
+vendor/google_gtvs/apps/arm64-v8a/PrebuiltGmsCorePano.apk 에서 검색됩니다.
+@endcode
+
+
+---
+<br>
+---
+*/

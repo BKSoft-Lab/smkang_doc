@@ -1,0 +1,233 @@
+/*!
+@page work_20241007	2024.10.07
+
+# SKB수원
+---
+
+## 부팅시 실행되어 usb에 정보를 저장하는 script 작성 (#rc파일 #usb #su권한)
+
+
+> 요청 사항 Mail
+@code
+
+안녕하세요. 김원균PM 입니다.
+
+@강성민매니저님,
+VOC 안정성에서 발생한 전체채널 시청불가 이슈 – EGLInitialize Error 에 대해,
+Broadcom에서 메모리(v3d) 사용량이 비정상적으로 많다며 검토 요청이 왔습니다.
+
+두 번째 첨부파일에 v3d 관련 내용 확인 요청 드려요
+
+감사합니다.
+김원균드림
+
+Update By: Jason Lim(Broadcom Corporation)
+Update Time: 04-October-2024 03:22:00
+
+Latest Response: 
+Hi Kim WonKyun,
+ 
+You can check memory information by the following ways. (rmlmk log / log message of NEXUS / BHPA memory / memory utilization on each appliction)
+I guess you can find which application's memory is growing.
+ 
+-. enable rmlmk relevant log messages in nxserver.cpp (vendor/broadcom/bcm_platform/nxif/nxserver)
+    #define USAGE_PER_CLIENT 1
+    #define USAGE_FULL_DETAILS 1
+-. enanbling log messages
+$ su
+# echo "nexus_memory msg" > /proc/brcm/debug
+# echo "nexus_memory_cache msg" > /proc/brcm/debug
+-. monitoring BHPA memory. please call "cat /sys/kernel/debug/bhpa" every 1min
+$ su
+# cat /sys/kernel/debug/bhpa
+-. monitoring memory utilization on each appliction
+# dumpsys meminfo
+ 
+Thanks,
+Jason Lim
+
+
+Hi Kim WonKyun,
+ 
+Please check "cat /sys/kernel/debug/dri/0/*/client" too. This "DRI" is related to V3D memory on applications.
+ 
+-. monitoring BHPA memory. please call "cat /sys/kernel/debug/bhpa" &  "cat /sys/kernel/debug/dri/0/*/client" every 1min
+$ su
+# cat /sys/kernel/debug/bhpa
+# cat /sys/kernel/debug/dri/0/*/client
+
+@endcode
+
+> USB에 저장하는 스크립트 추가
+
+@code
+1. rc파일에 등록 시작 
+- X:\SKB\kaon_bcm_androidtv12\device\broadcom\K1100UA\rcs\init.rmag.rc
+
+on property:dev.eth0.init=1 && property:dev.cm.ni.init=2
+    setprop vendor.nx.fe.state 1
+    start networkmonitor
+	start checkmemory
+	
+service checkmemory /system/bin/checkmemory
+   class main
+   user root
+   group root
+   disabled
+   seclabel u:r:su:s0	#su권한 추가
+
+2. 빌드 추가 
+- X:\SKB\kaon_bcm_androidtv12\vendor\kaon\kaon.mk
+# scripts in prebuilts
+PRODUCT_PACKAGES += cmconnectioncheck
+PRODUCT_PACKAGES += networkmonitor
+PRODUCT_PACKAGES += checkmemory
+
+- X:\SKB\kaon_bcm_androidtv12\vendor\kaon\prebuilts\scripts\Android.mk
+# checkmemory
+include $(CLEAR_VARS)
+LOCAL_MODULE := checkmemory
+LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_MODULE_TAG := optional
+LOCAL_SRC_FILES := checkmemory
+LOCAL_STRIP_MODULE := false
+LOCAL_PRELINK_MODULE := false
+include $(BUILD_PREBUILT)
+
+3. 스크립트 작성
+- X:\SKB\kaon_bcm_androidtv12\vendor\kaon\prebuilts\scripts\checkmemory
+#!/system/bin/sh
+
+loga "checkmemory."
+echo "nexus_memory_cache msg" > /proc/brcm/debug
+loga "checkmemory.."
+echo "nexus_memory msg" > /proc/brcm/debug
+loga "checkmemory..."
+function loga() {
+    /system/bin/logwrapper echo "${@}"
+}
+
+while true; do
+    loga "checkmemory...."
+    MOUNT_PATH=$(mount | grep '/storage/' | grep -v 'emulated' | awk '{print $3}')
+    if [ ! -z "$MOUNT_PATH" ]; then
+        LOG_FILE="$MOUNT_PATH/memory_info.log"
+
+            echo "========================================" >> $LOG_FILE
+            date >> $LOG_FILE
+
+        echo "======== /sys/kernel/debug/bhpa ========" >> $LOG_FILE
+        cat /sys/kernel/debug/bhpa >> $LOG_FILE
+
+        echo "=== /sys/kernel/debug/dri/0/*/client ===" >> $LOG_FILE
+        cat /sys/kernel/debug/dri/0/*/client >> $LOG_FILE
+
+        loga "Log write : $LOG_FILE"
+    else
+        loga "No USB."
+    fi
+
+    sleep 60
+done
+@endcode
+
+> 작업참고 / 테스트 
+@code
+
+
+130|console:/ $ logcat | grep echo | grep -v ret &
+[1] 3871 3872 3873
+
+
+$ su
+# cat /sys/kernel/debug/bhpa
+# cat /sys/kernel/debug/dri/0/*/client
+
+logcat | grep echo | grep -v ret
+
+dmesg | grep avc | grep networkmonitor | grep -v dns
+
+
+dmesg | grep 'audit'
+dmesg | grep avc
+
+/dev/block/vold/public:8,1  29G  22G  6.6G  77% /mnt/media_rw/749A-0B6D
+/dev/block/vold/public:8,1 7.1G 4.3G  2.8G  61% /mnt/media_rw/0607-84BB
+
+cat /proc/brcm/debug | grep nexus_memory
+nexus_memory_local      wrn
+nexus_memory_cache      wrn
+nexus_memory    wrn
+
+echo "nexus_memory msg" > /proc/brcm/debug
+cat /proc/brcm/debug | grep nexus_memory
+nexus_memory_local      wrn
+nexus_memory_cache      wrn
+nexus_memory    msg
+
+cat /proc/brcm/debug | grep nexus_memory_cache   
+nexus_memory_cache      wrn
+
+echo "nexus_memory_cache msg" > /proc/brcm/debug
+cat /proc/brcm/debug | grep nexus_memory_cache   
+nexus_memory_cache      msg
+
+예를 들어, /data/local/tmp/test.txt 파일의 내용을 바꾸려면:
+
+bash
+코드 복사
+sed -i 's/hello/world/g' /data/local/tmp/test.txt
+
+이 명령어는 test.txt 파일 내에서 모든 "hello"를 "world"로 변경합니다.
+
+sed -i 's//mnt/media_rw/world/g' /data/local/tmp/test.txt
+
+sed -i 's/storage/storage\//g' /data/local/tmp/checkmemory
+
+storage
+
+
+sed -i "s/awk '{print \$3}'/grep -v 'emulated' | awk '{print \$3}'/g" /data/local/tmp/checkmemory
+
+
+
+cp /system/bin/checkmemory /data/local/tmp/
+cd data/local/tmp//
+./checkmemory
+
+
+130|console:/mnt/media_rw/0607-84BB # cat /sys/kernel/debug/bhpa
+MEMC0 0xba400000..0xda400000(0000000015feee8b) 256/0/252/4 (252/4) (104/0/0/0/152)
+ 0xba400000: AAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAABAAABAAAAAAAAAA
+ 0xc2800000: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ 0xcac00000: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ 0xd3000000: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+MEMC0 0x7a400000..0xba400000(00000000d8424d94) 512/351/160/1 (162/1) (91/1/0/0/120)
+ 0x7a400000: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ 0x82800000: AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ 0x8ac00000: A...............................AA................................
+ 0x93000000: ..AA..................................AA.A.AAAAAAAAA..............
+ 0x9b400000: ..................................................................
+ 0xa3800000: ....................................AAAA..........................
+ 0xabc00000: ......................................AAAA............A.AA.A......
+ 0xb4000000: ..................................................
+
+
+
+1분마다 grep '/mnt/media_rw' | awk '{print $3}' 하여 얻은 경로에
+"cat /sys/kernel/debug/bhpa"과 "cat /sys/kernel/debug/dri/0/*/client" 결과를 기록 하는 스크립트를 만들어줘
+
+@endcode
+
+
+> 수정내역 (SKB_TEST 폴더메만 적용)
+
+- [Main git - 20241007.diff](../data/20241007.diff)
+
+- [Hal git - 20241007_hal.diff](../data/20241007_hal.diff)
+
+---
+<br>
+---
+
+*/

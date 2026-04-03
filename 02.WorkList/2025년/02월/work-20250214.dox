@@ -1,0 +1,157 @@
+/*!
+@page work_20250214	2025.02.14
+
+---
+
+# gtvs 정리
+
+> 반영 필요 판단
+
+- TrichromeLibrary.apk는 Android에서 WebView를 실행하는 데 사용되는 구성 요소
+
+- YouTubeLeanback.apk는 Android TV 및 Google TV용 YouTube 앱
+
+- YouTubeMusicTVPrebuilt.apk는 Android TV 및 Google TV에서 YouTube Music을 실행하는 앱
+
+> 반영 불필요 판단
+
+- AndroidMediaShell.apk는 Android TV 또는 Android 기반 장치에서 미디어 관련 기능을 처리하는 시스템 앱
+
+- LatinIMEGoogleTvPrebuilt.apk는 Google TV(Android TV)의 기본 키보드 앱
+
+- PlayGamesPano.apk는 Google Play Games의 VR/AR 또는 TV 전용 버전
+
+- TalkBack.apk는 Android의 스크린 리더(Screen Reader) 앱으로, 시각 장애인 및 저시력 사용자를 위한 접근성(Accessibility) 기능을 제공
+
+- TVLauncher.apk는 Android TV 및 Google TV에서 홈 화면(UI) 역할을 하는 기본 런처 앱입니다
+
+- VideosPano.apk는 Google의 VR(가상 현실) 또는 Android TV/Google TV용 비디오 플레이어와 관련된 앱
+
+LatinIMEGoogleTvPrebuilt.apk
+PlayGamesPano.apk
+TVLauncher.apk
+VideosPano.apk
+talkback.apk
+
+
+
+> gsm 버전확인
+console:/ $ dumpsys package com.google.android.gms | grep versionCode
+    versionCode=244035110 minSdk=30 targetSdk=34
+
+> sts 테스트 예정
+
+---
+<br>
+
+# LGHV K1100 DRM키 검증 작업
+
+- [Factory_SW_DRM.zip](../data/202502/Factory_SW_DRM.zip)
+- [K1100UA_DRM_HWPA_20250213_00000000.bin](../data/202502/K1100UA_DRM_HWPA_20250213_00000000.bin)
+- [K1100UA_DRM키검증_김희철.pdf](../data/202502/K1100UA_DRM키검증_김희철.pdf)
+
+https://confluence.kaonmedia.com/display/AP3/%5BK1100UA%5D+DRM+Key+Test
+
+- http://172.16.5.75/lghv/k1100ua/html/devops_maintenance_lghv_k1100ua_20241113_1.html
+- http://172.16.5.75/lghv/k1100ua/html/devops_maintenance_lghv_k1100ua_20241118_1.html
+- http://172.16.5.75/lghv/k1100ua/html/devops_maintenance_lghv_k1100ua_20241119_4.html
+
+
+@code
+
+히든메뉴 > STB 동작설정 > 5.1 ETHERNET BYPASS 설정 (설정됨)
+
+D:\platform-tools>adb connect 192.168.0.5:5555
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
+connected to 192.168.0.5:5555
+
+D:\platform-tools>adb root
+
+D:\platform-tools>adb pull /dev/hwcfg/drm.bin
+/dev/hwcfg/drm.bin: 1 file pulled, 0 skipped. 1.9 MB/s (12496 bytes in 0.006s)
+
+검색에 "PowerShell" 입력  후 검색 된 Windows PowerShell 관리자 권한으로 열기
+
+PS D:\> cd .\platform-tools\
+PS D:\platform-tools>
+PS D:\platform-tools>
+PS D:\platform-tools> Get-FileHash -Path drm_old.bin -Algorithm md5
+
+Algorithm       Hash                              Path
+---------       ----                              ----
+MD5             76A25E4D6356A7763EC23829C953033A  D:\platform-tools\drm_old.bin
+
+
+PS D:\platform-tools> Get-FileHash -Path drm_new.bin -Algorithm md5
+
+Algorithm       Hash                              Path
+---------       ----                              ----
+MD5             F64F72326B44430E8546B5F95CA44EA9  D:\platform-tools\drm_new.bin
+
+
+PS D:\platform-tools>
+
+20240719QAQA04QA
+
+
+11. [User] Enter Pcb Number to send PC_DOWNLOAD message in 5 seconds.
+PCB Number 란이 활성화 되면 붙여넣기 엔터, 붙여넣기 엔터를 여러번 한다. (한번만 한 경우 계속 Timeout 발생)
+
+fastboot -s tcp:192.168.11.3 flash super X:\LGHV\kaon_bcm_androidtv12\out\target\product\K1100UA\super.img 
+
+
+KaonManager
+admin/admin
+
+@endcode
+
+
+fastboot -s tcp:192.168.11.7 flash super W:\home\kaon-m325\works\hcn\kaon\kstb1157_atv12\out\target\product\KSTB1157\super.img
+fastboot -s tcp:192.168.11.7 --slot all flash boot_a W:\home\kaon-m325\works\hcn\kaon\kstb1157_atv12\out\target\product\KSTB1157\boot.img
+fastboot -s tcp:192.168.11.7 --slot all flash boot_b W:\home\kaon-
+
+BOLT> flash usbdisk0:K1100UA_BSU_1_60_E16_ForNoFusing.elf flash0.BSU1
+
+BOLT> boot -bsu -noclose -elf flash0.BSU1;android boot -rawfs
+아래 에러 발생시 BOLT> setenv -p FB_DEVICE_TYPE flash0 실행 > 재부팅 > 재시도
+
+Loader:elf Filesys:raw Dev:flash0.BSU1 File:(null) Options:(null)
+warning: did not add macaddr to /pcie@8b10000/pci@1,0
+Starting program at 0x42000000 (DTB @ 0x47619000)
+ 
+Android BSU requires defining a valid flash device,
+please issue 'setenv -p FB_DEVICE_TYPE <device>' and retry.
+Failed starting Android BSU
+ 
+Invalid command: 'android boot -rawfs'.  Available commands are:
+ 
+astra boot,  batch,  boards,  boot,  coap listen,  coap term,  crc,  d,  dir,  dt add node,  dt add prop,  dt bolt,  dt del node,  dt del prop,  dt off,  dt on,  dt phandle,  dt sane,  dt show,  e,  ephycfg,  erase,  f,  flash,  gisb,  go,  help,  ifconfig,  incenv,  info,  load,  loop,  macprog,  memtest,  memwrap,  mii,  mon64 load,  mon64 nw cpus,  mon64 tz cpus,  ping,  printenv,  psci,  reboot,  rlogin,  rmem,  rpmb counter,  rpmb program-key,  rts,  save,  sec_rpmb,  secureload,  set console,  setenv,  setsn,  sha,  show devices,  show heap,  show usb,  sleep,  ssdp start,  ssdp stop,  strap,  t,  tcp connect,  tcp constest,  tcp listen,  testenv,  time,  ttcp,  u,  uncache,  unsetenv,  usb exit,  usb init,  verifyboot,  waitusb,
+ 
+*** command status = -1
+BOLT>
+
+
+12. Drm info 프로그램 설치 및 실행
+adb install drm-info-1-1-9-220331.apk
+adb shell am start -n com.androidfung.drminfo/com.androidfung.drminfo.TvActivity
+13. ExoPlayer 프로그램 설치 및 실행
+adb install ExoPlayer-demo-2.9.6-05072019.apk
+adb shell am start -n com.google.android.exoplayer2.demo/com.google.android.exoplayer2.demo.SampleChooserActivity
+14. GTS 테스트 진행
+run gts -m GtsGmscoreHostTestCases
+
+
+screencap -p /mnt/media_rw/749A-0B6D/snd_setting.png 
+
+adb shell input keyevent 201
+ /storage/emulated/0/
+adb shell screencap -p /mnt/media_rw/749A-0B6D/low_bat_01.png 
+adb shell screencap -p /storage/emulated/0/low_bat_02.png 
+
+input keyevent 201
+screencap -p /mnt/media_rw/749A-0B6D/low_bat_01.png
+*/
+
+
+

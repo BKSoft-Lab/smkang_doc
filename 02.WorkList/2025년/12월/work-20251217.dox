@@ -1,0 +1,34 @@
+/*!
+@page work_20251217	2025.12.17
+
+---
+
+# !!
+
+> !!
+
+@code
+
+Z:\K1200_ATV14\lghv_k1200ua\frameworks\base\core\res\res\values\config.xml
+>> 현재 셋탑상단 전원키나 리모컨 전원키를 3초간 누르면 딥슬립으로 진입하도록 되어 있습니다. 
+
+\frameworks\base\core\res\res\values\config.xml
+
+<integer name="config_globalActionsKeyTimeout">3000</integer> 
+
+위 값 변경으로 시간은 변경가능. 10000 변경 시 10초로 동작 확인.
+
+30초까지 적용되는 것 확인했으며 더 이상도 가능합니다.
+
+
+logcat | grep WindowManager
+
+@endcode
+
+@code
+
+
+
+@endcode
+
+*/

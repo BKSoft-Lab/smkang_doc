@@ -1,0 +1,58 @@
+/*!
+@page work_20241016	2024.10.16
+
+# SKB수원
+---
+## VOC 안정성 2차 5번 셋탑 리부팅 관련한 로그 추가
+
+> 요청 사항 Mail
+
+SKB_TEST 폴더에 만 적용 
+
+@code
+
+@강성민매니저님,
+VoC 안정성 2차 시료 5번에 대한 CSP를 어제 생성했고,
+브로드컴에서 아래 정보들이 안보이다는데 /bcm-hwc/bcm-audio/nxwrap 확인 요청 드려요.
+
+감사합니다.
+김원균드림
+
+From: support@broadcom.com <support@broadcom.com> 
+Sent: Tuesday, October 15, 2024 7:59 PM
+To: 김원균[KIM WONKYUN] <wk.kim@kaongroup.com>
+Cc: 이상훈[LEE SANGHOON] <lsh@kaongroup.com>; 김경달[Kim Kyungdal] <kendall.kim@kaonbroadband.com>; 한동우[HAN DONG WOO] <tony.han@kaongroup.com>; 김연호[YEON HO KIM] <yhkim@kaongroup.com>
+Subject: {Case#CS00012373355} ##-  Updated: STB is rebooted while aging
+
+-begin-
+Update By: Jason Lim(Broadcom Corporation)
+Update Time: 15-October-2024 03:58:54
+
+Latest Response: 
+Hello, Kim WonKyun,
+ 
+I need log messages before capturing "logcat_20241014_225335_000.log". I cannot see "bcm-hwc/bcm-audio/nxwrap/etc" during standby off/on".
+It looks like the system is in the wrong condition. "bcm-hwc/bcm-audio/nxwrap" should be printed out during standby off/on if broadcom hal codes are running.
+So the full logcat messages are very important to see what happens before the wrong condition.
+ 
+Thanks,
+Jason Lim
+
+@endcode
+
+
+> 작업내역
+
+@code
+
+bcm-hwc bcm-audio nxwrap > 대문자로 변경하여 USB 에 logcat log가 저장되도록 수정
+
+@endcode
+
+- [SKB_TEST_20241016.diff](../data/20241016/SKB_TEST_20241016.diff)
+
+---
+<br>
+---
+
+*/

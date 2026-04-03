@@ -1,0 +1,46 @@
+/*!
+@page work_20251212	2025.12.12
+
+---
+
+# !!
+
+> !!
+
+@code
+Z:\K1200_ATV14\lghv_packages\hiddenmenu\pages\SelfDiagPage.h
+Z:\K1200_ATV14\lghv_packages\hiddenmenu\pages\SelfDiagPage.cpp
+
+sgkang@lguplus-pc:~/K1200_ATV14/lghv_k1200ua$ 
+mv ../middleware ./vendor/quber/
+mv ../packages ./vendor/quber/
+
+주석해제
+vi vendor/quber/quber.mk
+TARGET_BUILD_QUBER_SRC_BUILD := true 
+
+source build/envsetup.sh;lunch 3
+
+미들웨어 빌드
+cd vendor/quber/middleware 
+m -j$(nproc)
+Z:\K1200_ATV14\lghv_k1200ua\out\target\product\K1200UA\vendor\lib 
+libquantum_core.so
+ 
+hiddenmenu/pages/HiddenMenuPage.cpp
+m -j$(nproc) hiddenmenu
+adb push out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/bin/hiddenmenu
+cp out/target/product/K1200UA/vendor/bin/hiddenmenu vendor/quber/prebuilts/packages/hiddenmenu/
+
+mv vendor/quber/middleware ../middleware
+mv vendor/quber/packages ../packages
+
+@endcode
+
+@code
+
+
+
+@endcode
+
+*/

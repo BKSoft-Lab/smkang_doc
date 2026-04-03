@@ -1,0 +1,15 @@
+/*!
+@page work_20240728	2024.07.28
+
+# 가온본사 
+---
+## HCN, LGHV 수정사항  SKB 반영검토
+
+@code
+BT연결 시 VOD 싱크 맞지 않는 현상 수정( Broadcom CSP.No - CS00012353180 )--K1100UA적용사항
+https://gitlab.altimedia.com/atv/hcn-android-tv/hcn_kaon_brcm_androidtv12/kaon_bcm_androidtv12/-/commit/9d8cc71e84f6c8967fb5122d5440dfa795a841f7
+git cherry-pick 9d8cc71e84f6c8967fb5122d5440dfa795a841f7
+수원에서 테스트 후 적용예정
+@endcode
+
+*/
