@@ -1,0 +1,165 @@
+<!DOCTYPE html []>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="author" content="MarkdownViewer++" />
+    <title>std_base_user_mgmt_api.md</title>
+    <style type="text/css">
+            
+/* Avoid page breaks inside the most common attributes, especially for exports (i.e. PDF) */
+td, h1, h2, h3, h4, h5, p, ul, ol, li {
+    page-break-inside: avoid; 
+}
+
+        </style>
+  </head>
+  <body>
+    <h1 id="std_base_user_mgmt-http-api">std_base_user_mgmt — HTTP API·쿼리 정리</h1>
+    <p>
+      <code>std_base_user_mgmt</code> 화면에서 나가는 HTTP 호출은 모두 <code>mesDbUrl()</code>로 만든 URL이며, <strong>GET은 두 종류</strong>(사용자 테이블·공통코드 함수)이다.</p>
+    <h2 id="url-mesdburl">1. 베이스 URL (<code>mesDbUrl</code>)</h2>
+    <ul>
+      <li>파일: <code>renderer/src/lib/mesDbBaseUrl.ts</code></li>
+      <li>
+        <strong>개발(DEV)</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음 → 베이스 <code>''</code> → 최종 URL은 <strong><code>/db/...</code></strong>, <strong><code>/func/...</code></strong> 상대 경로(Vite <code>proxy</code>로 백엔드 전달).</li>
+      <li>
+        <strong>프로덕션</strong> 또는 env 설정 시 → <code>https://…:7443</code> 등 + path.</li>
+    </ul>
+    <h2 id="get-tb_cm_user">2. GET — 사용자 목록 <code>tb_cm_user</code></h2>
+    <ul>
+      <li>
+        <strong>함수</strong>: <code>fetchTbCmUsers</code> — <code>renderer/src/lib/tbCmUserApi.ts</code></li>
+      <li>
+        <strong>형태</strong>: <code>GET {base}/db/tb_cm_user?{쿼리스트링}</code></li>
+    </ul>
+    <h3 id="section">쿼리 파라미터</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>파라미터</th>
+          <th>의미</th>
+          <th>화면 조건</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <code>user_id__like</code>
+          </td>
+          <td>사용자 ID 부분 일치(서버 규약)</td>
+          <td>필터 사용자ID에 값이 있을 때만</td>
+        </tr>
+        <tr>
+          <td>
+            <code>user_name__like</code>
+          </td>
+          <td>사용자명 부분 일치</td>
+          <td>필터 사용자명에 값이 있을 때만</td>
+        </tr>
+        <tr>
+          <td>
+            <code>_orderBy</code>
+          </td>
+          <td>정렬</td>
+          <td>
+            <strong>항상</strong>
+            <code>user_id</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="std_base_user_mgmt.tsx">사용 위치 (<code>std_base_user_mgmt.tsx</code>)</h3>
+    <ol>
+      <li>
+        <strong>마운트 1회</strong>: <code>fetchTbCmUsers({})</code> → 실질적으로 <code>?_orderBy=user_id</code> 만.</li>
+      <li>
+        <strong>조회(Search)</strong>: 필터 trim 후 비어 있지 않을 때만 <code>user_id__like</code> / <code>user_name__like</code> 설정 후 <code>fetchTbCmUsers(q)</code>.</li>
+      <li>
+        <strong>저장 성공 후</strong>: <code>runSearch()</code> 재호출 → 당시 필터와 동일한 GET.</li>
+    </ol>
+    <h3 id="section-1">응답</h3>
+    <p>JSON이 배열이 아니면 <code>data</code> / <code>rows</code> / <code>result</code> / <code>items</code> / <code>records</code> 중 배열 필드를 찾아 <code>TbCmUser[]</code>로 파싱.</p>
+    <h2 id="get-fn_cm_code">3. GET — 공통코드 <code>fn_cm_code</code> (부서·직급)</h2>
+    <ul>
+      <li>
+        <strong>함수</strong>: <code>fetchFnCmCodeOptions(p1)</code> — <code>renderer/src/lib/fnCmCodeApi.ts</code></li>
+      <li>
+        <strong>URL</strong>:
+<ul><li><code>GET {base}/func/fn_cm_code?p1=DEPT</code></li><li><code>GET {base}/func/fn_cm_code?p1=DUTY</code></li></ul></li>
+      <li>
+        <strong>호출</strong>: 화면 마운트 시 <code>Promise.all</code>로 동시 2회.</li>
+      <li>
+        <strong>용도</strong>: 상세 <code>PlainSelect</code> 옵션; 그리드 부서·직급 열은 <code>resolveFnCmCodeLabel</code>로 명칭 표시(별도 GET 없음).</li>
+    </ul>
+    <h2 id="get">4. 같은 화면의 비-GET</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>메서드</th>
+          <th>URL</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>POST</td>
+          <td>
+            <code>{base}/db/tb_cm_user</code>
+          </td>
+          <td>
+            <code>buildTbCmUserPostBody</code> JSON</td>
+        </tr>
+        <tr>
+          <td>DELETE</td>
+          <td>
+            <code>{base}/db/tb_cm_user?user_id={id}</code>
+          </td>
+          <td>삭제 확인 후</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 id="section-2">5. 요약 표</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>GET path</th>
+          <th>쿼리</th>
+          <th>호출 시점</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>사용자</td>
+          <td>
+            <code>/db/tb_cm_user</code>
+          </td>
+          <td>
+            <code>_orderBy=user_id</code> + 선택 <code>user_id__like</code>, <code>user_name__like</code></td>
+          <td>최초 마운트, Search, 저장/삭제 후 재조회</td>
+        </tr>
+        <tr>
+          <td>부서</td>
+          <td>
+            <code>/func/fn_cm_code</code>
+          </td>
+          <td>
+            <code>p1=DEPT</code>
+          </td>
+          <td>마운트 1회</td>
+        </tr>
+        <tr>
+          <td>직급</td>
+          <td>
+            <code>/func/fn_cm_code</code>
+          </td>
+          <td>
+            <code>p1=DUTY</code>
+          </td>
+          <td>마운트 1회</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>서버 쪽 파라미터 의미는 백엔드(DB 래퍼) 규약에 따른다.</p>
+  </body>
+</html>
