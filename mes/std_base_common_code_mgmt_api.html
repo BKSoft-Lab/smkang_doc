@@ -27,7 +27,7 @@ ul { padding-left: 1.25rem; }
 <body>
 <main class="wrap">
 <h1>std_base_common_code_mgmt — DB·HTTP API 상세 정리</h1>
-<p>화면 ID: <code>std_base_common_code_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_common_code_mgmt.tsx"><code>renderer/src/screens/std/std_base_common_code_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>공통코드 API: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a><br>코드 테이블 API: <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>renderer/src/lib/tbCmCodeApi.ts</code></a><br>매퍼: <a href="../../renderer/src/lib/tbCmCodeMapper.ts"><code>renderer/src/lib/tbCmCodeMapper.ts</code></a></p>
+<p>화면 ID: <code>std_base_common_code_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_common_code_mgmt.tsx"><code>renderer/src/screens/std/std_base_common_code_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>공통코드 API: <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>renderer/src/lib/tbCmCodeApi.ts</code></a><br>매퍼: <a href="../../renderer/src/lib/tbCmCodeMapper.ts"><code>renderer/src/lib/tbCmCodeMapper.ts</code></a><br>함수 조회: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a></p>
 <hr>
 <h2>1. 베이스 URL·환경</h2>
 <table>
@@ -62,16 +62,16 @@ ul { padding-left: 1.25rem; }
 </tr>
 </thead>
 <tbody><tr>
-<td>상단 Group Code 콤보</td>
-<td>GET</td>
-<td><code>/func/fn_cm_code</code></td>
-<td><code>p1=GROUPCODE</code>, <code>p2=code_name</code></td>
-</tr>
-<tr>
 <td>그리드·목록</td>
 <td>GET</td>
 <td><code>/db/tb_cm_code</code></td>
 <td>공통코드 행 목록</td>
+</tr>
+<tr>
+<td>상단 Group Code 콤보</td>
+<td>GET</td>
+<td><code>/func/fn_cm_code</code></td>
+<td><code>p1=GROUPCODE</code>, <code>p2=code_name</code></td>
 </tr>
 <tr>
 <td>저장(신규/수정)</td>
@@ -87,90 +87,32 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>3. GET — <code>/func/fn_cm_code</code> (상단 Group Code 콤보)</h2>
+<h2>3. GET — <code>/db/tb_cm_code</code></h2>
 <h3>3.1 호출 코드</h3>
-<ul>
-<li><strong>파일</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(p1, p2?)</code></li>
-<li><strong>화면</strong>: 마운트 시 <code>fetchFnCmCodeOptions(&#39;GROUPCODE&#39;, &#39;code_name&#39;)</code></li>
-</ul>
-<h3>3.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_cm_code?p1=GROUPCODE&amp;p2=code_name
-</code></pre>
-<h3>3.3 호출 시점·조건</h3>
-<table>
-<thead>
-<tr>
-<th>시점</th>
-<th>조건</th>
-<th>비고</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>화면 <strong>최초 마운트</strong></td>
-<td>항상 1회</td>
-<td><code>Promise.all</code>로 그리드 GET과 <strong>동시</strong> 요청</td>
-</tr>
-<tr>
-<td>이후</td>
-<td>자동 재호출 없음</td>
-<td>콤보 옵션은 마운트 결과를 state에 유지</td>
-</tr>
-</tbody></table>
-<h3>3.4 응답 처리</h3>
-<ul>
-<li>JSON이 배열이 아니면 키 <code>data</code> / <code>rows</code> / <code>result</code> / <code>items</code> / <code>records</code> 중 <strong>첫 배열</strong>을 사용.</li>
-<li>행 → <code>{ value, label }</code>: <code>code</code>/<code>CODE</code>를 value, <code>code_name</code>/<code>CODE_NAME</code>/<code>codeName</code>을 label(없으면 code).</li>
-<li><strong>중복 <code>value</code>는 제거</strong>(첫 항목 유지).</li>
-</ul>
-<h3>3.5 응답·UI</h3>
-<ul>
-<li>필터 <code>PlainSelect</code>: <code>value</code> = 그룹 코드, 표시 = <code>label</code>.</li>
-<li>상세 <strong>Group Code</strong> <code>PlainSelect</code>: 동일 옵션 + <code>mergeLegacyGroupOption</code>으로 DB에만 있는 그룹은 <strong><code>(현재값)</code></strong> 옵션 추가.</li>
-</ul>
-<h3>3.6 에러</h3>
-<table>
-<thead>
-<tr>
-<th>원인</th>
-<th>동작</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>res.ok === false</code></td>
-<td><code>throw new Error(\</code>GET fn_cm_code ${status}: …`)`</td>
-</tr>
-<tr>
-<td>화면</td>
-<td><code>catch</code> → 인라인 배너 <strong><code>조회 실패: …</code></strong> (그리드 GET과 같은 <code>try</code>이면 <strong>한 번의 실패로 둘 다 중단</strong>)</td>
-</tr>
-</tbody></table>
-<hr>
-<h2>4. GET — <code>/db/tb_cm_code</code> (그리드)</h2>
-<h3>4.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>tbCmCodeApi.ts</code></a> — <code>fetchTbCmCodes(query)</code></li>
 <li><strong>쿼리 빌드</strong>: <code>buildQuery</code> — 항상 <code>code_group__like</code>, <code>_orderBy=disp_seq</code>; 선택적으로 <code>code</code>, <code>code_name__like</code></li>
 </ul>
-<h3>4.2 URL·쿼리</h3>
+<h3>3.2 URL·쿼리</h3>
 <p><strong>전체(첫 화면):</strong></p>
 <pre><code>GET {base}/db/tb_cm_code?code_group__like=&amp;_orderBy=disp_seq
 </code></pre>
 <p><strong>그룹 필터(예: DEPT):</strong></p>
 <pre><code>GET {base}/db/tb_cm_code?code_group__like=DEPT&amp;_orderBy=disp_seq
 </code></pre>
-<p>(<code>code_group__like</code>가 비어 있어도 키는 <strong>항상</strong> 전송됨.)</p>
+<p>(<code>code_group__like</code> 키는 <strong>항상</strong> 전송; 값이 비어 있으면 전체 조회 의미.)</p>
 <table>
 <thead>
 <tr>
 <th>파라미터</th>
 <th>전송 조건</th>
-<th>화면에서의 의미</th>
+<th>의미</th>
 </tr>
 </thead>
 <tbody><tr>
 <td><code>code_group__like</code></td>
 <td><strong>항상</strong></td>
-<td>생략 시 <strong>빈 문자열</strong> → “전체”. Search 시 <code>filterGroupCode.trim()</code></td>
+<td><code>undefined</code>/생략 시 <strong>빈 문자열</strong>. Search 시 <code>filterGroupCode.trim()</code></td>
 </tr>
 <tr>
 <td><code>_orderBy</code></td>
@@ -188,43 +130,42 @@ ul { padding-left: 1.25rem; }
 <td>이 화면에서는 <strong>미사용</strong></td>
 </tr>
 </tbody></table>
-<h3>4.3 호출 시점·조건</h3>
+<h3>3.3 호출 시점·조건</h3>
 <table>
 <thead>
 <tr>
 <th>시점</th>
-<th>호출 인자</th>
+<th>인자</th>
 <th>트리거</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>마운트</td>
+<td>화면 <strong>최초 마운트</strong></td>
 <td><code>fetchTbCmCodes({ code_group__like: &#39;&#39; })</code></td>
-<td><code>useEffect</code> 1회 (<code>Promise.all</code>의 한쪽)</td>
+<td><code>Promise.all</code>로 Group 콤보 GET과 <strong>동시</strong></td>
 </tr>
 <tr>
-<td>Toolbar <strong>Search</strong> / 조회줄</td>
+<td>Toolbar <strong>Search</strong></td>
 <td><code>fetchTbCmCodes({ code_group__like: filterGroupCode.trim() })</code></td>
 <td><code>runSearch</code></td>
 </tr>
 <tr>
 <td><strong>저장 성공</strong> 후</td>
-<td>위와 동일(현재 필터)</td>
+<td>동일(현재 필터)</td>
 <td><code>runSave</code> → <code>runSearch()</code></td>
 </tr>
 <tr>
 <td><strong>삭제 성공</strong> 후</td>
-<td>위와 동일</td>
+<td>동일</td>
 <td><code>executeDelete</code> → <code>runSearch()</code></td>
 </tr>
 </tbody></table>
-<h3>4.4 응답 처리</h3>
+<h3>3.4 응답 처리</h3>
 <ul>
-<li><strong>타입</strong>: <code>TbCmCode[]</code> — 필드는 아래 <strong>§7</strong> 참고.</li>
-<li>파싱: 래핑 객체의 배열 필드(<code>data</code>/<code>rows</code>/…) 지원.</li>
+<li>JSON이 배열이 아니면 키 <code>data</code> / <code>rows</code> / <code>result</code> / <code>items</code> / <code>records</code> 중 <strong>첫 배열</strong>을 <code>TbCmCode[]</code>로 사용.</li>
 <li>빈 배열이면 그리드 비움, 상세 초기화(<code>applySelectionAfterLoad</code>).</li>
 </ul>
-<h3>4.5 에러</h3>
+<h3>3.5 에러</h3>
 <table>
 <thead>
 <tr>
@@ -238,7 +179,59 @@ ul { padding-left: 1.25rem; }
 </tr>
 <tr>
 <td>화면</td>
-<td><strong><code>조회 실패: …</code></strong> 배너, <code>loading</code> 해제</td>
+<td><code>catch</code> → 배너 <strong><code>조회 실패: …</code></strong> (<code>Promise.all</code> 실패 시 콤보·그리드 <strong>동시</strong> 실패)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. GET — <code>/func/fn_cm_code</code> (상단 Group Code 콤보)</h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(p1, p2?)</code></li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<pre><code>GET {base}/func/fn_cm_code?p1=GROUPCODE&amp;p2=code_name
+</code></pre>
+<h3>4.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>조건</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>화면 <strong>최초 마운트</strong></td>
+<td>항상 1회</td>
+<td><code>tb_cm_code</code> GET과 <code>Promise.all</code>로 <strong>동시</strong></td>
+</tr>
+<tr>
+<td>이후</td>
+<td>자동 재호출 없음</td>
+<td>옵션은 state 유지</td>
+</tr>
+</tbody></table>
+<h3>4.4 응답·UI</h3>
+<ul>
+<li>행 <code>{ code, code_name }</code> → <code>{ value, label }</code>. 중복 <code>value</code>는 <strong>첫 항목만</strong> 유지.</li>
+<li>필터 <code>PlainSelect</code>: 전체 + 그룹 목록.</li>
+<li>상세 <strong>Group Code</strong> <code>PlainSelect</code>: 동일 옵션 + DB에만 있는 그룹은 <strong><code>(현재값)</code></strong> 병합(<code>mergeLegacyGroupOption</code>).</li>
+</ul>
+<h3>4.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw new Error(\</code>GET fn_cm_code ${status}: …`)`</td>
+</tr>
+<tr>
+<td>화면</td>
+<td><code>catch</code> → <strong><code>조회 실패: …</code></strong> (그리드와 같은 <code>try</code>이면 한 번에 실패)</td>
 </tr>
 </tbody></table>
 <hr>
@@ -246,19 +239,25 @@ ul { padding-left: 1.25rem; }
 <h3>5.1 호출 코드</h3>
 <ul>
 <li><strong>함수</strong>: <code>postTbCmCode(body)</code> — <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>tbCmCodeApi.ts</code></a></li>
-<li><strong>본문</strong>: <code>buildTbCmCodePostBody</code> — <a href="../../renderer/src/lib/tbCmCodeMapper.ts"><code>tbCmCodeMapper.ts</code></a></li>
+<li><strong>본문 생성</strong>: <code>buildTbCmCodePostBody</code> — <a href="../../renderer/src/lib/tbCmCodeMapper.ts"><code>tbCmCodeMapper.ts</code></a></li>
 </ul>
 <h3>5.2 URL</h3>
 <pre><code>POST {base}/db/tb_cm_code
 Content-Type: application/json
 Accept: application/json
 </code></pre>
-<h3>5.3 클라이언트 검증(저장 전)</h3>
+<h3>5.3 호출 시점·조건</h3>
 <ul>
-<li>기존 행: <code>useDirtyCheck</code>로 변경 없으면 저장 안 함 + 배너 “변경된 항목이 없습니다.”</li>
-<li><code>code</code> 비어 있으면 mapper에서 <code>throw</code> → “저장 실패: Code는 필수입니다.”</li>
+<li>Toolbar <strong>Save</strong> / 조회줄 저장 연동 → <code>runSave</code>.</li>
+<li>기존 행: <code>useDirtyCheck</code>로 변경 없으면 저장 안 함 + 배너 <strong>「변경된 항목이 없습니다.」</strong></li>
+<li><code>code</code> 비어 있으면 mapper에서 <code>throw</code> → <strong>「저장 실패: Code는 필수입니다.」</strong></li>
 </ul>
-<h3>5.4 JSON 필드(매퍼 기준)</h3>
+<h3>5.4 클라이언트 검증</h3>
+<ul>
+<li>신규/수정 공통: <code>code</code> 필수(trim 후).</li>
+<li>기존 행 저장 시 상세 dirty 없으면 조기 return(위 배너).</li>
+</ul>
+<h3>5.5 POST JSON 필드(매퍼 기준)</h3>
 <table>
 <thead>
 <tr>
@@ -276,7 +275,7 @@ Accept: application/json
 </tr>
 <tr>
 <td><code>activated</code></td>
-<td><code>Y</code> / <code>N</code> (상세 Activity yes/no)</td>
+<td>상세 Activity yes/no → <code>Y</code> / <code>N</code></td>
 </tr>
 <tr>
 <td><code>create_date</code>, <code>created_by</code></td>
@@ -291,10 +290,6 @@ Accept: application/json
 <td>기존 유지(없으면 <code>&#39;&#39;</code>)</td>
 </tr>
 </tbody></table>
-<h3>5.5 호출 시점</h3>
-<ul>
-<li>Toolbar <strong>Save</strong>, 조회줄 저장 연동 시 <code>runSave</code>에서 1회.</li>
-</ul>
 <h3>5.6 에러</h3>
 <table>
 <thead>
@@ -304,47 +299,31 @@ Accept: application/json
 </tr>
 </thead>
 <tbody><tr>
-<td><code>!res.ok</code></td>
+<td><code>res.ok === false</code></td>
 <td><code>throw new Error(\</code>POST tb_cm_code ${status}: …`)`</td>
 </tr>
 <tr>
 <td>화면</td>
-<td><strong><code>저장 실패: …</code></strong></td>
+<td>배너 <strong><code>저장 실패: …</code></strong></td>
 </tr>
 </tbody></table>
 <hr>
 <h2>6. DELETE — <code>/db/tb_cm_code</code></h2>
-<h3>6.1 호출 코드</h3>
-<ul>
-<li><strong>함수</strong>: <code>deleteTbCmCode({ code, codeGroup })</code> — <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>tbCmCodeApi.ts</code></a></li>
-</ul>
-<h3>6.2 URL·쿼리</h3>
+<h3>6.1 URL·쿼리</h3>
 <pre><code>DELETE {base}/db/tb_cm_code?code={code}&amp;code_group={codeGroup}
 </code></pre>
 <ul>
 <li><code>code_group</code>은 <code>detail.codeGroup</code> trim 후 비어 있지 않을 때만 쿼리에 포함.</li>
 </ul>
+<h3>6.2 호출 코드</h3>
+<ul>
+<li><strong>함수</strong>: <code>deleteTbCmCode({ code, codeGroup })</code> — <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>tbCmCodeApi.ts</code></a></li>
+</ul>
 <h3>6.3 호출 시점·조건</h3>
-<table>
-<thead>
-<tr>
-<th>시점</th>
-<th>조건</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>인라인 삭제 확인 후</td>
-<td><code>deleteConfirmCode</code> 설정 뒤 확인 버튼</td>
-</tr>
-<tr>
-<td>요청 전</td>
-<td>신규 모드이거나 <code>existingCode</code> 없으면 “DB에 등록된 코드 행을…”</td>
-</tr>
-<tr>
-<td>클라이언트</td>
-<td><code>code</code> 없으면 <code>deleteTbCmCode</code>에서 <code>throw</code></td>
-</tr>
-</tbody></table>
+<ul>
+<li>인라인 삭제 확인 후 <code>executeDelete</code>.</li>
+<li>신규 모드이거나 <code>existingCode</code> 없으면 삭제 불가 배너.</li>
+</ul>
 <h3>6.4 에러</h3>
 <table>
 <thead>
@@ -354,7 +333,7 @@ Accept: application/json
 </tr>
 </thead>
 <tbody><tr>
-<td><code>!res.ok</code></td>
+<td><code>res.ok === false</code></td>
 <td><code>throw new Error(\</code>DELETE tb_cm_code ${status}: …`)`</td>
 </tr>
 <tr>
@@ -364,7 +343,6 @@ Accept: application/json
 </tbody></table>
 <hr>
 <h2>7. 테이블·응답 필드 (<code>tb_cm_code</code> 관점)</h2>
-<p>클라이언트 타입 <code>TbCmCode</code> (<a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>tbCmCodeApi.ts</code></a>) 및 API JSON.</p>
 <table>
 <thead>
 <tr>
@@ -374,39 +352,35 @@ Accept: application/json
 </thead>
 <tbody><tr>
 <td><code>code</code></td>
-<td>코드(PK 일부로 가정, 서버 규약에 따름)</td>
+<td>코드(PK 일부; 서버가 복합키면 <code>code_group</code>과 쌍)</td>
 </tr>
 <tr>
-<td><code>code_name</code></td>
-<td>코드명</td>
-</tr>
-<tr>
-<td><code>code_group</code></td>
-<td>그룹 코드</td>
+<td><code>code_name</code>, <code>code_group</code></td>
+<td></td>
 </tr>
 <tr>
 <td><code>attribute01</code> … <code>attribute05</code></td>
-<td>확장 속성</td>
+<td></td>
 </tr>
 <tr>
 <td><code>disp_seq</code></td>
-<td>표시 순서</td>
+<td>정렬·표시 순</td>
 </tr>
 <tr>
 <td><code>activated</code></td>
-<td>활성 <code>Y</code>/<code>N</code></td>
+<td>우선 사용; 없으면 <code>activity</code> 읽기 시 매퍼에서 보완</td>
 </tr>
 <tr>
 <td><code>activity</code></td>
-<td>일부 응답 호환 — 읽기 시 <code>activated</code> 우선, 없으면 <code>activity</code> (<a href="../../renderer/src/lib/tbCmCodeMapper.ts"><code>tbCmCodeMapper.ts</code></a>)</td>
+<td>레거시 호환</td>
 </tr>
 <tr>
 <td><code>description</code></td>
-<td>설명</td>
+<td></td>
 </tr>
 <tr>
 <td><code>create_date</code>, <code>created_by</code>, <code>update_date</code>, <code>updated_by</code></td>
-<td>감사 필드</td>
+<td></td>
 </tr>
 </tbody></table>
 <hr>
@@ -435,29 +409,9 @@ Accept: application/json
 <td><code>code_group</code></td>
 </tr>
 <tr>
-<td>3</td>
-<td>Attribute.01</td>
-<td><code>attribute01</code></td>
-</tr>
-<tr>
-<td>4</td>
-<td>Attribute.02</td>
-<td><code>attribute02</code></td>
-</tr>
-<tr>
-<td>5</td>
-<td>Attribute.03</td>
-<td><code>attribute03</code></td>
-</tr>
-<tr>
-<td>6</td>
-<td>Attribute.04</td>
-<td><code>attribute04</code></td>
-</tr>
-<tr>
-<td>7</td>
-<td>Attribute.05</td>
-<td><code>attribute05</code></td>
+<td>3–7</td>
+<td>Attribute.01–05</td>
+<td><code>attribute01</code>–<code>attribute05</code></td>
 </tr>
 <tr>
 <td>8</td>
@@ -467,7 +421,7 @@ Accept: application/json
 <tr>
 <td>9</td>
 <td>Activity</td>
-<td><code>activated</code>/<code>activity</code> → 그리드 <strong>Y/N</strong>, 상세 <strong>yes/no</strong></td>
+<td><code>activated</code>/<code>activity</code> → 그리드는 <code>Y</code>/<code>N</code></td>
 </tr>
 <tr>
 <td>10</td>
@@ -475,26 +429,18 @@ Accept: application/json
 <td><code>description</code></td>
 </tr>
 </tbody></table>
+<p>상세 폼은 동일 필드; Activity는 UI에서 yes/no 셀렉트 → POST 시 <code>activated</code>로 변환.</p>
 <hr>
-<h2>9. 화면 수준 동작·UX</h2>
-<ul>
-<li><strong>로딩</strong>: 조회 중 <code>loading</code> true → 조회줄에 “조회 중…” 표시.</li>
-<li><strong>배너</strong>: 성공/실패 메시지 약 3.2초 후 자동 제거.</li>
-<li><strong>정렬</strong>: <code>MesDataGridPanel</code> 내부 정렬 시 <code>onSortChange</code> → 상세·선택 초기화(데이터 재요청 없음).</li>
-<li><strong>줄 선택</strong>: 그리드 클릭 시 <code>onSelectRow</code>로 <code>CommonCodeDetail</code> 구성.</li>
-</ul>
-<hr>
-<h2>10. 보완·주의점(제안)</h2>
+<h2>9. 보완·주의점(제안)</h2>
 <ol>
-<li><strong>마운트 시 콤보·그리드 결합 실패</strong>: <code>Promise.all</code>로 한쪽만 실패해도 전체 <code>catch</code> — 필요 시 분리해 그리드만 표시하거나 콤보만 재시도.</li>
-<li><strong><code>TbCmCodeQuery.code</code> / <code>code_name__like</code></strong>: API는 지원하나 화면 미사용 — 단건 조회·이름 검색 UI가 생기면 연동 검토.</li>
-<li><strong>POST 응답 본문</strong>: 현재 성공 여부만 <code>ok</code>로 판단; 서버가 검증 오류 메시지를 JSON으로 주면 파싱해 배너에 넣을 수 있음.</li>
-<li><strong>DELETE PK 규약</strong>: 서버가 복합키를 <code>code</code>만으로는 부족하다면 <code>code_group</code> 필수 여부를 백엔드와 재확인.</li>
-<li><strong>Activity 필드</strong>: 읽기 시 <code>activated</code>와 <code>activity</code> 혼용 매핑 — DB 스키마 단일화 시 mapper 단순화 가능.</li>
-<li><strong>오프라인·타임아웃</strong>: <code>fetch</code> 기본 타임아웃 없음 — 필요 시 <code>AbortSignal</code>·재시도 정책 추가 검토.</li>
+<li><strong>마운트 시 <code>Promise.all</code></strong>: 콤보·그리드 중 하나만 실패해도 전체 <code>catch</code> — 필요 시 분리 재시도 검토.</li>
+<li><strong><code>code</code> / <code>code_name__like</code></strong>: API는 지원하나 화면 미사용 — 단건·이름 검색 UI 추가 시 연동.</li>
+<li><strong>DELETE 복합키</strong>: 서버가 <code>code</code>만으로 부족하면 <code>code_group</code> 필수 여부를 백엔드와 재확인.</li>
+<li><strong><code>activated</code> vs <code>activity</code></strong>: 읽기 시 혼용 매핑 — DB 스키마 단일화 시 mapper 단순화 가능.</li>
+<li><strong>정렬</strong>: <code>MesDataGridPanel</code> 내부 정렬 시 <code>onSortChange</code>로 상세·선택 초기화(데이터 재요청 없음).</li>
 </ol>
 <hr>
-<h2>11. 관련 소스 파일</h2>
+<h2>10. 관련 소스 파일</h2>
 <table>
 <thead>
 <tr>
@@ -520,7 +466,6 @@ Accept: application/json
 <td><code>renderer/vite.config.ts</code> (<code>proxy</code>: <code>/db</code>, <code>/func</code>)</td>
 </tr>
 </tbody></table>
-<p>서버 측 파라미터 의미·제약은 <strong>MES DB HTTP 래퍼 규약</strong>에 따른다.</p>
 
 
 </main>
