@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_base_user_permission_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_base_user_permission_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_base_user_permission_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_user_permission_mgmt.tsx"><code>renderer/src/screens/std/std_base_user_permission_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>권한 API: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>renderer/src/lib/userAuthorityApi.ts</code></a><br>공통코드: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a></p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
+<td><code>base === &#39;&#39;</code> → <strong><code>/db/...</code></strong>, <strong><code>/func/...</code></strong> 상대 경로. <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 <code>https://100.71.84.10:7443</code>에 전달.</td>
+</tr>
+<tr>
+<td><strong>프로덕션</strong></td>
+<td>기본 <code>https://100.71.84.10:7443</code> + path.</td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>https://100.71.84.10:7443/func/fn_user_authority_base?p1=MM</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>왼쪽 부서 콤보</td>
+<td>GET</td>
+<td><code>/func/fn_cm_code</code></td>
+<td><code>p1=DEPT&amp;p2=disp_seq</code></td>
+</tr>
+<tr>
+<td>왼쪽 그리드(부서별 사용자)</td>
+<td>GET</td>
+<td><code>/func/fn_cm_user_dept</code></td>
+<td><code>p1=&lt;dept&gt;</code></td>
+</tr>
+<tr>
+<td>왼쪽 아래(사용자 권한그룹)</td>
+<td>GET</td>
+<td><code>/func/fn_user_authority_userid</code></td>
+<td><code>p1=&lt;user_id&gt;</code></td>
+</tr>
+<tr>
+<td>오른쪽 권한그룹 콤보</td>
+<td>GET</td>
+<td><code>/func/fn_cm_code</code></td>
+<td><code>p1=USER_CLASS&amp;p2=disp_seq</code></td>
+</tr>
+<tr>
+<td>오른쪽 그리드(권한별 사용자)</td>
+<td>GET</td>
+<td><code>/func/fn_user_authority_base</code></td>
+<td><code>p1=&lt;user_class&gt;</code></td>
+</tr>
+<tr>
+<td>저장 테이블</td>
+<td>GET/POST/DELETE</td>
+<td><code>/db/tb_mes_user_authority</code></td>
+<td>권한 매핑 CRUD</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. GET — <code>/func/fn_cm_code?p1=DEPT&amp;p2=disp_seq</code> (왼쪽 부서 콤보)</h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(&#39;DEPT&#39;, &#39;disp_seq&#39;)</code></li>
+</ul>
+<h3>3.2 URL</h3>
+<pre><code>GET {base}/func/fn_cm_code?p1=DEPT&amp;p2=disp_seq
+</code></pre>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>화면 <strong>최초 마운트</strong></td>
+<td>항상 1회</td>
+<td><code>useEffect</code> — USER_CLASS와 <code>Promise.all</code></td>
+</tr>
+</tbody></table>
+<h3>3.4 응답·UI</h3>
+<ul>
+<li><code>{ code, code_name }</code> → <code>{ value, label }</code>. UI에서 <strong>전체</strong> 옵션(<code>value=&quot;&quot;</code>)을 맨 위에 추가.</li>
+<li>부서 선택 시 왼쪽 그리드(<code>fn_cm_user_dept</code>) 자동 재조회.</li>
+</ul>
+<h3>3.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP 오류</td>
+<td><code>throw</code> → 배너 <strong><code>콤보 로드 실패: …</code></strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. GET — <code>/func/fn_cm_user_dept?p1=&lt;dept&gt;</code> (왼쪽 가운데 그리드)</h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchCmUserDept(dept)</code></li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<pre><code>GET {base}/func/fn_cm_user_dept?p1=A030
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p1</code></td>
+<td>부서 코드(<code>DEPT</code> 코드 값)</td>
+</tr>
+</tbody></table>
+<h3>4.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>부서 콤보 <strong>변경</strong> 시</td>
+<td><code>useEffect([filterDept])</code></td>
+</tr>
+<tr>
+<td><strong>Search</strong> 버튼</td>
+<td><code>runSearch</code></td>
+</tr>
+</tbody></table>
+<h3>4.4 응답·UI</h3>
+<ul>
+<li>타입 <code>CmUserDeptRow</code>: <code>user_id</code>, <code>user_name</code>, <code>dept</code>, <code>dept_code_name</code>, <code>duty</code>, <code>duty_code_name</code></li>
+<li>그리드 4열: 사용자 ID | 사용자 이름 | 부서(<code>dept_code_name</code>) | 직급(<code>duty_code_name</code>)</li>
+</ul>
+<h3>4.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP 오류</td>
+<td>배너 <strong><code>부서 사용자 조회 실패: …</code></strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>5. GET — <code>/func/fn_user_authority_userid?p1=&lt;user_id&gt;</code> (왼쪽 아래)</h2>
+<h3>5.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchUserAuthorityOfUser(userId)</code></li>
+</ul>
+<h3>5.2 URL·쿼리</h3>
+<pre><code>GET {base}/func/fn_user_authority_userid?p1=SKJANG
+</code></pre>
+<h3>5.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>왼쪽 그리드 <strong>행 선택</strong> 시</td>
+<td><code>useEffect([selectedUser])</code></td>
+</tr>
+</tbody></table>
+<h3>5.4 응답·UI</h3>
+<ul>
+<li>타입 <code>UserAuthorityOfUser</code>: <code>user_id</code>, <code>user_class</code>, <code>code_name</code></li>
+<li>목록에 <code>code_name</code>(권한그룹 명칭)을 표시.</li>
+</ul>
+<h3>5.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP 오류</td>
+<td>배너 <strong><code>권한 조회 실패: …</code></strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. GET — <code>/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq</code> (오른쪽 권한그룹 콤보)</h2>
+<h3>6.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(&#39;USER_CLASS&#39;, &#39;disp_seq&#39;)</code></li>
+</ul>
+<h3>6.2 URL</h3>
+<pre><code>GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
+</code></pre>
+<h3>6.3 호출 시점</h3>
+<ul>
+<li>마운트 1회(DEPT와 <code>Promise.all</code> 동시).</li>
+</ul>
+<h3>6.4 응답·UI</h3>
+<ul>
+<li>18개 권한그룹 코드: <code>MM</code>(자재 관리자), <code>MS</code>(자재 구성원), <code>QM</code>(QM 관리자), <code>QS</code>(QS 구성원), <code>PM</code>(제품 관리자), <code>PS</code>(제품 구성원), <code>SM</code>(설비 관리자), <code>SS</code>(설비 구성원), <code>MTM</code>(자재단가관리 관리자), <code>MTS</code>(자재단가관리 구성원), <code>RM</code>(자료관리자), <code>IO</code>(검수 입출고원), <code>SO</code>(SMT 오퍼레이터), <code>O</code>(Operator), <code>A</code>(Admin), <code>G</code>(Guest), <code>S</code>(Super User), <code>EX_PRODUCE</code>(외주생산업체) 등.</li>
+</ul>
+<h3>6.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP 오류</td>
+<td>배너 <strong><code>콤보 로드 실패: …</code></strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. GET — <code>/func/fn_user_authority_base?p1=&lt;user_class&gt;</code> (오른쪽 그리드)</h2>
+<h3>7.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchUserAuthorityBase(userClass)</code></li>
+</ul>
+<h3>7.2 URL·쿼리</h3>
+<pre><code>GET {base}/func/fn_user_authority_base?p1=MM
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p1</code></td>
+<td><code>USER_CLASS</code> 코드 값</td>
+</tr>
+</tbody></table>
+<h3>7.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>권한그룹 콤보 <strong>변경</strong> 시</td>
+<td><code>useEffect([filterUserClass])</code></td>
+</tr>
+<tr>
+<td><strong>Search</strong> 버튼</td>
+<td><code>runSearch</code></td>
+</tr>
+</tbody></table>
+<h3>7.4 응답·UI</h3>
+<ul>
+<li>타입 <code>UserAuthorityBaseRow</code>: <code>user_id</code>, <code>user_class</code>, <code>user_name</code>, <code>dept</code>, <code>dept_code_name</code>, <code>duty</code>, <code>duty_code_name</code></li>
+<li>그리드 4열: 사용자 ID | 사용자 이름 | 부서(<code>dept_code_name</code>) | 직급(<code>duty_code_name</code>)</li>
+</ul>
+<h3>7.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP 오류</td>
+<td>배너 <strong><code>권한그룹 사용자 조회 실패: …</code></strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>8. POST / DELETE — <code>/db/tb_mes_user_authority</code></h2>
+<h3>8.1 테이블 구조</h3>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user_id</code></td>
+<td>PK 일부</td>
+</tr>
+<tr>
+<td><code>user_class</code></td>
+<td>PK 일부 — <code>USER_CLASS</code> 코드 값</td>
+</tr>
+<tr>
+<td><code>create_date</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>created_by</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>update_date</code></td>
+<td>null 가능</td>
+</tr>
+<tr>
+<td><code>updated_by</code></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3>8.2 POST (권한 추가)</h3>
+<pre><code>POST {base}/db/tb_mes_user_authority
+Content-Type: application/json
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>출처</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user_id</code></td>
+<td>왼쪽 그리드 선택 사용자</td>
+</tr>
+<tr>
+<td><code>user_class</code></td>
+<td>오른쪽 콤보 선택 권한그룹 코드</td>
+</tr>
+</tbody></table>
+<h3>8.3 DELETE (권한 제거)</h3>
+<pre><code>DELETE {base}/db/tb_mes_user_authority?user_id={id}&amp;user_class={cls}
+</code></pre>
+<h3>8.4 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP 오류</td>
+<td><code>throw</code> → 배너 표시</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>9. 그리드·UI 매핑</h2>
+<h3>왼쪽 가운데 그리드 (<code>fn_cm_user_dept</code> 응답)</h3>
+<table>
+<thead>
+<tr>
+<th>인덱스</th>
+<th>컬럼명</th>
+<th>DB 필드</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>사용자 ID</td>
+<td><code>user_id</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>사용자 이름</td>
+<td><code>user_name</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>부서</td>
+<td><code>dept_code_name</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>직급</td>
+<td><code>duty_code_name</code></td>
+</tr>
+</tbody></table>
+<h3>오른쪽 그리드 (<code>fn_user_authority_base</code> 응답)</h3>
+<table>
+<thead>
+<tr>
+<th>인덱스</th>
+<th>컬럼명</th>
+<th>DB 필드</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>사용자 ID</td>
+<td><code>user_id</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>사용자 이름</td>
+<td><code>user_name</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>부서</td>
+<td><code>dept_code_name</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>직급</td>
+<td><code>duty_code_name</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>10. 보완·주의점(제안)</h2>
+<ol>
+<li><strong>데이터 247건</strong>: <code>tb_mes_user_authority</code>에 현재 247행, 18개 <code>user_class</code>에 분포.</li>
+<li><strong>복합 PK</strong>: <code>user_id</code> + <code>user_class</code>이므로 DELETE 시 <strong>두 값 모두</strong> 필수.</li>
+<li><strong>권한복사 탭</strong>: PNG에 &quot;권한복사&quot; 탭이 보이나 현재 구현은 조회 위주 — 권한 일괄 복사 기능 추가 시 별도 POST 로직 필요.</li>
+<li><strong><code>fn_cm_user_dept</code> 전체 조회</strong>: 부서 콤보에서 &quot;전체&quot; 선택 시 빈 <code>p1</code>을 보내면 전 부서 사용자를 반환하는지 백엔드 확인 필요.</li>
+</ol>
+<hr>
+<h2>11. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>renderer/src/screens/std/std_base_user_permission_mgmt.tsx</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/userAuthorityApi.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/fnCmCodeApi.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/mesDbBaseUrl.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/vite.config.ts</code> (<code>proxy</code>: <code>/db</code>, <code>/func</code>)</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>
