@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_base_unit_process_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_base_unit_process_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_base_unit_process_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_unit_process_mgmt.tsx"><code>renderer/src/screens/std/std_base_unit_process_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>공통코드(콤보): <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions</code><br>단위 공정 그리드: <a href="../../renderer/src/lib/fnUnitProcessApi.ts"><code>renderer/src/lib/fnUnitProcessApi.ts</code></a> — <code>fetchFnUnitProcess</code><br>공통코드 그룹: 조회줄·그리드 <strong>공정</strong> <code>p1=PROCESS</code>; 그리드 <strong>포장타입</strong> <code>p1=ASSY_PACKING_UNIT</code> (<code>tb_cm_code.code_group</code> 가정)</p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
+<td><code>base === &#39;&#39;</code> → 요청은 <strong><code>/func/...</code></strong> (상대). <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 백엔드에 전달(CORS 회피).</td>
+</tr>
+<tr>
+<td><strong>프로덕션(Electron 빌드 등)</strong></td>
+<td>기본 <code>https://100.71.84.10:7443</code> + path, 또는 <code>VITE_MES_DB_API_BASE</code>.</td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>https://100.71.84.10:7443/func/fn_unit_process?p1=</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>공정 콤보(조회줄·그리드)</td>
+<td>GET</td>
+<td><code>/func/fn_cm_code</code></td>
+<td><code>p1=PROCESS</code>, <code>p2=disp_seq</code></td>
+</tr>
+<tr>
+<td>포장타입 콤보(그리드)</td>
+<td>GET</td>
+<td><code>/func/fn_cm_code</code></td>
+<td><code>p1=ASSY_PACKING_UNIT</code>, <code>p2=disp_seq</code></td>
+</tr>
+<tr>
+<td>단위 공정 그리드</td>
+<td>GET</td>
+<td><code>/func/fn_unit_process</code></td>
+<td><code>p1</code> 공정 조건(빈 값=전체)</td>
+</tr>
+</tbody></table>
+<p>이 화면은 <strong>저장·삭제 HTTP 호출 없음</strong>(<code>MesSearchSaveBar</code> <code>showFilterSave={false}</code>). 그리드 편집은 <strong>클라이언트 state</strong>만 변경.</p>
+<hr>
+<h2>3. GET — <code>/func/fn_cm_code</code> (<code>p1=PROCESS</code>)</h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(&#39;PROCESS&#39;, &#39;disp_seq&#39;)</code></li>
+<li><strong>화면</strong>: <a href="../../renderer/src/screens/std/std_base_unit_process_mgmt.tsx"><code>std_base_unit_process_mgmt.tsx</code></a> — 마운트 시 <code>useEffect</code> 1회</li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<pre><code>GET {base}/func/fn_cm_code?p1=PROCESS&amp;p2=disp_seq
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p1</code></td>
+<td><strong>항상</strong></td>
+<td><code>PROCESS</code> — <code>tb_cm_code.code_group</code> 등 서버 정의</td>
+</tr>
+<tr>
+<td><code>p2</code></td>
+<td><strong>항상</strong></td>
+<td><code>disp_seq</code> — 정렬·표시 순</td>
+</tr>
+</tbody></table>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>최초 마운트</strong></td>
+<td><code>fetchFnCmCodeOptions(&#39;PROCESS&#39;, &#39;disp_seq&#39;)</code></td>
+<td><code>useEffect</code> (빈 deps)</td>
+</tr>
+<tr>
+<td>이후</td>
+<td>자동 재호출 없음</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h3>3.4 응답 처리</h3>
+<ul>
+<li>JSON 배열 또는 래핑 객체(<code>data</code> / <code>rows</code> / <code>result</code> / <code>items</code> / <code>records</code>) 중 첫 배열.</li>
+<li>행 <code>{ code, code_name }</code> → <code>{ value: code, label: code_name }</code> (<code>rowToOption</code>). 중복 <code>value</code>는 <strong>첫 항목만</strong> 유지.</li>
+<li><strong>실패 시</strong> <code>setProcessOptions([])</code> — 그리드 공정 콤보 옵션 없음.</li>
+</ul>
+<h3>3.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw new Error(\</code>GET fn_cm_code ${status}: …`)`</td>
+</tr>
+<tr>
+<td>화면 <code>catch</code></td>
+<td><code>setProcessOptions([])</code> — <strong>배너 없음</strong>(공정 콤보만 비움)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. GET — <code>/func/fn_cm_code</code> (<code>p1=ASSY_PACKING_UNIT</code>)</h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(PACK_TYPE_CM_GROUP, &#39;disp_seq&#39;)</code><br><code>PACK_TYPE_CM_GROUP = &#39;ASSY_PACKING_UNIT&#39;</code> (화면 상수)</li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<pre><code>GET {base}/func/fn_cm_code?p1=ASSY_PACKING_UNIT&amp;p2=disp_seq
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p1</code></td>
+<td><strong>항상</strong></td>
+<td><code>ASSY_PACKING_UNIT</code> — 서버 그룹명이 다르면 화면 상수만 교체</td>
+</tr>
+<tr>
+<td><code>p2</code></td>
+<td><strong>항상</strong></td>
+<td><code>disp_seq</code></td>
+</tr>
+</tbody></table>
+<h3>4.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>최초 마운트</strong></td>
+<td>위 인자</td>
+<td><code>useEffect</code> (빈 deps)</td>
+</tr>
+<tr>
+<td>이후</td>
+<td>자동 재호출 없음</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h3>4.4 응답·UI</h3>
+<ul>
+<li><code>fetchFnCmCodeOptions</code> 동일 처리 → <code>{ value, label }[]</code>.</li>
+<li>응답 <strong>0건</strong>이면 <code>setPackTypeOptions(FALLBACK_PACK_TYPE_OPTIONS)</code> — 매거진·박스·트레이·출하(라벨 동일).</li>
+<li><strong>catch</strong> 시에도 동일 폴백.</li>
+</ul>
+<h3>4.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw</code> → <code>catch</code> → <code>FALLBACK_PACK_TYPE_OPTIONS</code></td>
+</tr>
+<tr>
+<td>네트워크 등</td>
+<td>동일 폴백</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>5. GET — <code>/func/fn_unit_process</code></h2>
+<h3>5.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnUnitProcessApi.ts"><code>fnUnitProcessApi.ts</code></a> — <code>fetchFnUnitProcess(p1)</code></li>
+</ul>
+<h3>5.2 URL·쿼리</h3>
+<p><strong>전체 조회:</strong></p>
+<pre><code>GET {base}/func/fn_unit_process?p1=
+</code></pre>
+<p><strong>공정 코드 조건(예: SMT):</strong></p>
+<pre><code>GET {base}/func/fn_unit_process?p1=SMT
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p1</code></td>
+<td><strong>항상</strong></td>
+<td>조회줄 <strong>공정</strong> <code>PlainSelect</code> 값. <strong>빈 문자열</strong> = 전체</td>
+</tr>
+</tbody></table>
+<h3>5.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>조회줄 <strong>Search</strong> 클릭</td>
+<td><code>loadGrid(processFilter)</code></td>
+<td><code>onFilterSearch</code> — <code>processFilter</code>가 <code>p1</code></td>
+</tr>
+<tr>
+<td><strong>최초 마운트</strong></td>
+<td>자동 호출 <strong>없음</strong></td>
+<td>사용자가 Search 전까지 그리드 비어 있음</td>
+</tr>
+</tbody></table>
+<h3>5.4 응답 처리</h3>
+<ul>
+<li>JSON 배열 또는 래핑 객체(<code>data</code> / <code>rows</code> / <code>result</code> / <code>items</code> / <code>records</code>) 중 첫 배열.</li>
+<li>각 행 <code>rowToGridRow</code> → <strong>8열 문자열 배열</strong> (아래 필드 표).</li>
+<li><code>p1</code>이 비어 있지 않은데 행 JSON에 공정이 비어 있으면 <strong>열0</strong>에 <code>p1</code> 보강.</li>
+</ul>
+<h3>5.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw new Error(\</code>GET fn_unit_process ${status}: …`)`</td>
+</tr>
+<tr>
+<td>화면</td>
+<td><code>setErrorMsg</code>, <code>setRawRows([])</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. 테이블·응답 필드 (<code>fn_unit_process</code> 행 객체 관점)</h2>
+<p><code>rowToGridRow</code>가 객체일 때 읽는 키(우선순위 순). 실제 DB 함수·뷰는 서버 정의.</p>
+<table>
+<thead>
+<tr>
+<th>논리 필드</th>
+<th>후보 키(일부)</th>
+<th>그리드 열</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>공정(상위 공정 코드 등)</td>
+<td><code>attribute01</code>, <code>process_code_name</code>, <code>process_cd</code>, …</td>
+<td>0</td>
+</tr>
+<tr>
+<td>단위 공정코드</td>
+<td><code>unit_process_cd</code>, <code>code</code>, <code>CODE</code>, …</td>
+<td>1</td>
+</tr>
+<tr>
+<td>단위 공정명</td>
+<td><code>unit_process_nm</code>, <code>code_name</code>, …</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Tact Time</td>
+<td><code>tact_time</code>, <code>tact_time_sec</code>, …</td>
+<td>3</td>
+</tr>
+<tr>
+<td>포장단위</td>
+<td><code>pack_unit</code>, <code>ea</code>, …</td>
+<td>4</td>
+</tr>
+<tr>
+<td>포장타입</td>
+<td><code>pack_type</code>, …</td>
+<td>5</td>
+</tr>
+<tr>
+<td>순서</td>
+<td><code>disp_seq</code>, <code>seq</code>, …</td>
+<td>6</td>
+</tr>
+<tr>
+<td>비고</td>
+<td><code>remark</code>, <code>remarks</code>, …</td>
+<td>7</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>그리드 인덱스</th>
+<th>컬럼명</th>
+<th>DB·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>공정</td>
+<td><code>PlainSelect</code> — <code>PROCESS</code> 콤보. 빈 셀은 옵션 로드 후 <strong>첫 <code>value</code>로</strong> <code>useEffect</code> 보정</td>
+</tr>
+<tr>
+<td>1</td>
+<td>단위 공정코드</td>
+<td>텍스트(읽기)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>단위 공정명</td>
+<td>텍스트(읽기)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Tact Time (Sec)</td>
+<td>텍스트(읽기)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>포장단위(E/A)</td>
+<td>텍스트(읽기)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>포장타입</td>
+<td><code>PlainSelect</code> — <code>ASSY_PACKING_UNIT</code> 콤보 + <strong>첫 항목 <code>&lt;option value=&quot;&quot;&gt;</code></strong>. 값 없음 = <strong>빈 선택</strong> 표시(공정과 다름)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>순서</td>
+<td>텍스트(읽기)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>비고</td>
+<td>텍스트(읽기)</td>
+</tr>
+</tbody></table>
+<p><strong>조회줄 필터(클라이언트):</strong> <code>appliedUnitText</code>가 비어 있지 않으면 <strong>단위 공정코드</strong> 또는 <strong>단위 공정명</strong> 열에 <strong>부분 일치</strong>(대소문자 무시). 검색 적용은 <strong>Search 클릭</strong> 시 <code>appliedUnitField</code> / <code>appliedUnitText</code> 확정 후.</p>
+<hr>
+<h2>8. 보완·주의점(제안)</h2>
+<ol>
+<li><strong>저장 미연동</strong>: 그리드 편집은 <strong>로컬 state</strong>만 변경 — 서버 반영은 별도 API·화면 필요.</li>
+<li><strong><code>fn_unit_process</code> 응답 형태</strong>: <code>UNIT_PROCESS</code> 형태 공통코드(<code>code</code>/<code>code_name</code>)와 일반 컬럼명 혼용 가능 — <code>rowToGridRow</code>가 다중 키로 흡수.</li>
+<li><strong>포장타입 코드/라벨</strong>: DB <code>pack_type</code>이 <strong>코드</strong>(<code>MAZ</code>)인지 <strong>명</strong>인지에 따라 콤보 <code>value</code>와 불일치 시 <code>resolveCmCodeSelectValue</code>·orphan <code>&lt;option&gt;</code>으로 보강.</li>
+<li><strong><code>p1</code> 필터</strong>: 서버가 <code>code_group</code> <code>ASSY_PACKING_UNIT</code>과 다른 이름을 쓰면 상수 <code>PACK_TYPE_CM_GROUP</code>만 교체.</li>
+<li><strong>조회 시점</strong>: 그리드는 <strong>Search</strong> 시에만 <code>loadGrid</code> — 공정 콤보만 바꾸고 Search 안 하면 이전 데이터 유지.</li>
+</ol>
+<hr>
+<h2>9. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>renderer/src/screens/std/std_base_unit_process_mgmt.tsx</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/fnCmCodeApi.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/fnUnitProcessApi.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/mesDbBaseUrl.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/components/MesDataGridPanel.tsx</code></td>
+</tr>
+<tr>
+<td><code>renderer/vite.config.ts</code> (<code>proxy</code>: <code>/db</code>, <code>/func</code>)</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>
