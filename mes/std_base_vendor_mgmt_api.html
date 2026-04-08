@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_base_vendor_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_base_vendor_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_base_vendor_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_vendor_mgmt.tsx"><code>renderer/src/screens/std/std_base_vendor_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>거래처 API: <a href="../../renderer/src/lib/tbCmCustomerApi.ts"><code>renderer/src/lib/tbCmCustomerApi.ts</code></a><br>매퍼: <a href="../../renderer/src/lib/tbCmCustomerMapper.ts"><code>renderer/src/lib/tbCmCustomerMapper.ts</code></a></p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
+<td><code>base === &#39;&#39;</code> → 요청은 <strong><code>/db/...</code></strong> 상대 경로. <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 백엔드 전달(CORS 회피).</td>
+</tr>
+<tr>
+<td><strong>프로덕션(Electron 빌드 등)</strong></td>
+<td>기본 <code>https://100.71.84.10:7443</code> + path, 또는 <code>VITE_MES_DB_API_BASE</code>.</td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>https://100.71.84.10:7443/db/tb_cm_customer?...</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>목록·조회</td>
+<td>GET</td>
+<td><code>/db/tb_cm_customer</code></td>
+<td>마운트 시 전체/조회줄 검색(업체명 LIKE)</td>
+</tr>
+<tr>
+<td>저장(신규/수정)</td>
+<td>POST</td>
+<td><code>/db/tb_cm_customer</code></td>
+<td>JSON body (<code>buildTbCmCustomerPostBody</code>)</td>
+</tr>
+<tr>
+<td>삭제</td>
+<td>DELETE</td>
+<td><code>/db/tb_cm_customer</code></td>
+<td>쿼리 <code>cust_code</code></td>
+</tr>
+</tbody></table>
+<p><strong>비연동(클라이언트만):</strong> 조회줄 <strong>거래형태</strong>(매출·매입·임가공·Maker)는 GET에 포함하지 않고, 응답 배열을 <code>cust_type</code> 기준으로 필터(<code>filterByDealType</code>).</p>
+<hr>
+<h2>3. GET — <code>/db/tb_cm_customer</code></h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/tbCmCustomerApi.ts"><code>tbCmCustomerApi.ts</code></a> — <code>fetchTbCmCustomers(query)</code></li>
+<li><strong>쿼리 빌드</strong>: <code>buildQuery</code> — 선택 <code>cust_code__like</code>, <code>cust_name__like</code>; <strong>항상</strong> <code>_orderBy=cust_code</code>  <ul>
+<li>이 화면의 <strong><code>runSearch</code></strong> 는 <strong><code>cust_name__like</code>만</strong> 설정(<code>cust_code__like</code> 미사용).</li>
+</ul>
+</li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<p><strong>마운트 시 전체(검색어 없음):</strong></p>
+<pre><code>GET {base}/db/tb_cm_customer?_orderBy=cust_code
+</code></pre>
+<p><strong>조회줄 Search(거래처 검색어 있음, 예: <code>경미전자</code>):</strong></p>
+<pre><code>GET {base}/db/tb_cm_customer?cust_name__like=경미전자&amp;_orderBy=cust_code
+</code></pre>
+<p>(브라우저는 한글 등을 퍼센트 인코딩함.)</p>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cust_name__like</code></td>
+<td><strong>조회(Search)</strong> 시 <code>filterVendorTextRef.current.trim()</code>이 비어 있지 않을 때만</td>
+<td>업체명 부분 일치</td>
+</tr>
+<tr>
+<td><code>cust_code__like</code></td>
+<td><strong>이 화면에서는 미전송</strong></td>
+<td>API 타입은 지원하나 <code>runSearch</code>에서 설정하지 않음</td>
+</tr>
+<tr>
+<td><code>_orderBy</code></td>
+<td><strong>항상</strong></td>
+<td><code>cust_code</code></td>
+</tr>
+</tbody></table>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>화면 <strong>최초 마운트</strong></td>
+<td><code>fetchTbCmCustomers({})</code></td>
+<td><code>useEffect</code> 1회</td>
+</tr>
+<tr>
+<td>조회줄 <strong>Search</strong> / 툴바 <strong>Search</strong></td>
+<td><code>cust_name__like</code> 선택(검색어 있을 때만) + <code>_orderBy</code></td>
+<td><code>runSearch</code></td>
+</tr>
+<tr>
+<td><strong>저장·삭제 성공</strong> 후</td>
+<td>현재 검색 조건과 동일</td>
+<td><code>runSearch()</code> 재호출</td>
+</tr>
+</tbody></table>
+<h3>3.4 응답 처리</h3>
+<ul>
+<li>JSON이 배열이 아니면 키 <code>data</code> / <code>rows</code> / <code>result</code> / <code>items</code> / <code>records</code> / <code>list</code> / <code>List</code> / <code>DATA</code> 중 <strong>첫 배열</strong>을 <code>TbCmCustomer[]</code>로 파싱.</li>
+<li><code>setSearchResult(rows)</code> 후 <code>applyRowsAfterFetch(rows, dealCol)</code>에서 거래형태 필터·첫 행 선택·상세 반영.</li>
+</ul>
+<h3>3.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw new Error(\</code>GET tb_cm_customer ${status}: …`)`</td>
+</tr>
+<tr>
+<td>화면</td>
+<td><code>catch</code> → 배너 <strong><code>조회 실패: …</code></strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. POST — <code>/db/tb_cm_customer</code></h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/tbCmCustomerApi.ts"><code>tbCmCustomerApi.ts</code></a> — <code>postTbCmCustomer(body)</code></li>
+<li><strong>본문 생성</strong>: <a href="../../renderer/src/lib/tbCmCustomerMapper.ts"><code>tbCmCustomerMapper.ts</code></a> — <code>buildTbCmCustomerPostBody({ detail, existingRow })</code></li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<pre><code>POST {base}/db/tb_cm_customer
+Content-Type: application/json
+</code></pre>
+<h3>4.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>조회줄 <strong>Save</strong> / 툴바 <strong>Save</strong></td>
+<td><code>buildTbCmCustomerPostBody</code> 결과</td>
+<td><code>runSave</code> — 업체코드 필수, 신규 시 중복 코드 검사</td>
+</tr>
+</tbody></table>
+<h3>4.4 응답·UI</h3>
+<ul>
+<li>성공 시 <code>runSearch()</code>로 목록 갱신, 배너 <strong><code>저장되었습니다.</code></strong></li>
+<li>응답 본문은 JSON 또는 텍스트로 소비 가능(화면은 추가 파싱 없음).</li>
+</ul>
+<h3>4.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw</code> → 배너 <strong><code>저장 실패: …</code></strong></td>
+</tr>
+</tbody></table>
+<h3>4.6 JSON 필드(POST body)</h3>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>출처·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cust_code</code></td>
+<td>상세 <code>detail[0]</code></td>
+</tr>
+<tr>
+<td><code>cust_name</code></td>
+<td><code>detail[1]</code></td>
+</tr>
+<tr>
+<td><code>cust_aliasname</code></td>
+<td><code>detail[2]</code></td>
+</tr>
+<tr>
+<td><code>family_flag</code></td>
+<td><code>detail[3]</code> (자회사구분)</td>
+</tr>
+<tr>
+<td><code>cust_type</code></td>
+<td><code>gridFlagsToCustType(detail, existing)</code> — 앞 4자리 매출·매입·임가공·Maker + 나머지 패딩</td>
+</tr>
+<tr>
+<td><code>bizregno</code></td>
+<td><code>detail[8]</code></td>
+</tr>
+<tr>
+<td><code>reprename</code></td>
+<td><code>detail[9]</code></td>
+</tr>
+<tr>
+<td><code>bizcond</code></td>
+<td><code>detail[10]</code></td>
+</tr>
+<tr>
+<td><code>biztype</code></td>
+<td><code>detail[11]</code></td>
+</tr>
+<tr>
+<td><code>tel_no</code></td>
+<td><code>detail[12]</code></td>
+</tr>
+<tr>
+<td><code>fax_no</code></td>
+<td><code>detail[13]</code></td>
+</tr>
+<tr>
+<td><code>staff_name</code></td>
+<td><code>detail[14]</code></td>
+</tr>
+<tr>
+<td><code>staff_mobile</code></td>
+<td><code>detail[15]</code></td>
+</tr>
+<tr>
+<td><code>attribute02</code></td>
+<td><code>detail[16]</code> — 화면 라벨 담당자 eMail</td>
+</tr>
+<tr>
+<td><code>attribute01</code></td>
+<td><code>detail[17]</code> — 화면 라벨 국내외</td>
+</tr>
+<tr>
+<td><code>addr_head</code></td>
+<td><code>detail[18]</code></td>
+</tr>
+<tr>
+<td><code>update_date</code></td>
+<td>신규 ISO 시각</td>
+</tr>
+<tr>
+<td><code>updated_by</code></td>
+<td>기존값 또는 <code>&#39;ADMIN&#39;</code></td>
+</tr>
+<tr>
+<td><code>create_date</code> / <code>created_by</code></td>
+<td>신규 시 설정, 수정 시 기존 유지</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>5. DELETE — <code>/db/tb_cm_customer</code></h2>
+<h3>5.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/tbCmCustomerApi.ts"><code>tbCmCustomerApi.ts</code></a> — <code>deleteTbCmCustomer(custCode)</code></li>
+</ul>
+<h3>5.2 URL·쿼리</h3>
+<pre><code>DELETE {base}/db/tb_cm_customer?cust_code=&lt;업체코드&gt;
+</code></pre>
+<h3>5.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>삭제 확인 후 <strong>삭제</strong> 버튼</td>
+<td><code>deleteConfirmCode</code></td>
+<td><code>executeDelete</code> — DB 행 선택·신규 모드 아님</td>
+</tr>
+</tbody></table>
+<h3>5.4 응답·UI</h3>
+<ul>
+<li>성공 시 <code>runSearch()</code>, 배너 <strong><code>삭제되었습니다.</code></strong></li>
+</ul>
+<h3>5.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw</code> → 배너 <strong><code>삭제 실패: …</code></strong>, 확인 UI 닫힘</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. 테이블·응답 필드 (<code>TbCmCustomer</code> / <code>tb_cm_customer</code> 연동)</h2>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cust_code</code></td>
+<td>PK, 필수</td>
+</tr>
+<tr>
+<td><code>cust_name</code></td>
+<td>업체명</td>
+</tr>
+<tr>
+<td><code>cust_aliasname</code></td>
+<td>예명</td>
+</tr>
+<tr>
+<td><code>family_flag</code></td>
+<td>자회사 구분 등</td>
+</tr>
+<tr>
+<td><code>cust_type</code></td>
+<td>10자리 내역 — 1~4번째 자리: 매출·매입·임가공·Maker</td>
+</tr>
+<tr>
+<td><code>bizregno</code></td>
+<td>사업자번호</td>
+</tr>
+<tr>
+<td><code>reprename</code></td>
+<td>대표자</td>
+</tr>
+<tr>
+<td><code>bizcond</code></td>
+<td>업종</td>
+</tr>
+<tr>
+<td><code>biztype</code></td>
+<td>업태</td>
+</tr>
+<tr>
+<td><code>tel_no</code></td>
+<td>전화</td>
+</tr>
+<tr>
+<td><code>fax_no</code></td>
+<td>FAX</td>
+</tr>
+<tr>
+<td><code>staff_name</code></td>
+<td>담당자</td>
+</tr>
+<tr>
+<td><code>staff_mobile</code></td>
+<td>담당자 전화</td>
+</tr>
+<tr>
+<td><code>attribute01</code></td>
+<td>국내외(화면 매핑)</td>
+</tr>
+<tr>
+<td><code>attribute02</code></td>
+<td>담당자 eMail(화면 매핑)</td>
+</tr>
+<tr>
+<td><code>addr_head</code></td>
+<td>주소</td>
+</tr>
+<tr>
+<td><code>create_date</code> / <code>created_by</code> / <code>update_date</code> / <code>updated_by</code></td>
+<td>감사 필드(POST에서 일부 설정)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>그리드 인덱스</th>
+<th>컬럼명</th>
+<th>DB·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>업체코드</td>
+<td><code>cust_code</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>업체명</td>
+<td><code>cust_name</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>예명</td>
+<td><code>cust_aliasname</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>자회사</td>
+<td><code>family_flag</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>매출</td>
+<td><code>cust_type</code> 1번째 자리 → 체크박스 표시</td>
+</tr>
+<tr>
+<td>5</td>
+<td>매입</td>
+<td><code>cust_type</code> 2번째 자리</td>
+</tr>
+<tr>
+<td>6</td>
+<td>임가공</td>
+<td><code>cust_type</code> 3번째 자리</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Maker</td>
+<td><code>cust_type</code> 4번째 자리</td>
+</tr>
+<tr>
+<td>8</td>
+<td>사업자번호</td>
+<td><code>bizregno</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>대표자</td>
+<td><code>reprename</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td>업종</td>
+<td><code>bizcond</code></td>
+</tr>
+<tr>
+<td>11</td>
+<td>업태</td>
+<td><code>biztype</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td>전화</td>
+<td><code>tel_no</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td>FAX</td>
+<td><code>fax_no</code></td>
+</tr>
+<tr>
+<td>14</td>
+<td>담당자</td>
+<td><code>staff_name</code></td>
+</tr>
+<tr>
+<td>15</td>
+<td>담당자전화</td>
+<td><code>staff_mobile</code></td>
+</tr>
+<tr>
+<td>16</td>
+<td>담당자eMail</td>
+<td><code>attribute02</code></td>
+</tr>
+<tr>
+<td>17</td>
+<td>국내외</td>
+<td><code>attribute01</code> (표시용 <code>국내</code>/<code>국외</code> 변환은 매퍼·화면 로직)</td>
+</tr>
+<tr>
+<td>18</td>
+<td>주소</td>
+<td><code>addr_head</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>8. 보완·주의점(제안)</h2>
+<ol>
+<li><strong>거래형태 필터</strong>는 서버가 아닌 <strong>클라이언트</strong>만 적용 — 대량 데이터 시 전체 GET 후 필터하면 비효율일 수 있음. 필요 시 백엔드에 <code>cust_type</code> 조건 검토.</li>
+<li><strong><code>cust_type</code></strong>: <code>gridFlagsToCustType</code>이 기존 10자 유지 시 <strong>5~10번째 자리</strong>는 편집하지 않고 유지.</li>
+<li><strong>삭제/저장 권한</strong>은 API·DB 측 정책에 따름 — 화면은 HTTP 에러 메시지 표시.</li>
+<li>조회줄 검색은 <strong><code>cust_name__like</code>만</strong> 전달 — <strong>업체코드만</strong>으로 찾으려면 API·화면 확장 필요.</li>
+</ol>
+<hr>
+<h2>9. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../../renderer/src/screens/std/std_base_vendor_mgmt.tsx"><code>renderer/src/screens/std/std_base_vendor_mgmt.tsx</code></a></td>
+<td>화면·조회/저장/삭제·거래형태 클라이언트 필터</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/tbCmCustomerApi.ts"><code>renderer/src/lib/tbCmCustomerApi.ts</code></a></td>
+<td>GET/POST/DELETE</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/tbCmCustomerMapper.ts"><code>renderer/src/lib/tbCmCustomerMapper.ts</code></a></td>
+<td>행 매핑·POST body·<code>cust_type</code> ↔ 그리드 4열</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a></td>
+<td>베이스 URL</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>
