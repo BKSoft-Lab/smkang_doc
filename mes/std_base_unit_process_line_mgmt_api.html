@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_base_unit_process_line_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_base_unit_process_line_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_base_unit_process_line_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_unit_process_line_mgmt.tsx"><code>renderer/src/screens/std/std_base_unit_process_line_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>공통코드(콤보): <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions</code><br>단위공정 라인 그리드: <a href="../../renderer/src/lib/fnUnitProcessLineApi.ts"><code>renderer/src/lib/fnUnitProcessLineApi.ts</code></a> — <code>fetchFnUnitProcessLine</code><br>공통코드 원본(논리): <code>GET /db/tb_cm_code</code> — <code>tb_cm_code</code>; 조회줄 콤보는 <strong><code>fn_cm_code</code></strong> 로 <code>UNIT_PROCESS</code> 그룹</p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
+<td><code>base === &#39;&#39;</code> → 요청은 <strong><code>/func/...</code></strong> (상대). <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 백엔드에 전달(CORS 회피).</td>
+</tr>
+<tr>
+<td><strong>프로덕션(Electron 빌드 등)</strong></td>
+<td>기본 <code>https://100.71.84.10:7443</code> + path, 또는 <code>VITE_MES_DB_API_BASE</code>.</td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>https://100.71.84.10:7443/func/fn_unit_process_line?p1=</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>단위공정 콤보(조회줄)</td>
+<td>GET</td>
+<td><code>/func/fn_cm_code</code></td>
+<td><code>p1=UNIT_PROCESS</code>, <code>p2=disp_seq</code></td>
+</tr>
+<tr>
+<td>단위공정 라인 그리드</td>
+<td>GET</td>
+<td><code>/func/fn_unit_process_line</code></td>
+<td><code>p1</code> 빈 값=전체; <code>p1=&lt;코드&gt;</code>=단위공정 조건</td>
+</tr>
+</tbody></table>
+<p>이 화면은 <strong>저장·삭제 HTTP 호출 없음</strong>(<code>showFilterSave={false}</code>). 그리드는 <strong>읽기 전용</strong> 표시.</p>
+<hr>
+<h2>3. GET — <code>/func/fn_cm_code</code> (<code>p1=UNIT_PROCESS</code>)</h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(&#39;UNIT_PROCESS&#39;, &#39;disp_seq&#39;)</code></li>
+<li><strong>화면</strong>: <a href="../../renderer/src/screens/std/std_base_unit_process_line_mgmt.tsx"><code>std_base_unit_process_line_mgmt.tsx</code></a> — 마운트 시 <code>useEffect</code> 1회</li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<pre><code>GET {base}/func/fn_cm_code?p1=UNIT_PROCESS&amp;p2=disp_seq
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p1</code></td>
+<td><strong>항상</strong></td>
+<td><code>UNIT_PROCESS</code> — <code>tb_cm_code.code_group</code> 등 서버 정의</td>
+</tr>
+<tr>
+<td><code>p2</code></td>
+<td><strong>항상</strong></td>
+<td><code>disp_seq</code></td>
+</tr>
+</tbody></table>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>최초 마운트</strong></td>
+<td>위 인자</td>
+<td><code>useEffect</code> (빈 deps)</td>
+</tr>
+<tr>
+<td>이후</td>
+<td>자동 재호출 없음</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h3>3.4 응답 처리</h3>
+<ul>
+<li>JSON 배열 또는 래핑 객체(<code>data</code> / <code>rows</code> / <code>result</code> / <code>items</code> / <code>records</code> / <code>list</code> 등) 중 첫 배열.</li>
+<li>행 <code>{ code, code_name }</code> → <code>{ value, label }</code> (<code>rowToOption</code>).</li>
+<li><strong>실패 시</strong> <code>setUnitProcessOptions([])</code>.</li>
+</ul>
+<h3>3.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw</code> → <code>catch</code> → <code>setUnitProcessOptions([])</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. GET — <code>/func/fn_unit_process_line</code></h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnUnitProcessLineApi.ts"><code>fnUnitProcessLineApi.ts</code></a> — <code>fetchFnUnitProcessLine(p1)</code></li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<p><strong>전체(빈 <code>p1</code>):</strong></p>
+<pre><code>GET {base}/func/fn_unit_process_line?p1=
+</code></pre>
+<ul>
+<li>클라이언트는 먼저 위 URL을 호출하고, <strong>파싱 후 행이 0건</strong>이면 <strong>쿼리 없이</strong> <code>GET {base}/func/fn_unit_process_line</code> 를 한 번 더 시도한다.</li>
+</ul>
+<p><strong>단위공정 코드 조건(예: FCT):</strong></p>
+<pre><code>GET {base}/func/fn_unit_process_line?p1=FCT
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p1</code></td>
+<td><strong>항상</strong>(<code>URLSearchParams</code>)</td>
+<td>조회줄 <strong>단위공정</strong> <code>PlainSelect</code> 값. <strong>빈 문자열</strong> = 전체</td>
+</tr>
+</tbody></table>
+<h3>4.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>최초 마운트</strong></td>
+<td><code>loadGrid(&#39;&#39;)</code></td>
+<td><code>useEffect</code> — 전체 조회 1회</td>
+</tr>
+<tr>
+<td>조회줄 <strong>Search</strong></td>
+<td><code>loadGrid(unitProcessFilter)</code></td>
+<td><code>onFilterSearch</code></td>
+</tr>
+<tr>
+<td>콤보만 변경</td>
+<td>—</td>
+<td><strong>자동 조회 없음</strong></td>
+</tr>
+</tbody></table>
+<h3>4.4 응답 처리</h3>
+<ul>
+<li>JSON 배열 또는 래핑 객체 내 첫 배열; 객체 안 <strong>임의 키의 배열 값</strong>도 탐색.</li>
+<li>각 행 <code>rowToGridRow</code> → <strong>6열 문자열 배열</strong> (아래 §6).</li>
+<li>응답이 <strong>객체 배열</strong>이면 우선 필드명으로 매핑; <strong>배열의 배열</strong>이면 인덱스 0~5로 자름.</li>
+</ul>
+<h3>4.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw new Error(\</code>GET fn_unit_process_line ${status}: …`)`</td>
+</tr>
+<tr>
+<td>화면</td>
+<td><code>setErrorMsg</code>, <code>setRawRows([])</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>5. 테이블·응답 필드 (<code>fn_unit_process_line</code> 행 객체 관점)</h2>
+<p>객체 응답 시 <strong>우선</strong> 사용하는 키(그 다음 레거시·별명 키는 <code>rowToGridRow</code> 참고).</p>
+<table>
+<thead>
+<tr>
+<th>논리 필드</th>
+<th>우선 키</th>
+<th>그리드 열</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>단위공정</td>
+<td><code>unit_process_name</code></td>
+<td>0</td>
+</tr>
+<tr>
+<td>단위공정 라인코드</td>
+<td><code>code</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td>단위공정 라인명</td>
+<td><code>code_name</code></td>
+<td>2</td>
+</tr>
+<tr>
+<td>공정</td>
+<td><code>attribute04</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td>공정라인</td>
+<td><code>line_code_name</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td>비고</td>
+<td><code>attribute05</code></td>
+<td>5</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. 그리드·UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>그리드 인덱스</th>
+<th>컬럼명</th>
+<th>DB·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>단위공정</td>
+<td>객체: <code>unit_process_name</code> 우선</td>
+</tr>
+<tr>
+<td>1</td>
+<td>단위공정 라인코드</td>
+<td><code>code</code> 우선</td>
+</tr>
+<tr>
+<td>2</td>
+<td>단위공정 라인명</td>
+<td><code>code_name</code> 우선</td>
+</tr>
+<tr>
+<td>3</td>
+<td>공정</td>
+<td><code>attribute04</code> 우선</td>
+</tr>
+<tr>
+<td>4</td>
+<td>공정라인</td>
+<td><code>line_code_name</code> 우선</td>
+</tr>
+<tr>
+<td>5</td>
+<td>비고</td>
+<td><code>attribute05</code> 우선</td>
+</tr>
+</tbody></table>
+<p><strong>조회줄</strong>: <strong>단위공정</strong> 콤보(<code>전체</code> + <code>UNIT_PROCESS</code> 옵션) — 그리드 필터는 <strong><code>p1</code></strong> 로만 전달(클라이언트 텍스트 필터 없음).</p>
+<hr>
+<h2>7. 보완·주의점(제안)</h2>
+<ol>
+<li><strong><code>MesDataGridPanel</code></strong>: 데이터 열이 모두 빈 문자열이면 행이 <strong>렌더에서 제외</strong>됨 — API 키와 매핑 불일치 시 빈 그리드로 보일 수 있음.</li>
+<li><strong>전체 조회 0건 시 재시도</strong>: <code>?p1=</code> 후 빈 배열이면 <strong>쿼리 없는</strong> URL로 재호출 — 백엔드가 둘 중 하나만 지원할 수 있음.</li>
+<li><strong>배열 행 응답</strong>: 객체가 아닌 <code>[[...],...]</code> 이면 <strong>필드명 매핑 없이</strong> 열 순서만 사용.</li>
+<li><strong>저장 없음</strong>: 편집·POST 연동은 없음.</li>
+</ol>
+<hr>
+<h2>8. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>renderer/src/screens/std/std_base_unit_process_line_mgmt.tsx</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/fnCmCodeApi.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/fnUnitProcessLineApi.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/mesDbBaseUrl.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/components/MesDataGridPanel.tsx</code></td>
+</tr>
+<tr>
+<td><code>renderer/vite.config.ts</code> (<code>proxy</code>: <code>/db</code>, <code>/func</code>)</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>
