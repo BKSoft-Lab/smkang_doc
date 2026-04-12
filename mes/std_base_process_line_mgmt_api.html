@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_base_process_line_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_base_process_line_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_base_process_line_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_process_line_mgmt.tsx"><code>renderer/src/screens/std/std_base_process_line_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code><br>LINE 마스터 API: <a href="../../renderer/src/lib/lineMasterApi.ts"><code>renderer/src/lib/lineMasterApi.ts</code></a> — <code>fetchLineMasterLines</code>, <code>postLineMasterRow</code>, <code>deleteLineMasterCode</code><br>공정 콤보: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(&#39;PROCESS&#39;, &#39;disp_seq&#39;)</code><br>대표 단위공정 콤보: <a href="../../renderer/src/lib/fnUnitProcessApi.ts"><code>renderer/src/lib/fnUnitProcessApi.ts</code></a> — <code>fetchFnUnitProcess(p1)</code> (<code>GET /api/fn-unit-process</code>)<br>BE 진입: <a href="../../server/src/routes/byScreen/std_base_process_line_mgmt.mjs"><code>server/src/routes/byScreen/std_base_process_line_mgmt.mjs</code></a> — <a href="../../server/src/lib/queries/lineCodeMes.mjs"><code>lineCodeMes.mjs</code></a> — <code>GET</code>/<code>POST</code>/<code>DELETE</code> <strong><code>/api/line-codes</code></strong><br>PNG: <a href="../image/std_base_process_line_mgmt.png"><code>docs/image/std_base_process_line_mgmt.png</code></a><br>레거시: <a href="../legacy_mes/Basis/_2S_MES_Basis/frmProcessLineMng.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmProcessLineMng.cs</code></a> — <code>V_MES_PROCESS_LINE</code> 조회·<code>TB_CM_CODE</code> LINE 저장  </p>
+<p><strong>참고</strong>: 라인별 <strong>단위공정라인 순서</strong>(<code>tb_mes_process_line</code>)는 <a href="../../server/src/lib/queries/processLineMes.mjs"><code>processLineMes.mjs</code></a> — 본 화면 주 기능과 별개.</p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vite dev</strong></td>
+<td>상대 <strong><code>/api/...</code></strong> → <a href="../../renderer/vite.config.ts"><code>vite.config.ts</code></a> 프록시 → STD BE(기본 <code>http://localhost:8787</code>).</td>
+</tr>
+<tr>
+<td><strong>Electron</strong></td>
+<td><code>USER_MGMT_API_BASE</code> 등으로 주입된 베이스 + path.</td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>http://localhost:8787/api/line-codes?process=SMT</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>공정 콤보(조회줄·그리드)</td>
+<td>GET</td>
+<td><code>/api/fn-cm-code</code></td>
+<td><code>p1=PROCESS</code>, <code>p2=disp_seq</code> — 마운트 시</td>
+</tr>
+<tr>
+<td>LINE 목록</td>
+<td>GET</td>
+<td><code>/api/line-codes</code></td>
+<td><code>tb_cm_code</code> <code>LINE</code> — 조회줄 공정 필터</td>
+</tr>
+<tr>
+<td>LINE 저장</td>
+<td>POST</td>
+<td><code>/api/line-codes</code></td>
+<td>행 단위 INSERT/UPDATE</td>
+</tr>
+<tr>
+<td>LINE 삭제</td>
+<td>DELETE</td>
+<td><code>/api/line-codes</code></td>
+<td><code>?code=</code></td>
+</tr>
+<tr>
+<td>단위공정 목록(행별 콤보)</td>
+<td>GET</td>
+<td><code>/api/fn-unit-process</code></td>
+<td><code>p1=&lt;공정코드&gt;</code> — <code>attribute01 LIKE p1%</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. GET — <code>/api/fn-cm-code</code> (<code>p1=PROCESS</code>)</h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(&#39;PROCESS&#39;, &#39;disp_seq&#39;)</code></li>
+<li><strong>화면</strong>: 마운트 시 <code>useEffect</code> 1회 — 조회줄·그리드 <strong>공정</strong> 콤보</li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/fn-cm-code?p1=PROCESS&amp;p2=disp_seq
+</code></pre>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>최초 마운트</strong></td>
+<td>위 인자</td>
+<td><code>useEffect</code></td>
+</tr>
+</tbody></table>
+<h3>3.4 응답 처리</h3>
+<ul>
+<li><code>{ value, label }[]</code> → 조회줄·그리드 공정 <code>PlainSelect</code></li>
+</ul>
+<h3>3.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>실패</td>
+<td><code>setProcessOptions([])</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. GET — <code>/api/line-codes</code></h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/lineMasterApi.ts"><code>lineMasterApi.ts</code></a> — <code>fetchLineMasterLines(process?)</code></li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<p><strong>전체:</strong></p>
+<pre><code>GET {base}/api/line-codes
+</code></pre>
+<p><strong>공정 필터:</strong></p>
+<pre><code>GET {base}/api/line-codes?process=&lt;공정코드&gt;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>process</code></td>
+<td><strong>빈 값·<code>ALL</code> 아님</strong></td>
+<td><code>attribute01 = $1</code> <strong>또는</strong> <code>attribute02 = $1</code>(이관 데이터 호환)</td>
+</tr>
+</tbody></table>
+<h3>4.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>마운트</strong></td>
+<td>조회줄 공정(<code>processFilter</code>)</td>
+<td><code>useEffect</code> → <code>loadGrid</code></td>
+</tr>
+<tr>
+<td><strong>Search</strong></td>
+<td>동일</td>
+<td><code>onFilterSearch</code> / 툴바 Search</td>
+</tr>
+</tbody></table>
+<h3>4.4 응답 처리</h3>
+<ul>
+<li>행: <code>line_code</code>, <code>line_name</code>, <code>process</code>, <code>std_unit_process</code>, <code>prod_plan_yn</code>, <code>auto_client_yn</code>, <code>process_code</code>(=공정·<code>attribute01</code>), <code>code_desc</code> → 그리드 7열</li>
+<li>단위공정 콤보용: 응답에 등장하는 <strong>공정</strong> 값마다 <code>GET /api/fn-unit-process</code> 프리패치</li>
+</ul>
+<h3>4.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td>배너 메시지, 그리드 비움</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>5. POST — <code>/api/line-codes</code></h2>
+<h3>5.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/lineMasterApi.ts"><code>lineMasterApi.ts</code></a> — <code>postLineMasterRow</code></li>
+<li><strong>화면</strong>: 툴바/조회줄 <strong>Save</strong> — 그리드에 값이 있는 <strong>모든 행</strong> 순차 POST</li>
+</ul>
+<h3>5.2 URL·바디</h3>
+<pre><code>POST {base}/api/line-codes
+Content-Type: application/json
+</code></pre>
+<h3>5.3 JSON 필드</h3>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>출처·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>code</code></td>
+<td>라인코드(필수)</td>
+</tr>
+<tr>
+<td><code>code_name</code></td>
+<td>라인명(필수)</td>
+</tr>
+<tr>
+<td><code>process</code> 또는 <code>process_code</code></td>
+<td>공정 → <code>attribute01</code></td>
+</tr>
+<tr>
+<td><code>std_unit_process</code></td>
+<td>대표 단위공정 → <code>attribute02</code></td>
+</tr>
+<tr>
+<td><code>prod_plan_yn</code></td>
+<td>생산계획 Y/N → <code>attribute03</code></td>
+</tr>
+<tr>
+<td><code>auto_client_yn</code></td>
+<td>수율실적(레거시 <code>AUTO_CLIENT_YN</code>) → <code>attribute04</code></td>
+</tr>
+<tr>
+<td><code>code_desc</code></td>
+<td>비고</td>
+</tr>
+<tr>
+<td><code>created_by</code></td>
+<td>(선택)</td>
+</tr>
+</tbody></table>
+<h3>5.4 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Save</strong></td>
+<td>라인코드 비어 있으면 클라이언트에서 차단</td>
+<td><code>runSave</code></td>
+</tr>
+</tbody></table>
+<h3>5.5 응답 처리</h3>
+<ul>
+<li><code>{ ok: true }</code> → 성공 배너 → <code>loadGrid</code> 재조회</li>
+</ul>
+<h3>5.6 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400 <code>code와 code_name은 필수</code></td>
+<td>배너</td>
+</tr>
+<tr>
+<td>500</td>
+<td><code>friendlyPgError</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. DELETE — <code>/api/line-codes</code></h2>
+<h3>6.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/lineMasterApi.ts"><code>lineMasterApi.ts</code></a> — <code>deleteLineMasterCode(code)</code></li>
+</ul>
+<h3>6.2 URL·쿼리</h3>
+<pre><code>DELETE {base}/api/line-codes?code=&lt;라인코드&gt;
+</code></pre>
+<h3>6.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Delete</strong></td>
+<td>라인코드 있음 — <code>window.confirm</code> 후</td>
+<td>툴바 Delete</td>
+</tr>
+<tr>
+<td><strong>미저장 신규 행</strong></td>
+<td>라인코드 없음</td>
+<td>그리드에서 행만 제거</td>
+</tr>
+</tbody></table>
+<h3>6.4 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>404</td>
+<td>배너</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. GET — <code>/api/fn-unit-process</code></h2>
+<h3>7.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnUnitProcessApi.ts"><code>fnUnitProcessApi.ts</code></a> — <code>fetchFnUnitProcess(p1)</code></li>
+</ul>
+<h3>7.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/fn-unit-process?p1=&lt;공정코드&gt;
+</code></pre>
+<h3>7.3 응답 처리</h3>
+<ul>
+<li>그리드 행 → <code>code</code>(단위공정코드), <code>code_name</code> → <strong>대표 단위공정</strong> <code>PlainSelect</code> 옵션(공정별 캐시)</li>
+</ul>
+<hr>
+<h2>8. 테이블·응답 필드 (<code>tb_cm_code</code> <code>LINE</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>code</code></td>
+<td>라인코드</td>
+</tr>
+<tr>
+<td><code>code_name</code></td>
+<td>라인명</td>
+</tr>
+<tr>
+<td><code>attribute01</code></td>
+<td>공정(PROCESS)</td>
+</tr>
+<tr>
+<td><code>attribute02</code></td>
+<td>대표 단위공정(STD_UNIT_PROCESS)</td>
+</tr>
+<tr>
+<td><code>attribute03</code></td>
+<td>생산계획 Y/N</td>
+</tr>
+<tr>
+<td><code>attribute04</code></td>
+<td>수율실적(AUTO_CLIENT_YN)</td>
+</tr>
+<tr>
+<td><code>code_desc</code></td>
+<td>비고</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>9. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>그리드 인덱스</th>
+<th>컬럼명</th>
+<th>DB·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>라인코드</td>
+<td><code>code</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>라인명</td>
+<td><code>code_name</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>공정</td>
+<td><code>attribute01</code> — PROCESS 콤보</td>
+</tr>
+<tr>
+<td>3</td>
+<td>대표 단위공정</td>
+<td><code>attribute02</code> — <code>fn-unit-process</code> 옵션</td>
+</tr>
+<tr>
+<td>4</td>
+<td>생산계획</td>
+<td><code>attribute03</code> — Y/N</td>
+</tr>
+<tr>
+<td>5</td>
+<td>수율실적</td>
+<td><code>attribute04</code> — Y/N</td>
+</tr>
+<tr>
+<td>6</td>
+<td>비고</td>
+<td><code>code_desc</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>10. 보완·주의점(제안)</h2>
+<ol>
+<li><strong><code>processLineMes.mjs</code></strong>(<code>save-for-line</code> 등)는 <strong>공정라인 순서</strong>용 — 본 화면과 혼동하지 말 것.</li>
+<li>공정 필터·이관 데이터: <code>GET</code>은 <code>attribute01</code> 또는 <code>attribute02</code>가 공정과 같을 때 매칭한다.</li>
+<li>저장 시 <strong>라인코드·라인명</strong> 필수 — 빈 라인코드 행은 저장 불가.</li>
+</ol>
+<hr>
+<h2>11. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일 (경로)</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../../renderer/src/screens/std/std_base_process_line_mgmt.tsx"><code>renderer/src/screens/std/std_base_process_line_mgmt.tsx</code></a></td>
+<td>화면</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/lineMasterApi.ts"><code>renderer/src/lib/lineMasterApi.ts</code></a></td>
+<td>HTTP 래퍼</td>
+</tr>
+<tr>
+<td><a href="../../server/src/routes/byScreen/std_base_process_line_mgmt.mjs"><code>server/src/routes/byScreen/std_base_process_line_mgmt.mjs</code></a></td>
+<td><code>byScreen</code> 진입</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/lineCodeMes.mjs"><code>server/src/lib/queries/lineCodeMes.mjs</code></a></td>
+<td>BE</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/fnMesStd.mjs"><code>server/src/lib/queries/fnMesStd.mjs</code></a></td>
+<td><code>fn-unit-process</code></td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/screens/std/registry.ts"><code>renderer/src/screens/std/registry.ts</code></a></td>
+<td>레지스트리</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>

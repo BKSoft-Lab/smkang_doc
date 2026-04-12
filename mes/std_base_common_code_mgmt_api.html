@@ -27,7 +27,7 @@ ul { padding-left: 1.25rem; }
 <body>
 <main class="wrap">
 <h1>std_base_common_code_mgmt — DB·HTTP API 상세 정리</h1>
-<p>화면 ID: <code>std_base_common_code_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_common_code_mgmt.tsx"><code>renderer/src/screens/std/std_base_common_code_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>공통코드 API: <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>renderer/src/lib/tbCmCodeApi.ts</code></a><br>매퍼: <a href="../../renderer/src/lib/tbCmCodeMapper.ts"><code>renderer/src/lib/tbCmCodeMapper.ts</code></a><br>함수 조회: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a></p>
+<p>화면 ID: <code>std_base_common_code_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_common_code_mgmt.tsx"><code>renderer/src/screens/std/std_base_common_code_mgmt.tsx</code></a><br>BE 베이스: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> — <strong><code>/api/tb-cm-code</code></strong>, <strong><code>/api/fn-cm-code</code></strong> (STD BE, 기본 포트 8787)<br>공통코드 API: <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>renderer/src/lib/tbCmCodeApi.ts</code></a><br>매퍼: <a href="../../renderer/src/lib/tbCmCodeMapper.ts"><code>renderer/src/lib/tbCmCodeMapper.ts</code></a><br>함수 조회: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a><br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmCommonCode.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmCommonCode.cs</code></a></p>
 <hr>
 <h2>1. 베이스 URL·환경</h2>
 <table>
@@ -38,16 +38,16 @@ ul { padding-left: 1.25rem; }
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
-<td><code>base === &#39;&#39;</code> → 요청은 <strong><code>/db/...</code></strong>, <strong><code>/func/...</code></strong> (상대). <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 <code>https://100.71.84.10:7443</code>에 전달(CORS 회피).</td>
+<td><strong>Vite dev</strong></td>
+<td>상대 <strong><code>/api/...</code></strong> → <a href="../../renderer/vite.config.ts"><code>vite.config.ts</code></a> 프록시 → STD BE(기본 <code>http://localhost:8787</code>).</td>
 </tr>
 <tr>
-<td><strong>프로덕션(Electron 빌드 등)</strong></td>
-<td>기본 <code>https://100.71.84.10:7443</code> + path, 또는 <code>VITE_MES_DB_API_BASE</code>로 지정한 베이스.</td>
+<td><strong>Electron</strong></td>
+<td><code>USER_MGMT_API_BASE</code> 등 IPC·INI 주입 베이스 + path.</td>
 </tr>
 <tr>
 <td><strong>절대 URL 예</strong></td>
-<td><code>https://100.71.84.10:7443/db/tb_cm_code?...</code></td>
+<td><code>http://localhost:8787/api/tb-cm-code?...</code></td>
 </tr>
 </tbody></table>
 <hr>
@@ -64,30 +64,30 @@ ul { padding-left: 1.25rem; }
 <tbody><tr>
 <td>그리드·목록</td>
 <td>GET</td>
-<td><code>/db/tb_cm_code</code></td>
+<td><code>/api/tb-cm-code</code></td>
 <td>공통코드 행 목록</td>
 </tr>
 <tr>
 <td>상단 Group Code 콤보</td>
 <td>GET</td>
-<td><code>/func/fn_cm_code</code></td>
+<td><code>/api/fn-cm-code</code></td>
 <td><code>p1=GROUPCODE</code>, <code>p2=code_name</code></td>
 </tr>
 <tr>
 <td>저장(신규/수정)</td>
 <td>POST</td>
-<td><code>/db/tb_cm_code</code></td>
+<td><code>/api/tb-cm-code</code></td>
 <td>JSON body (<code>buildTbCmCodePostBody</code>)</td>
 </tr>
 <tr>
 <td>삭제</td>
 <td>DELETE</td>
-<td><code>/db/tb_cm_code</code></td>
+<td><code>/api/tb-cm-code</code></td>
 <td>쿼리 <code>code</code>, 선택 <code>code_group</code></td>
 </tr>
 </tbody></table>
 <hr>
-<h2>3. GET — <code>/db/tb_cm_code</code></h2>
+<h2>3. GET — <code>/api/tb-cm-code</code></h2>
 <h3>3.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>tbCmCodeApi.ts</code></a> — <code>fetchTbCmCodes(query)</code></li>
@@ -95,10 +95,10 @@ ul { padding-left: 1.25rem; }
 </ul>
 <h3>3.2 URL·쿼리</h3>
 <p><strong>전체(첫 화면):</strong></p>
-<pre><code>GET {base}/db/tb_cm_code?code_group__like=&amp;_orderBy=disp_seq
+<pre><code>GET {base}/api/tb-cm-code?code_group__like=&amp;_orderBy=disp_seq
 </code></pre>
 <p><strong>그룹 필터(예: DEPT):</strong></p>
-<pre><code>GET {base}/db/tb_cm_code?code_group__like=DEPT&amp;_orderBy=disp_seq
+<pre><code>GET {base}/api/tb-cm-code?code_group__like=DEPT&amp;_orderBy=disp_seq
 </code></pre>
 <p>(<code>code_group__like</code> 키는 <strong>항상</strong> 전송; 값이 비어 있으면 전체 조회 의미.)</p>
 <table>
@@ -183,13 +183,13 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>4. GET — <code>/func/fn_cm_code</code> (상단 Group Code 콤보)</h2>
+<h2>4. GET — <code>/api/fn-cm-code</code> (상단 Group Code 콤보)</h2>
 <h3>4.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(p1, p2?)</code></li>
 </ul>
 <h3>4.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_cm_code?p1=GROUPCODE&amp;p2=code_name
+<pre><code>GET {base}/api/fn-cm-code?p1=GROUPCODE&amp;p2=code_name
 </code></pre>
 <h3>4.3 호출 시점·조건</h3>
 <table>
@@ -235,14 +235,14 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>5. POST — <code>/db/tb_cm_code</code> (저장)</h2>
+<h2>5. POST — <code>/api/tb-cm-code</code> (저장)</h2>
 <h3>5.1 호출 코드</h3>
 <ul>
 <li><strong>함수</strong>: <code>postTbCmCode(body)</code> — <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>tbCmCodeApi.ts</code></a></li>
 <li><strong>본문 생성</strong>: <code>buildTbCmCodePostBody</code> — <a href="../../renderer/src/lib/tbCmCodeMapper.ts"><code>tbCmCodeMapper.ts</code></a></li>
 </ul>
 <h3>5.2 URL</h3>
-<pre><code>POST {base}/db/tb_cm_code
+<pre><code>POST {base}/api/tb-cm-code
 Content-Type: application/json
 Accept: application/json
 </code></pre>
@@ -308,9 +308,9 @@ Accept: application/json
 </tr>
 </tbody></table>
 <hr>
-<h2>6. DELETE — <code>/db/tb_cm_code</code></h2>
+<h2>6. DELETE — <code>/api/tb-cm-code</code></h2>
 <h3>6.1 URL·쿼리</h3>
-<pre><code>DELETE {base}/db/tb_cm_code?code={code}&amp;code_group={codeGroup}
+<pre><code>DELETE {base}/api/tb-cm-code?code={code}&amp;code_group={codeGroup}
 </code></pre>
 <ul>
 <li><code>code_group</code>은 <code>detail.codeGroup</code> trim 후 비어 있지 않을 때만 쿼리에 포함.</li>

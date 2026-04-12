@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_cfg_prod_router_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_cfg_prod_router_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_cfg_prod_router_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_cfg_prod_router_mgmt.tsx"><code>renderer/src/screens/std/std_cfg_prod_router_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> — <strong><code>/api/cfg/*</code></strong><br>클라이언트 API: <a href="../../renderer/src/lib/cfgMesApi.ts"><code>renderer/src/lib/cfgMesApi.ts</code></a><br>그리드 매핑: <a href="../../renderer/src/lib/cfgMesScreenMaps.ts"><code>renderer/src/lib/cfgMesScreenMaps.ts</code></a><br>BE: <a href="../../server/src/lib/queries/cfgMes.mjs"><code>server/src/lib/queries/cfgMes.mjs</code></a>, <a href="../../server/src/lib/queries/cfgMesMutations.mjs"><code>cfgMesMutations.mjs</code></a><br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmProdRouteManagement.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmProdRouteManagement.cs</code></a> — MDI <code>msStandard_ProdRouteMng</code></p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vite dev / Electron</strong></td>
+<td><a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>userMgmtBeBaseUrl.ts</code></a> — <code>/api/cfg/*</code></td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>http://localhost:8787/api/cfg/model-mapping?kind=model</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델 마스터</td>
+<td>GET</td>
+<td><code>/api/cfg/model-master</code></td>
+<td><code>model_code</code> 정확 검색(조회줄)</td>
+</tr>
+<tr>
+<td>모델 매핑</td>
+<td>GET</td>
+<td><code>/api/cfg/model-mapping</code></td>
+<td><code>kind=model</code> — <code>MODEL_MAPPING</code> 공통값 조인</td>
+</tr>
+<tr>
+<td>라우트 목록</td>
+<td>GET</td>
+<td><code>/api/cfg/routes</code></td>
+<td><strong><code>model_code</code> 필수</strong> — 하단 모델 선택 시</td>
+</tr>
+<tr>
+<td>라우트 행 저장</td>
+<td>POST</td>
+<td><code>/api/cfg/route-row</code></td>
+<td><code>tb_mes_route</code> upsert</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. GET — <code>/api/cfg/model-master</code></h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgModelMaster({ model_code })</code> — <code>runSearch</code>에서 단독 호출(조회줄 모델코드).</li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/model-master?model_code={code}
+</code></pre>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Search</strong></td>
+<td><code>onFilterSearch</code> → <code>runSearch</code></td>
+</tr>
+</tbody></table>
+<h3>3.4 응답·UI</h3>
+<ul>
+<li>하단 <strong>모델</strong> 그리드 7열: 모델코드·모델명·고객사·제품구분·사양·<strong>매핑 라우트값</strong>(<code>value_code</code> 병합)·빈 열.</li>
+</ul>
+<hr>
+<h2>4. GET — <code>/api/cfg/model-mapping</code></h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgModelMapping(&#39;model&#39;)</code> — <code>runSearch</code>에서 <code>model-master</code>와 병렬.</li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/model-mapping?kind=model
+</code></pre>
+<h3>4.3 응답 처리</h3>
+<ul>
+<li><code>model_code</code> → <code>Map</code> → 그리드 6번째 열 <strong>라우트 코드</strong> 자리에 <code>value_code</code> 표시.</li>
+</ul>
+<hr>
+<h2>5. GET — <code>/api/cfg/routes</code></h2>
+<h3>5.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgRoutes(selectedModelCode)</code> — 하단 모델 선택 시 <code>useEffect</code>.</li>
+</ul>
+<h3>5.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/routes?model_code={modelCode}
+</code></pre>
+<h3>5.3 응답·UI</h3>
+<ul>
+<li>상단 <strong>라우트</strong> 3열: <code>cfgRouteToShortRow</code></li>
+<li>상단 <strong>라우트 공정 리스트</strong> 14열: <code>cfgRouteToRouteListRow</code></li>
+</ul>
+<hr>
+<h2>6. POST — <code>/api/cfg/route-row</code></h2>
+<h3>6.1 호출 코드</h3>
+<ul>
+<li><code>postCfgRouteRow</code> — <code>onFilterSave</code>, <strong><code>lastPanel === &#39;routeProc&#39;</code></strong> 일 때.</li>
+</ul>
+<h3>6.2 클라이언트 검증·확인</h3>
+<ul>
+<li>저장 전 <code>window.confirm</code> — 레거시 506행 취지: <code>선택한 모델의 라우트 설정값을 저장 하시겠습니까?</code></li>
+</ul>
+<h3>6.3 JSON 필드</h3>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>출처</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>model_code</code></td>
+<td><code>selectedModelCode</code></td>
+</tr>
+<tr>
+<td><code>unit_process_code</code>, <code>work_side</code>, <code>route_seq</code>, <code>attribute01</code>, <code>attribute02</code>, <code>route_desc</code></td>
+<td>라우트 공정 리스트 상세 열 (라우터 관리 화면과 동일 인덱스)</td>
+</tr>
+</tbody></table>
+<h3>6.4 응답 처리</h3>
+<ul>
+<li>성공 배너: <code>선택한 모델의 라우트 설정값이 저장 되었습니다.</code> (레거시 528·564행 취지)</li>
+</ul>
+<h3>6.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>필수 누락</td>
+<td>빨간 배너 — 단위공정·작업면 안내</td>
+</tr>
+<tr>
+<td>서버 오류</td>
+<td><code>error</code> 메시지 배너</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. 테이블·응답 필드 (주)</h2>
+<table>
+<thead>
+<tr>
+<th>테이블</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tb_mes_model_master</code></td>
+<td>모델 목록</td>
+</tr>
+<tr>
+<td><code>tb_mes_common_value</code> <code>MODEL_MAPPING</code></td>
+<td>매핑 값</td>
+</tr>
+<tr>
+<td><code>tb_mes_route</code></td>
+<td>라우트 GET/POST</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>8. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>그리드</th>
+<th>컬럼</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>라우트</td>
+<td>3열</td>
+<td>단축 라우트 행</td>
+</tr>
+<tr>
+<td>라우트 공정 리스트</td>
+<td>14열</td>
+<td>PNG <code>routeProcCols</code></td>
+</tr>
+<tr>
+<td>모델</td>
+<td>7열</td>
+<td>마스터 + 매핑 <code>value_code</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>9. 보완·주의점(제안)</h2>
+<ol>
+<li>레거시 <strong>일괄 저장·삭제</strong>(506·603행)는 웹에서는 <strong>행 단위 <code>POST</code></strong> + 확인 한 번으로 단순화.</li>
+<li><code>ROUTE CODE … 존재하지 않습니다</code>(489행)는 웹에서 <strong>필수 필드 누락</strong> 메시지로 대체.</li>
+<li>PNG <code>docs/image/std_cfg_prod_router_mgmt.png</code> — §6.0 절차로 로컬 보관 권장.</li>
+</ol>
+<hr>
+<h2>10. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일 (경로)</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../../renderer/src/screens/std/std_cfg_prod_router_mgmt.tsx"><code>std_cfg_prod_router_mgmt.tsx</code></a></td>
+<td>화면</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/cfgMesApi.ts"><code>cfgMesApi.ts</code></a></td>
+<td>API</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/cfgMes.mjs"><code>cfgMes.mjs</code></a></td>
+<td>GET</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/cfgMesMutations.mjs"><code>cfgMesMutations.mjs</code></a></td>
+<td>POST</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>

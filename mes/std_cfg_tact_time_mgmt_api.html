@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_cfg_tact_time_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_cfg_tact_time_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_cfg_tact_time_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_cfg_tact_time_mgmt.tsx"><code>renderer/src/screens/std/std_cfg_tact_time_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> — <strong><code>/api/cfg/*</code></strong><br>클라이언트 API: <a href="../../renderer/src/lib/cfgMesApi.ts"><code>renderer/src/lib/cfgMesApi.ts</code></a><br>그리드 매핑: <a href="../../renderer/src/lib/cfgMesScreenMaps.ts"><code>renderer/src/lib/cfgMesScreenMaps.ts</code></a><br>BE: <a href="../../server/src/lib/queries/cfgMes.mjs"><code>server/src/lib/queries/cfgMes.mjs</code></a>, <a href="../../server/src/lib/queries/cfgMesMutations.mjs"><code>cfgMesMutations.mjs</code></a><br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmProdTactTimeManagement.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmProdTactTimeManagement.cs</code></a> — MDI <code>msStandard_TactTimeMng</code></p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>STD BE</strong></td>
+<td><code>userMgmtBeUrl(&#39;/api/cfg/...&#39;)</code></td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>http://localhost:8787/api/cfg/tact-times?process=SMT&amp;work_side=TOP&amp;model_code=...</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델 목록</td>
+<td>GET</td>
+<td><code>/api/cfg/model-master</code></td>
+<td><code>process</code>, <code>model_name__prefix</code></td>
+</tr>
+<tr>
+<td>택트 목록</td>
+<td>GET</td>
+<td><code>/api/cfg/tact-times</code></td>
+<td><strong><code>process</code></strong>, <strong><code>work_side</code></strong>, <strong><code>model_code</code> 필수</strong></td>
+</tr>
+<tr>
+<td>택트 행 저장</td>
+<td>POST</td>
+<td><code>/api/cfg/tact-time-row</code></td>
+<td><code>tb_mes_tact_time</code> INSERT/UPDATE</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. GET — <code>/api/cfg/model-master</code></h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgModelMaster({ process, model_name__prefix })</code> — <code>runSearch</code>.</li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/model-master?process={p}&amp;model_name__prefix={prefix}
+</code></pre>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>최초 마운트</strong></td>
+<td><code>useEffect</code> → <code>runSearch</code></td>
+</tr>
+<tr>
+<td><strong>Search</strong></td>
+<td>조회줄 버튼</td>
+</tr>
+</tbody></table>
+<h3>3.4 응답·UI</h3>
+<ul>
+<li><strong>모델</strong> 그리드 7열 — <code>cfgModelToTactModelRow</code>.</li>
+</ul>
+<hr>
+<h2>4. GET — <code>/api/cfg/tact-times</code></h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgTactTimes(process, workSide, modelCode)</code> — <code>selectedModelCode</code>·<code>workSide</code>·<code>processCode</code>·<code>tab===&#39;line&#39;</code>일 때 <code>useEffect</code>.</li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/tact-times?process={process}&amp;work_side={work_side}&amp;model_code={model_code}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>process</code></td>
+<td><strong>항상</strong></td>
+<td>공정 코드</td>
+</tr>
+<tr>
+<td><code>work_side</code></td>
+<td><strong>항상</strong></td>
+<td>작업면</td>
+</tr>
+<tr>
+<td><code>model_code</code></td>
+<td><strong>항상</strong></td>
+<td>모델 코드</td>
+</tr>
+</tbody></table>
+<h3>4.3 응답·UI</h3>
+<ul>
+<li><strong>라인 Tact Time</strong> 그리드 3열: 라인명(<code>process_line_name</code> 우선), <code>tact_time</code>, <code>tact_time_desc</code> — <code>cfgTactLineRow</code>.</li>
+</ul>
+<hr>
+<h2>5. POST — <code>/api/cfg/tact-time-row</code></h2>
+<h3>5.1 호출 코드</h3>
+<ul>
+<li><code>postCfgTactTimeRow</code> — <code>onFilterSave</code>, <strong><code>tab === &#39;line&#39;</code></strong> 이고 <strong><code>lastPanel === &#39;line&#39;</code></strong>.</li>
+</ul>
+<h3>5.2 JSON 필드</h3>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>출처</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>model_code</code></td>
+<td>선택 모델</td>
+</tr>
+<tr>
+<td><code>process</code></td>
+<td>조회줄 <code>processCode</code></td>
+</tr>
+<tr>
+<td><code>work_side</code></td>
+<td>조회줄/탭 하단 <code>workSide</code></td>
+</tr>
+<tr>
+<td><code>process_line</code></td>
+<td>원본 행 <code>process_line</code> 또는 라인 컬럼 매칭</td>
+</tr>
+<tr>
+<td><code>tact_time</code>, <code>tact_time_use</code>, <code>tact_time_desc</code></td>
+<td>상세 폼</td>
+</tr>
+</tbody></table>
+<h3>5.3 응답 처리</h3>
+<ul>
+<li>성공 배너: <code>라인 Tact Time 설정이 저장 되었습니다.</code> (레거시 380행 취지)</li>
+</ul>
+<h3>5.4 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델 미선택</td>
+<td><code>모델을 선택하세요.</code></td>
+</tr>
+<tr>
+<td>라인 그리드 미선택</td>
+<td>저장 안내 메시지</td>
+</tr>
+<tr>
+<td>서버 오류</td>
+<td><code>error</code> 또는 HTTP 본문</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. 테이블·응답 필드 (주)</h2>
+<table>
+<thead>
+<tr>
+<th>테이블</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tb_mes_model_master</code></td>
+<td>모델 조회</td>
+</tr>
+<tr>
+<td><code>tb_cm_code</code> <code>LINE</code> + <code>tb_mes_tact_time</code></td>
+<td>GET tact-times 조인</td>
+</tr>
+<tr>
+<td><code>tb_mes_tact_time</code></td>
+<td>POST tact-time-row</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>그리드</th>
+<th>컬럼</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델</td>
+<td>7열</td>
+<td>마스터 필드</td>
+</tr>
+<tr>
+<td>라인 Tact Time</td>
+<td>라인, Tact Time(초), 비고</td>
+<td><code>CfgTactTimeRow</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>8. 보완·주의점(제안)</h2>
+<ol>
+<li><strong>공정 Tact Time 설정</strong>·<strong>Tact Time 복사</strong> 탭은 웹 API 미연동 — 안내 문구만 표시(레거시 439·453·475행은 추후 범위).</li>
+<li>레거시 삭제 확인(587행)은 <strong>삭제 API</strong> 없으면 미구현.</li>
+<li>레거시 QUERY ERROR(219행) 취지는 조회 실패 시 <code>filterLeading</code> 오류로 대체 가능.</li>
+</ol>
+<hr>
+<h2>9. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일 (경로)</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../../renderer/src/screens/std/std_cfg_tact_time_mgmt.tsx"><code>std_cfg_tact_time_mgmt.tsx</code></a></td>
+<td>화면</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/cfgMesApi.ts"><code>cfgMesApi.ts</code></a></td>
+<td>API</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/cfgMes.mjs"><code>cfgMes.mjs</code></a></td>
+<td>GET tact-times</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/cfgMesMutations.mjs"><code>cfgMesMutations.mjs</code></a></td>
+<td>POST tact-time-row</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>

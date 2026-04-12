@@ -27,9 +27,10 @@ ul { padding-left: 1.25rem; }
 <body>
 <main class="wrap">
 <h1>std_base_user_mgmt — DB·HTTP API 상세 정리</h1>
-<p>화면 ID: <code>std_base_user_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_user_mgmt.tsx"><code>renderer/src/screens/std/std_base_user_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>사용자 API: <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>renderer/src/lib/tbCmUserApi.ts</code></a><br>매퍼: <a href="../../renderer/src/lib/tbCmUserMapper.ts"><code>renderer/src/lib/tbCmUserMapper.ts</code></a><br>공통코드: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a></p>
+<p>화면 ID: <code>std_base_user_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_user_mgmt.tsx"><code>renderer/src/screens/std/std_base_user_mgmt.tsx</code></a><br>사용자 API 베이스: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code><br>사용자 API: <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>renderer/src/lib/tbCmUserApi.ts</code></a><br>매퍼: <a href="../../renderer/src/lib/tbCmUserMapper.ts"><code>renderer/src/lib/tbCmUserMapper.ts</code></a><br>공통코드(부서·직급): <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a> — 베이스는 <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> — <strong><code>/api/fn-cm-code</code></strong><br>BE 구현: <a href="../../server/src/index.mjs"><code>server/src/index.mjs</code></a> — PostgreSQL <code>tb_cm_user</code> 직접 접근(레거시 <a href="../legacy_mes/Basis/_2S_MES_Basis/frmUser.cs"><code>frmUser.cs</code></a> 조회·MERGE·삭제 의미).</p>
 <hr>
 <h2>1. 베이스 URL·환경</h2>
+<h3>1.1 사용자 관리 BE (<code>/api/users</code>)</h3>
 <table>
 <thead>
 <tr>
@@ -38,16 +39,37 @@ ul { padding-left: 1.25rem; }
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
-<td><code>base === &#39;&#39;</code> → 요청은 <strong><code>/db/...</code></strong>, <strong><code>/func/...</code></strong> (상대). <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 <code>https://100.71.84.10:7443</code>에 전달(CORS 회피).</td>
+<td><strong>Electron(원격 UI)</strong></td>
+<td>부트 시 IPC <a href="../../electron/main.cjs"><code>mes:get-user-mgmt-api-base</code></a> → INI <strong><code>USER_MGMT_API_BASE</code></strong>(있으면 그대로) 또는 <strong><code>UI_URL</code>의 origin 호스트 + <code>USER_MGMT_API_PORT</code></strong>(기본 <strong>8787</strong>) → <code>window.__MES_USER_MGMT_API_BASE__</code> → <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>userMgmtBeBaseUrl.ts</code></a>. 환경 변수 <strong><code>MES_USER_MGMT_API_BASE</code></strong> 가 있으면 INI보다 우선.</td>
 </tr>
 <tr>
-<td><strong>프로덕션(Electron 빌드 등)</strong></td>
-<td>기본 <code>https://100.71.84.10:7443</code> + path, 또는 <code>VITE_MES_DB_API_BASE</code>로 지정한 베이스.</td>
+<td><strong>Vite dev</strong></td>
+<td><code>VITE_USER_MGMT_API_BASE</code> 비어 있으면 <strong><code>/api</code></strong> → 프록시 대상: <strong><code>MES_USER_MGMT_PROXY_TARGET</code></strong> 또는 저장소 루트 <strong><code>mes-config.ini</code></strong>(동일 INI 규칙), 없으면 <strong><code>http://localhost:8787</code></strong>.</td>
 </tr>
 <tr>
-<td><strong>절대 URL 예</strong></td>
-<td><code>https://100.71.84.10:7443/db/tb_cm_user?...</code></td>
+<td><strong>프로덕션(순수 브라우저 번들)</strong></td>
+<td><strong><code>VITE_USER_MGMT_API_BASE</code></strong> 빌드 시 주입.</td>
+</tr>
+<tr>
+<td><strong>TLS 사설 인증서</strong></td>
+<td>Electron: 파생·명시 BE URL의 hostname을 인증서 예외 목록에 추가(<a href="../../electron/main.cjs"><code>extendCertAllowlistFromIniUserMgmt</code></a>).</td>
+</tr>
+</tbody></table>
+<h3>1.2 공통코드 <code>/api/fn-cm-code</code></h3>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vite dev</strong></td>
+<td><code>userMgmtBeUrl(&#39;/api/fn-cm-code&#39;)</code> → 프록시 → STD BE(기본 <code>http://localhost:8787</code>).</td>
+</tr>
+<tr>
+<td><strong>Electron</strong></td>
+<td><code>USER_MGMT_API_BASE</code> + path.</td>
 </tr>
 </tbody></table>
 <hr>
@@ -62,10 +84,10 @@ ul { padding-left: 1.25rem; }
 </tr>
 </thead>
 <tbody><tr>
-<td>사용자 목록·조회</td>
+<td>사용자 목록·조건조회</td>
 <td>GET</td>
-<td><code>/db/tb_cm_user</code></td>
-<td>그리드 데이터</td>
+<td><code>/api/users</code></td>
+<td>BE → PostgreSQL <code>tb_cm_user</code></td>
 </tr>
 <tr>
 <td>부서 콤보</td>
@@ -82,48 +104,47 @@ ul { padding-left: 1.25rem; }
 <tr>
 <td>저장(신규/수정)</td>
 <td>POST</td>
-<td><code>/db/tb_cm_user</code></td>
-<td>JSON body (<code>buildTbCmUserPostBody</code>)</td>
+<td><code>/api/users</code></td>
+<td>JSON — 서버에서 bcrypt <code>user_pwd</code>, <code>UPDATE</code> 후 없으면 <code>INSERT</code> upsert</td>
 </tr>
 <tr>
 <td>삭제</td>
 <td>DELETE</td>
-<td><code>/db/tb_cm_user</code></td>
+<td><code>/api/users</code></td>
 <td>쿼리 <code>user_id</code></td>
 </tr>
 </tbody></table>
 <hr>
-<h2>3. GET — <code>/db/tb_cm_user</code></h2>
+<h2>3. GET — <code>/api/users</code></h2>
 <h3>3.1 호출 코드</h3>
 <ul>
-<li><strong>파일</strong>: <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>tbCmUserApi.ts</code></a> — <code>fetchTbCmUsers(query)</code></li>
+<li><a href="../../renderer/src/lib/tbCmUserApi.ts"><code>tbCmUserApi.ts</code></a> — <code>fetchTbCmUsers(query)</code></li>
 </ul>
 <h3>3.2 URL·쿼리</h3>
-<pre><code>GET {base}/db/tb_cm_user?{쿼리스트링}
+<pre><code>GET {userMgmtBase}/api/users?{쿼리스트링}
 </code></pre>
-<p><code>buildQuery</code>가 항상 <code>_orderBy=user_id</code>를 붙인다.</p>
 <table>
 <thead>
 <tr>
 <th>파라미터</th>
 <th>전송 조건</th>
-<th>의미</th>
+<th>BE 의미(레거시 정합)</th>
 </tr>
 </thead>
 <tbody><tr>
 <td><code>user_id__like</code></td>
 <td>trim 후 비어 있지 않을 때</td>
-<td>사용자 ID <strong>부분 일치</strong></td>
+<td><code>user_id LIKE upper(값) || &#39;%&#39;</code></td>
 </tr>
 <tr>
 <td><code>user_name__like</code></td>
 <td>trim 후 비어 있지 않을 때</td>
-<td>사용자명 <strong>부분 일치</strong></td>
+<td>이름에 부분 문자열 포함(대소문자 무시)</td>
 </tr>
 <tr>
-<td><code>_orderBy</code></td>
+<td>(암시)</td>
 <td><strong>항상</strong></td>
-<td><code>user_id</code></td>
+<td><code>user_id &lt;&gt; &#39;DEVELOPER&#39;</code></td>
 </tr>
 </tbody></table>
 <h3>3.3 호출 시점·조건</h3>
@@ -138,28 +159,23 @@ ul { padding-left: 1.25rem; }
 <tbody><tr>
 <td>화면 <strong>최초 마운트</strong></td>
 <td><code>{}</code></td>
-<td><code>useEffect</code> 1회 → 실질적으로 <code>?_orderBy=user_id</code>만</td>
+<td><code>useEffect</code> 1회</td>
 </tr>
 <tr>
-<td>Toolbar <strong>Search</strong> / 조회줄</td>
-<td><code>user_id__like</code>, <code>user_name__like</code> (필터에 값 있을 때만)</td>
+<td>Toolbar <strong>Search</strong></td>
+<td>필터 있을 때만 쿼리 파라미터</td>
 <td><code>runSearch</code></td>
 </tr>
 <tr>
-<td><strong>저장 성공</strong> 후</td>
-<td>Search와 동일(현재 필터)</td>
-<td><code>runSave</code> → <code>runSearch()</code></td>
-</tr>
-<tr>
-<td><strong>삭제 성공</strong> 후</td>
-<td>동일</td>
-<td><code>executeDelete</code> → <code>runSearch()</code></td>
+<td><strong>저장·삭제 성공</strong> 후</td>
+<td>현재 필터</td>
+<td><code>runSearch()</code></td>
 </tr>
 </tbody></table>
 <h3>3.4 응답 처리</h3>
 <ul>
-<li>JSON이 배열이 아니면 키 <code>data</code> / <code>rows</code> / <code>result</code> / <code>items</code> / <code>records</code> 중 <strong>첫 배열</strong>을 <code>TbCmUser[]</code>로 사용.</li>
-<li>타입 <code>TbCmUser</code>: <code>tbCmUserApi.ts</code> 참고(아래 §7 테이블·응답 필드와 정합).</li>
+<li>JSON <strong>배열</strong> — <code>TbCmUser[]</code>. (<code>data</code> 래핑 없음)</li>
+<li>필드: <code>telephone</code>, <code>address</code>, <code>attribute02</code>(E-Mail) 포함.</li>
 </ul>
 <h3>3.5 에러</h3>
 <table>
@@ -171,33 +187,31 @@ ul { padding-left: 1.25rem; }
 </thead>
 <tbody><tr>
 <td><code>res.ok === false</code></td>
-<td><code>throw new Error(\</code>GET tb_cm_user ${status}: …`)`</td>
+<td>본문 JSON <code>{ error }</code> 우선 파싱 후 <code>throw</code></td>
 </tr>
 <tr>
 <td>화면</td>
-<td><code>catch</code> → 인라인 배너 <strong><code>조회 실패: …</code></strong> (<code>flashSaveBanner(&#39;err&#39;, …)</code>)</td>
+<td><code>조회 실패: …</code> 배너</td>
 </tr>
 </tbody></table>
 <hr>
 <h2>4. GET — <code>/func/fn_cm_code</code> (부서·직급)</h2>
+<p>(기존과 동일 — §4 유지)</p>
 <h3>4.1 호출 코드</h3>
 <ul>
-<li><strong>파일</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(p1)</code></li>
+<li><a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(p1)</code></li>
 </ul>
 <h3>4.2 URL</h3>
-<pre><code>GET {base}/func/fn_cm_code?p1=DEPT
-GET {base}/func/fn_cm_code?p1=DUTY
+<pre><code>GET {mesDbBase}/func/fn_cm_code?p1=DEPT
+GET {mesDbBase}/func/fn_cm_code?p1=DUTY
 </code></pre>
 <h3>4.3 호출 시점</h3>
 <ul>
 <li>화면 마운트 시 <code>Promise.all</code>로 <strong>동시 2회</strong>.</li>
-<li>이후 자동 재호출 없음.</li>
 </ul>
 <h3>4.4 응답·UI</h3>
 <ul>
-<li>행 <code>{ code, code_name }</code> → <code>{ value: code, label: code_name }</code>.</li>
-<li>그리드 부서·직급 열: <code>resolveFnCmCodeLabel</code>로 <strong>명칭</strong> 표시.</li>
-<li>상세 <code>PlainSelect</code>: 코드 저장, 라벨 표시. 코드표에 없는 기존값은 <strong><code>(현재값)</code></strong> 옵션 병합(<code>mergeLegacyCodeOption</code>).</li>
+<li>그리드 부서·직급 명칭: <code>resolveFnCmCodeLabel</code>. 상세: <code>PlainSelect</code> + <code>mergeLegacyCodeOption</code>.</li>
 </ul>
 <h3>4.5 에러</h3>
 <table>
@@ -209,30 +223,27 @@ GET {base}/func/fn_cm_code?p1=DUTY
 </thead>
 <tbody><tr>
 <td><code>res.ok === false</code></td>
-<td><code>throw new Error(\</code>GET fn_cm_code ${status}: …`)`</td>
-</tr>
-<tr>
-<td>화면</td>
-<td><code>catch</code> → 배너 <strong><code>공통코드(DEPT/DUTY) 로드 실패: …</code></strong></td>
+<td><code>throw</code> → 배너 <strong><code>공통코드(DEPT/DUTY) 로드 실패</code></strong></td>
 </tr>
 </tbody></table>
 <hr>
-<h2>5. POST — <code>/db/tb_cm_user</code> (저장)</h2>
+<h2>5. POST — <code>/api/users</code> (저장)</h2>
 <h3>5.1 호출 코드</h3>
 <ul>
-<li><strong>함수</strong>: <code>postTbCmUser(body)</code> — <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>tbCmUserApi.ts</code></a></li>
-<li><strong>본문 생성</strong>: <code>buildTbCmUserPostBody</code> — <a href="../../renderer/src/lib/tbCmUserMapper.ts"><code>tbCmUserMapper.ts</code></a></li>
+<li><code>postTbCmUser(body)</code> — <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>tbCmUserApi.ts</code></a></li>
+<li><code>buildTbCmUserPostBody</code> — <a href="../../renderer/src/lib/tbCmUserMapper.ts"><code>tbCmUserMapper.ts</code></a></li>
 </ul>
-<h3>5.2 호출 시점</h3>
+<h3>5.2 BE 동작</h3>
 <ul>
-<li>Toolbar <strong>Save</strong>, 조회줄 저장 연동 시 <code>runSave</code> 성공 분기에서 1회.</li>
+<li>PostgreSQL <strong><code>UPDATE tb_cm_user … WHERE user_id = $1</code></strong> — <code>rowCount === 0</code> 이면 <strong><code>INSERT</code></strong> (레거시 DB에 <code>user_id</code> UNIQUE/PK가 없어 <code>ON CONFLICT (user_id)</code> 가 불가한 경우 대비).</li>
+<li><strong><code>password</code></strong>: 평문이 비어 있지 않으면 <strong>bcrypt</strong> 해시 후 <code>user_pwd</code> 저장. 비어 있으면 <strong>기존 행은 기존 <code>user_pwd</code> 유지</strong>, 신규는 <strong>400</strong>. <strong><code>user_pwd</code> 컬럼</strong>이 <strong>varchar(50)</strong> 등 짧으면 해시(약 <strong>60자</strong>)가 들어가지 않아 PostgreSQL <strong>22001</strong> — <strong><code>VARCHAR(72)</code> 이상</strong> 또는 <strong><code>TEXT</code></strong> 권장.</li>
+<li><strong><code>pass</code></strong>: 정책상 DB에 <strong>빈 문자열</strong>로 둠(평문 미저장).</li>
+<li><strong><code>beginning_employment_date</code></strong>: 레거시 DB에서 <strong><code>varchar</code></strong> 인 경우가 있어, <code>date</code>와 <code>COALESCE</code>를 섞지 않고 <strong><code>to_char(…,&#39;YYYY-MM-DD&#39;)</code></strong>·<strong><code>CASE</code></strong> 로 문자열과 맞춤. INSERT는 <code>to_char(COALESCE($8::date, CURRENT_DATE), &#39;YYYY-MM-DD&#39;)</code>; UPDATE는 기존 행이 비어 있지 않으면 유지, 아니면 동일 <code>to_char</code>.</li>
+<li><strong><code>DEVELOPER</code></strong>: 저장 <strong>403</strong>.</li>
 </ul>
 <h3>5.3 클라이언트 검증(저장 전)</h3>
 <ul>
-<li>신규: Password 비어 있거나 <code>****</code>만이면 저장 거부.</li>
-<li>기존: 상세 변경·비밀번호 변경 없으면 저장 거부.</li>
-<li>Password 변경 시 Pass 체크 입력·일치 필수.</li>
-<li><code>buildTbCmUserPostBody</code> 내부에서도 Password/Pass 체크 불일치 시 <code>throw</code>.</li>
+<li>(기존과 동일) 신규 비밀번호 필수, 변경 시 Pass 체크 일치 등 — 화면 + 매퍼.</li>
 </ul>
 <h3>5.4 POST JSON 필드(매퍼 기준)</h3>
 <table>
@@ -243,63 +254,42 @@ GET {base}/func/fn_cm_code?p1=DUTY
 </tr>
 </thead>
 <tbody><tr>
-<td><code>user_id</code></td>
-<td>상세 <code>사용자ID</code> (필수)</td>
+<td><code>user_id</code>, <code>user_name</code></td>
+<td>필수</td>
 </tr>
 <tr>
-<td><code>user_name</code></td>
-<td>상세 <code>사용자명</code></td>
+<td><code>password</code></td>
+<td>비밀번호 <strong>변경·신규</strong> 시만 포함. BE에서만 해시.</td>
 </tr>
 <tr>
-<td><code>pass</code></td>
-<td>평문 비밀번호(변경 시). 미변경 시 기존 <code>existing.pass</code></td>
-</tr>
-<tr>
-<td><code>user_pwd</code></td>
-<td>비밀번호 변경 시 <code>MD5(평문).toUpperCase()</code>, 미변경 시 기존 <code>user_pwd</code></td>
-</tr>
-<tr>
-<td><code>dept</code>, <code>duty</code></td>
-<td>상세 콤보(코드)</td>
-</tr>
-<tr>
-<td><code>mobile</code></td>
+<td><code>dept</code>, <code>duty</code>, <code>mobile</code>, <code>telephone</code></td>
 <td>상세</td>
 </tr>
 <tr>
 <td><code>beginning_employment_date</code></td>
-<td>기존 행 값 또는 <strong>당일 <code>YYYY-MM-DD</code></strong></td>
+<td><code>YYYY-MM-DD</code> 등</td>
 </tr>
 <tr>
-<td><code>ip_address</code>, <code>user_initial</code></td>
+<td><code>ip_address</code>, <code>user_initial</code>, <code>resigned</code>, <code>activated</code></td>
 <td>상세</td>
 </tr>
 <tr>
-<td><code>resigned</code>, <code>activated</code></td>
-<td>상세 셀렉트(기본 <code>N</code> / <code>Y</code>)</td>
+<td><code>address</code>, <code>attribute02</code></td>
+<td>주소, E-Mail(레거시 <code>ATTRIBUTE02</code>)</td>
 </tr>
 <tr>
 <td><code>description</code></td>
-<td>상세 textarea</td>
+<td></td>
 </tr>
 <tr>
 <td><code>attribute01</code></td>
-<td>기존값 또는 기본 <code>&#39;Y&#39;</code></td>
+<td>기본 <code>Y</code></td>
 </tr>
 <tr>
-<td><code>create_date</code>, <code>created_by</code></td>
-<td>신규 시 현재 시각·<code>ADMIN</code> 등</td>
-</tr>
-<tr>
-<td><code>update_date</code></td>
-<td>항상 현재 시각(ISO)</td>
-</tr>
-<tr>
-<td><code>updated_by</code></td>
-<td>기존 유지 또는 빈 문자열</td>
+<td><code>create_date</code>, <code>created_by</code>, <code>update_date</code>, <code>updated_by</code></td>
+<td>감사 필드( BE가 일부 보정 가능)</td>
 </tr>
 </tbody></table>
-<p><strong>미전송(그리드/상세에 있으나 매퍼·타입에 없음)</strong>: <code>telephone</code>, <code>address</code> 등은 POST 본문에 포함되지 않음(현재 구현). DB에 컬럼이 있어도 이 화면 저장으로 갱신되지 않는다.</p>
 <h3>5.5 에러</h3>
 <table>
 <thead>
@@ -309,19 +299,30 @@ GET {base}/func/fn_cm_code?p1=DUTY
 </tr>
 </thead>
 <tbody><tr>
-<td><code>res.ok === false</code></td>
-<td><code>throw new Error(\</code>POST tb_cm_user ${status}: …`)`</td>
+<td>400 / 403 / 500</td>
+<td>JSON <code>error</code> 메시지</td>
+</tr>
+<tr>
+<td><strong>22001</strong> (varchar 길이 초과)</td>
+<td>흔히 <strong><code>user_pwd</code> varchar(50)</strong> + bcrypt — <code>friendlyPgError</code>에 <code>ALTER TABLE</code> 안내</td>
+</tr>
+<tr>
+<td><strong>400</strong> (<code>user_pwd</code> varchar(n) 부족)</td>
+<td>BE가 <strong><code>information_schema</code></strong> 로 <code>n</code>을 읽어 해시 길이 초과 시 <strong>PostgreSQL 전</strong> 차단·<code>ALTER TABLE</code> 문구</td>
 </tr>
 <tr>
 <td>화면</td>
-<td>배너 <strong><code>저장 실패: …</code></strong></td>
+<td><strong><code>저장 실패: …</code></strong></td>
 </tr>
 </tbody></table>
 <hr>
-<h2>6. DELETE — <code>/db/tb_cm_user</code></h2>
+<h2>6. DELETE — <code>/api/users</code></h2>
 <h3>6.1 형태</h3>
-<pre><code>DELETE {base}/db/tb_cm_user?user_id={user_id}
+<pre><code>DELETE {userMgmtBase}/api/users?user_id={user_id}
 </code></pre>
+<ul>
+<li><code>DEVELOPER</code> 삭제 <strong>403</strong>. 없는 행 <strong>404</strong>.</li>
+</ul>
 <h3>6.2 호출 시점</h3>
 <ul>
 <li>인라인 삭제 확인 후 <code>executeDelete</code>.</li>
@@ -336,16 +337,11 @@ GET {base}/func/fn_cm_code?p1=DUTY
 </thead>
 <tbody><tr>
 <td><code>res.ok === false</code></td>
-<td><code>throw new Error(\</code>DELETE tb_cm_user ${status}: …`)`</td>
-</tr>
-<tr>
-<td>화면</td>
-<td>배너 <strong><code>삭제 실패: …</code></strong></td>
+<td><code>throw</code> → <strong><code>삭제 실패: …</code></strong></td>
 </tr>
 </tbody></table>
 <hr>
-<h2>7. 테이블·응답 필드 (<code>tb_cm_user</code> 관점)</h2>
-<p>클라이언트 타입 <code>TbCmUser</code> 및 실제 API JSON에 나타나는 필드 예시.</p>
+<h2>7. 테이블·응답 필드 (<code>tb_cm_user</code>)</h2>
 <table>
 <thead>
 <tr>
@@ -355,7 +351,7 @@ GET {base}/func/fn_cm_code?p1=DUTY
 </thead>
 <tbody><tr>
 <td><code>user_id</code></td>
-<td>PK로 가정. <strong>라이브 데이터에서 동일 ID 중복 행이 관측될 수 있음</strong>(백엔드·데이터 정합 이슈).</td>
+<td>식별자(업서트 시 <code>WHERE</code>·<code>INSERT</code> 키; DB에 PK/UNIQUE 없어도 BE upsert 동작)</td>
 </tr>
 <tr>
 <td><code>user_name</code></td>
@@ -363,19 +359,19 @@ GET {base}/func/fn_cm_code?p1=DUTY
 </tr>
 <tr>
 <td><code>pass</code></td>
-<td>평문 비밀번호가 저장되는 경우가 있음(보안상 취약).</td>
+<td>BE가 빈 문자열 유지</td>
 </tr>
 <tr>
 <td><code>user_pwd</code></td>
-<td>MD5 대문자 hex 등</td>
+<td><strong>bcrypt</strong> 해시(기존 MD5·Oracle 패키지와 <strong>비호환</strong> — 이전 비밀번호는 재설정 전제)</td>
 </tr>
 <tr>
 <td><code>dept</code>, <code>duty</code></td>
-<td>공통코드 값</td>
+<td></td>
 </tr>
 <tr>
 <td><code>mobile</code>, <code>telephone</code></td>
-<td>전화는 UI 그리드 매핑에서 빈 칸 처리됨</td>
+<td></td>
 </tr>
 <tr>
 <td><code>beginning_employment_date</code></td>
@@ -387,15 +383,15 @@ GET {base}/func/fn_cm_code?p1=DUTY
 </tr>
 <tr>
 <td><code>resigned</code>, <code>activated</code></td>
-<td><code>Y</code>/<code>N</code></td>
+<td></td>
 </tr>
 <tr>
-<td><code>address</code>, <code>description</code></td>
-<td>주소는 상세에는 매핑, 그리드 열은 매퍼에서 빈값</td>
+<td><code>address</code>, <code>attribute02</code>, <code>description</code></td>
+<td><code>attribute02</code> = E-Mail</td>
 </tr>
 <tr>
-<td><code>attribute01</code> … <code>attribute10</code></td>
-<td>확장</td>
+<td><code>attribute01</code> …</td>
+<td></td>
 </tr>
 <tr>
 <td><code>create_date</code>, <code>created_by</code>, <code>update_date</code>, <code>updated_by</code></td>
@@ -425,12 +421,12 @@ GET {base}/func/fn_cm_code?p1=DUTY
 <tr>
 <td>2</td>
 <td>부서</td>
-<td><code>dept</code> → <strong>명칭</strong></td>
+<td><code>dept</code> → 명칭(<code>fn_cm_code</code>)</td>
 </tr>
 <tr>
 <td>3</td>
 <td>직급</td>
-<td><code>duty</code> → <strong>명칭</strong></td>
+<td><code>duty</code> → 명칭</td>
 </tr>
 <tr>
 <td>4</td>
@@ -440,7 +436,7 @@ GET {base}/func/fn_cm_code?p1=DUTY
 <tr>
 <td>5</td>
 <td>전화번호</td>
-<td>(빈 문자열 — <code>telephone</code> 미연동)</td>
+<td><code>telephone</code></td>
 </tr>
 <tr>
 <td>6</td>
@@ -465,12 +461,12 @@ GET {base}/func/fn_cm_code?p1=DUTY
 <tr>
 <td>10</td>
 <td>주소</td>
-<td>(빈 문자열 — <code>address</code> 미연동)</td>
+<td><code>address</code></td>
 </tr>
 <tr>
 <td>11</td>
 <td>E-Mail</td>
-<td>(빈 문자열 — DB 컬럼 없음)</td>
+<td><code>attribute02</code></td>
 </tr>
 <tr>
 <td>12</td>
@@ -481,10 +477,9 @@ GET {base}/func/fn_cm_code?p1=DUTY
 <hr>
 <h2>9. 보완·주의점(제안)</h2>
 <ol>
-<li><strong>PK 중복</strong>: <code>user_id</code>가 논리적 PK인데 동일 ID로 여러 행이 있으면 <code>find</code>로 첫 행만 편집·삭제 대상이 되어 데이터 정합이 깨질 수 있음. DB UNIQUE 제약·API upsert 규약 점검 권장.</li>
-<li><strong>비밀번호</strong>: <code>pass</code> 평문 저장·MD5만 사용은 보안 정책상 개선 필요(해시 알고리즘·서버 측만 저장 등).</li>
-<li><strong>telephone / address / E-Mail</strong>: DB·UI·POST 일관성 정리 권장.</li>
-<li><strong><code>GET …?_count=true</code></strong>: 일부 환경에서 500이 보고됨 — 백엔드 지원 여부 확인.</li>
+<li><strong>스키마</strong>: <code>tb_cm_user</code>에 <code>telephone</code>, <code>address</code>, <code>attribute02</code> 및 <code>user_id</code> UNIQUE(PK) 필요. 없으면 마이그레이션 선행.</li>
+<li><strong>다른 화면</strong>: <code>fetchTbCmUsers</code>를 쓰는 화면(예: 사용자 권한)도 <strong>동일 BE</strong>를 바라봄 — BE 가동·<code>VITE_USER_MGMT_API_BASE</code> 필수.</li>
+<li><strong>운영</strong>: 구 사용자 비밀번호는 bcrypt 전환 전 <strong>재설정</strong> 정책 명시.</li>
 </ol>
 <hr>
 <h2>10. 관련 소스 파일</h2>
@@ -501,6 +496,9 @@ GET {base}/func/fn_cm_code?p1=DUTY
 <td><code>renderer/src/lib/tbCmUserApi.ts</code></td>
 </tr>
 <tr>
+<td><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></td>
+</tr>
+<tr>
 <td><code>renderer/src/lib/tbCmUserMapper.ts</code></td>
 </tr>
 <tr>
@@ -510,7 +508,13 @@ GET {base}/func/fn_cm_code?p1=DUTY
 <td><code>renderer/src/lib/mesDbBaseUrl.ts</code></td>
 </tr>
 <tr>
-<td><code>renderer/vite.config.ts</code> (<code>proxy</code>: <code>/db</code>, <code>/func</code>)</td>
+<td><code>renderer/vite.config.ts</code> (<code>proxy</code>: <code>/api</code>, <code>/db</code>, <code>/func</code>)</td>
+</tr>
+<tr>
+<td><code>server/src/index.mjs</code></td>
+</tr>
+<tr>
+<td><code>server/.env.example</code></td>
 </tr>
 </tbody></table>
 

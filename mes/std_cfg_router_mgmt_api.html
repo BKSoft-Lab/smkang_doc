@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_cfg_router_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_cfg_router_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_cfg_router_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_cfg_router_mgmt.tsx"><code>renderer/src/screens/std/std_cfg_router_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> — <strong><code>/api/cfg/*</code></strong> (STD BE)<br>클라이언트 API: <a href="../../renderer/src/lib/cfgMesApi.ts"><code>renderer/src/lib/cfgMesApi.ts</code></a><br>그리드 매핑: <a href="../../renderer/src/lib/cfgMesScreenMaps.ts"><code>renderer/src/lib/cfgMesScreenMaps.ts</code></a><br>BE: <a href="../../server/src/lib/queries/cfgMes.mjs"><code>server/src/lib/queries/cfgMes.mjs</code></a>, <a href="../../server/src/lib/queries/cfgMesMutations.mjs"><code>cfgMesMutations.mjs</code></a><br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmRouteManagement.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmRouteManagement.cs</code></a> — MDI <code>msStandard_RouteMng</code></p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vite dev</strong></td>
+<td>상대 <strong><code>/api/...</code></strong> → <a href="../../renderer/vite.config.ts"><code>vite.config.ts</code></a> 프록시 → STD BE(기본 <code>http://localhost:8787</code>).</td>
+</tr>
+<tr>
+<td><strong>Electron</strong></td>
+<td><code>USER_MGMT_API_BASE</code> 등 IPC·INI 주입 베이스 + path.</td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>http://localhost:8787/api/cfg/model-master?...</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델 목록</td>
+<td>GET</td>
+<td><code>/api/cfg/model-master</code></td>
+<td><code>process</code>, <code>model_name__prefix</code> (선택)</td>
+</tr>
+<tr>
+<td>단위공정</td>
+<td>GET</td>
+<td><code>/api/cfg/unit-processes</code></td>
+<td>라우트 화면 좌측 목록</td>
+</tr>
+<tr>
+<td>모델별 라우트</td>
+<td>GET</td>
+<td><code>/api/cfg/routes</code></td>
+<td><strong><code>model_code</code> 필수</strong> — 선택 모델 변경 시</td>
+</tr>
+<tr>
+<td>라우트 행 저장</td>
+<td>POST</td>
+<td><code>/api/cfg/route-row</code></td>
+<td><code>tb_mes_route</code> upsert</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. GET — <code>/api/cfg/model-master</code></h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><strong>파일</strong>: <a href="../../renderer/src/lib/cfgMesApi.ts"><code>cfgMesApi.ts</code></a> — <code>fetchCfgModelMaster({ process, model_name__prefix })</code></li>
+<li><strong>화면</strong>: <code>runSearch</code> — 조회줄 <strong>Search</strong></li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/model-master?process={p}&amp;model_name__prefix={prefix}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>process</code></td>
+<td>trim 후 비어 있지 않을 때</td>
+<td>공정 코드 필터</td>
+</tr>
+<tr>
+<td><code>model_name__prefix</code></td>
+<td>trim 후 비어 있지 않을 때</td>
+<td>모델명 접두(대소문자 무시)</td>
+</tr>
+</tbody></table>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>최초 마운트</strong></td>
+<td><code>runSearch()</code></td>
+<td><code>useEffect</code></td>
+</tr>
+<tr>
+<td><strong>Search</strong></td>
+<td>현재 조회줄 <code>process</code>, <code>model_name__prefix</code></td>
+<td><code>onFilterSearch</code></td>
+</tr>
+</tbody></table>
+<h3>3.4 응답 처리</h3>
+<ul>
+<li><code>CfgModelMasterRow[]</code> 파싱 후 상단 <strong>모델</strong> 그리드 3열: <code>model_code</code>, <code>model_name</code>, <code>model_desc</code> (<code>cfgModelToRouterTopRow</code>).</li>
+</ul>
+<h3>3.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw</code> — <code>filterLeading</code> 빨간 메시지</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. GET — <code>/api/cfg/unit-processes</code></h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgUnitProcesses()</code> — <code>runSearch</code> 내 <code>Promise.all</code>로 모델 마스터와 병렬 호출.</li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/unit-processes
+</code></pre>
+<h3>4.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Search</strong> 성공 시</td>
+<td><code>runSearch</code></td>
+</tr>
+</tbody></table>
+<h3>4.4 응답·UI</h3>
+<ul>
+<li><strong>단위공정</strong> 그리드 3열: 공정(빈 값), <code>unit_process_code</code>, <code>unit_process_name</code>.</li>
+</ul>
+<hr>
+<h2>5. GET — <code>/api/cfg/routes</code></h2>
+<h3>5.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgRoutes(modelCode)</code> — <code>selectedModelCode</code> 변경 시 <code>useEffect</code>.</li>
+</ul>
+<h3>5.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/routes?model_code={modelCode}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>model_code</code></td>
+<td><strong>항상</strong> (비어 있으면 클라이언트에서 호출 생략)</td>
+<td>모델 코드</td>
+</tr>
+</tbody></table>
+<h3>5.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델 행 선택·조회 후 첫 모델 선택</td>
+<td><code>selectedModelCode</code> 갱신</td>
+</tr>
+</tbody></table>
+<h3>5.4 응답·UI</h3>
+<ul>
+<li><strong>라우트 공정 리스트</strong> 14열 — <code>cfgRouteToRouteListRow</code> (API 필드 + 빈 열 패딩).</li>
+</ul>
+<hr>
+<h2>6. POST — <code>/api/cfg/route-row</code></h2>
+<h3>6.1 호출 코드</h3>
+<ul>
+<li><a href="../../renderer/src/lib/cfgMesApi.ts"><code>cfgMesApi.ts</code></a> — <code>postCfgRouteRow(body)</code></li>
+<li><strong>화면</strong>: <code>onFilterSave</code> — <strong>마지막 포커스 패널</strong>이 <strong>라우트 공정 리스트</strong>일 때만</li>
+</ul>
+<h3>6.2 URL·본문</h3>
+<pre><code>POST {base}/api/cfg/route-row
+Content-Type: application/json
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>JSON 필드</th>
+<th>출처·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>model_code</code></td>
+<td>선택 모델 <code>selectedModelCode</code></td>
+</tr>
+<tr>
+<td><code>unit_process_code</code></td>
+<td>상세/그리드 열 인덱스 1</td>
+</tr>
+<tr>
+<td><code>work_side</code></td>
+<td>열 인덱스 3</td>
+</tr>
+<tr>
+<td><code>route_seq</code></td>
+<td>열 4 (숫자 변환)</td>
+</tr>
+<tr>
+<td><code>attribute01</code></td>
+<td>투입여부 (열 5, 기본 <code>N</code>)</td>
+</tr>
+<tr>
+<td><code>attribute02</code></td>
+<td>완료여부 (열 6, 기본 <code>N</code>)</td>
+</tr>
+<tr>
+<td><code>route_desc</code></td>
+<td>열 12</td>
+</tr>
+</tbody></table>
+<h3>6.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>조건</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Save</strong></td>
+<td><code>lastPanel === &#39;list&#39;</code> 이고 <code>selectedModelCode</code> 있음</td>
+</tr>
+</tbody></table>
+<h3>6.4 응답 처리</h3>
+<ul>
+<li>성공 시 <code>filterLeading</code> <strong>초록</strong> 배너: 레거시와 동일 취지 — <code>라우트 정보가 저장 되었습니다.</code></li>
+<li>이후 <code>fetchCfgRoutes</code>로 그리드 재조회.</li>
+</ul>
+<h3>6.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>400/500</td>
+<td><code>POST</code> 메시지 본문 또는 <code>error</code> 필드 → 빨간 배너</td>
+</tr>
+<tr>
+<td>단위공정/작업면 누락</td>
+<td>클라이언트 배너 — <code>라우트 코드나 라우트 명이 입력안된 데이타가 있습니다...</code> (레거시 <code>frmRouteManagement</code> 370행 취지)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. 테이블·응답 필드 (주)</h2>
+<table>
+<thead>
+<tr>
+<th>테이블</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tb_mes_model_master</code></td>
+<td>GET model-master</td>
+</tr>
+<tr>
+<td><code>tb_mes_unit_process</code></td>
+<td>GET unit-processes</td>
+</tr>
+<tr>
+<td><code>tb_mes_route</code></td>
+<td>GET routes / POST route-row</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>8. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>그리드</th>
+<th>인덱스·컬럼</th>
+<th>DB·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델</td>
+<td>0~2</td>
+<td><code>model_code</code>, <code>model_name</code>, <code>model_desc</code></td>
+</tr>
+<tr>
+<td>단위공정</td>
+<td>0~2</td>
+<td>공정(빈), <code>unit_process_code</code>, <code>unit_process_name</code></td>
+</tr>
+<tr>
+<td>라우트 공정 리스트</td>
+<td>0~13</td>
+<td><code>CfgRouteRow</code> 기반 14열 PNG 정렬</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>9. 보완·주의점(제안)</h2>
+<ol>
+<li>레거시 <code>MessageBox</code> (삭제 확인 708행 등)는 웹에서는 <strong>삭제 API 미구현</strong> 시 생략; 저장만 배너·<code>POST</code> 오류로 정합.</li>
+<li>상단 표제가 PNG의 「라우트」였으나 API는 <strong>모델 마스터</strong> 기준이므로 화면 표제는 <strong>모델</strong>로 표시.</li>
+<li><code>docs/image/std_cfg_router_mgmt.png</code>는 §6.0 캡처 절차로 저장소에 두는 것이 원칙(로컬 워크스페이스에 없을 수 있음).</li>
+</ol>
+<hr>
+<h2>10. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일 (경로)</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../../renderer/src/screens/std/std_cfg_router_mgmt.tsx"><code>std_cfg_router_mgmt.tsx</code></a></td>
+<td>화면</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/cfgMesApi.ts"><code>cfgMesApi.ts</code></a></td>
+<td>GET/POST</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/cfgMesScreenMaps.ts"><code>cfgMesScreenMaps.ts</code></a></td>
+<td>그리드 문자열 매핑</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/cfgMes.mjs"><code>cfgMes.mjs</code></a></td>
+<td>GET 구현</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/cfgMesMutations.mjs"><code>cfgMesMutations.mjs</code></a></td>
+<td>POST 구현</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>

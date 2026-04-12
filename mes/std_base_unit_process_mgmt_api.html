@@ -27,7 +27,7 @@ ul { padding-left: 1.25rem; }
 <body>
 <main class="wrap">
 <h1>std_base_unit_process_mgmt — DB·HTTP API 상세 정리</h1>
-<p>화면 ID: <code>std_base_unit_process_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_unit_process_mgmt.tsx"><code>renderer/src/screens/std/std_base_unit_process_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>공통코드(콤보): <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions</code><br>단위 공정 그리드: <a href="../../renderer/src/lib/fnUnitProcessApi.ts"><code>renderer/src/lib/fnUnitProcessApi.ts</code></a> — <code>fetchFnUnitProcess</code><br>공통코드 그룹: 조회줄·그리드 <strong>공정</strong> <code>p1=PROCESS</code>; 그리드 <strong>포장타입</strong> <code>p1=ASSY_PACKING_UNIT</code> (<code>tb_cm_code.code_group</code> 가정)</p>
+<p>화면 ID: <code>std_base_unit_process_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_unit_process_mgmt.tsx"><code>renderer/src/screens/std/std_base_unit_process_mgmt.tsx</code></a><br>BE 베이스: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> — <strong><code>/api/fn-cm-code</code></strong>, <strong><code>/api/fn-unit-process</code></strong>, <strong><code>POST /api/tb-cm-code</code></strong><br>공통코드(콤보): <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions</code><br>단위 공정 그리드: <a href="../../renderer/src/lib/fnUnitProcessApi.ts"><code>renderer/src/lib/fnUnitProcessApi.ts</code></a> — <code>fetchFnUnitProcess</code><br>저장(그리드 → <code>UNIT_PROCESS</code>): <a href="../../renderer/src/lib/unitProcessMgmtApi.ts"><code>renderer/src/lib/unitProcessMgmtApi.ts</code></a> — <code>saveUnitProcessGridRows</code> → <a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>postTbCmCode</code></a><br>공통코드 그룹: 조회줄·그리드 <strong>공정</strong> <code>p1=PROCESS</code>; 그리드 <strong>포장타입</strong> <code>p1=ASSY_PACKING_UNIT</code> (<code>tb_cm_code.code_group</code> 가정)<br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmUnitProcessMng.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmUnitProcessMng.cs</code></a></p>
 <hr>
 <h2>1. 베이스 URL·환경</h2>
 <table>
@@ -38,16 +38,16 @@ ul { padding-left: 1.25rem; }
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
-<td><code>base === &#39;&#39;</code> → 요청은 <strong><code>/func/...</code></strong> (상대). <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 백엔드에 전달(CORS 회피).</td>
+<td><strong>Vite dev</strong></td>
+<td>상대 <strong><code>/api/...</code></strong> → <a href="../../renderer/vite.config.ts"><code>vite.config.ts</code></a> 프록시 → STD BE(기본 <code>http://localhost:8787</code>).</td>
 </tr>
 <tr>
-<td><strong>프로덕션(Electron 빌드 등)</strong></td>
-<td>기본 <code>https://100.71.84.10:7443</code> + path, 또는 <code>VITE_MES_DB_API_BASE</code>.</td>
+<td><strong>Electron</strong></td>
+<td><code>USER_MGMT_API_BASE</code> 등으로 주입된 베이스 + path.</td>
 </tr>
 <tr>
 <td><strong>절대 URL 예</strong></td>
-<td><code>https://100.71.84.10:7443/func/fn_unit_process?p1=</code></td>
+<td><code>http://localhost:8787/api/fn-unit-process?p1=</code></td>
 </tr>
 </tbody></table>
 <hr>
@@ -64,32 +64,38 @@ ul { padding-left: 1.25rem; }
 <tbody><tr>
 <td>공정 콤보(조회줄·그리드)</td>
 <td>GET</td>
-<td><code>/func/fn_cm_code</code></td>
+<td><code>/api/fn-cm-code</code></td>
 <td><code>p1=PROCESS</code>, <code>p2=disp_seq</code></td>
 </tr>
 <tr>
 <td>포장타입 콤보(그리드)</td>
 <td>GET</td>
-<td><code>/func/fn_cm_code</code></td>
+<td><code>/api/fn-cm-code</code></td>
 <td><code>p1=ASSY_PACKING_UNIT</code>, <code>p2=disp_seq</code></td>
 </tr>
 <tr>
 <td>단위 공정 그리드</td>
 <td>GET</td>
-<td><code>/func/fn_unit_process</code></td>
+<td><code>/api/fn-unit-process</code></td>
 <td><code>p1</code> 공정 조건(빈 값=전체)</td>
 </tr>
+<tr>
+<td>단위 공정 저장(행별 upsert)</td>
+<td>POST</td>
+<td><code>/api/tb-cm-code</code></td>
+<td><code>code_group=UNIT_PROCESS</code> — <code>unitProcessMgmtApi</code></td>
+</tr>
 </tbody></table>
-<p>이 화면은 <strong>저장·삭제 HTTP 호출 없음</strong>(<code>MesSearchSaveBar</code> <code>showFilterSave={false}</code>). 그리드 편집은 <strong>클라이언트 state</strong>만 변경.</p>
+<p><strong>저장·조회줄 Save</strong>: <code>MesSearchSaveBar</code> <strong>Save</strong>·모듈 툴바 <strong>save</strong> → <code>runSave</code> → 전체 <code>rawRows</code> 순회 <code>postTbCmCode</code>. 성공 후 <code>loadGrid(processFilter)</code>로 <code>GET /api/fn-unit-process</code> 재조회.</p>
 <hr>
-<h2>3. GET — <code>/func/fn_cm_code</code> (<code>p1=PROCESS</code>)</h2>
+<h2>3. GET — <code>/api/fn-cm-code</code> (<code>p1=PROCESS</code>)</h2>
 <h3>3.1 호출 코드</h3>
 <ul>
 <li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(&#39;PROCESS&#39;, &#39;disp_seq&#39;)</code></li>
 <li><strong>화면</strong>: <a href="../../renderer/src/screens/std/std_base_unit_process_mgmt.tsx"><code>std_base_unit_process_mgmt.tsx</code></a> — 마운트 시 <code>useEffect</code> 1회</li>
 </ul>
 <h3>3.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_cm_code?p1=PROCESS&amp;p2=disp_seq
+<pre><code>GET {base}/api/fn-cm-code?p1=PROCESS&amp;p2=disp_seq
 </code></pre>
 <table>
 <thead>
@@ -154,13 +160,13 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>4. GET — <code>/func/fn_cm_code</code> (<code>p1=ASSY_PACKING_UNIT</code>)</h2>
+<h2>4. GET — <code>/api/fn-cm-code</code> (<code>p1=ASSY_PACKING_UNIT</code>)</h2>
 <h3>4.1 호출 코드</h3>
 <ul>
 <li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(PACK_TYPE_CM_GROUP, &#39;disp_seq&#39;)</code><br><code>PACK_TYPE_CM_GROUP = &#39;ASSY_PACKING_UNIT&#39;</code> (화면 상수)</li>
 </ul>
 <h3>4.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_cm_code?p1=ASSY_PACKING_UNIT&amp;p2=disp_seq
+<pre><code>GET {base}/api/fn-cm-code?p1=ASSY_PACKING_UNIT&amp;p2=disp_seq
 </code></pre>
 <table>
 <thead>
@@ -225,17 +231,17 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>5. GET — <code>/func/fn_unit_process</code></h2>
+<h2>5. GET — <code>/api/fn-unit-process</code></h2>
 <h3>5.1 호출 코드</h3>
 <ul>
 <li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/fnUnitProcessApi.ts"><code>fnUnitProcessApi.ts</code></a> — <code>fetchFnUnitProcess(p1)</code></li>
 </ul>
 <h3>5.2 URL·쿼리</h3>
 <p><strong>전체 조회:</strong></p>
-<pre><code>GET {base}/func/fn_unit_process?p1=
+<pre><code>GET {base}/api/fn-unit-process?p1=
 </code></pre>
 <p><strong>공정 코드 조건(예: SMT):</strong></p>
-<pre><code>GET {base}/func/fn_unit_process?p1=SMT
+<pre><code>GET {base}/api/fn-unit-process?p1=SMT
 </code></pre>
 <table>
 <thead>
@@ -251,6 +257,14 @@ ul { padding-left: 1.25rem; }
 <td>조회줄 <strong>공정</strong> <code>PlainSelect</code> 값. <strong>빈 문자열</strong> = 전체</td>
 </tr>
 </tbody></table>
+<h3>5.2.1 BE·DB (PostgreSQL)</h3>
+<ul>
+<li><strong>구현</strong>: <a href="../../server/src/lib/queries/fnMesStd.mjs"><code>server/src/lib/queries/fnMesStd.mjs</code></a> <code>createFnUnitProcessOnlyRouter</code>.</li>
+<li><strong>테이블</strong>: <strong><code>tb_cm_code</code></strong> — <code>code_group = &#39;UNIT_PROCESS&#39;</code> (Oracle <strong><code>TB_CM_CODE</code></strong> / 레거시 <code>frmUnitProcessMng.cs</code> <code>lPrcRetrieveProcessInfoData</code> 와 동일 출처).</li>
+<li><strong>필터</strong>: <code>p1</code>이 비어 있지 않으면 <code>attribute01::text LIKE p1 || &#39;%&#39;</code> (접두 일치). 빈 <code>p1</code>이면 공정 조건 없음.</li>
+<li><strong>정렬</strong>: <code>attribute01</code>, <code>disp_seq</code>(숫자로 해석 가능하면 수치 순·아니면 999 취급), <code>code</code>.</li>
+<li><strong>응답 행 매핑</strong>: <code>code</code>·<code>code_name</code>·<code>attribute01</code>·<code>attribute02</code>~`attribute04<code>·</code>disp_seq<code>·</code>code_desc<code>→ JSON</code>code<code>·</code>code_name<code>·</code>attribute01<code>·</code>tact_time<code>·</code>pack_unit<code>·</code>pack_type<code>·</code>disp_seq<code>·</code>remark`.</li>
+</ul>
 <h3>5.3 호출 시점·조건</h3>
 <table>
 <thead>
@@ -295,7 +309,116 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>6. 테이블·응답 필드 (<code>fn_unit_process</code> 행 객체 관점)</h2>
+<h2>6. POST — <code>/api/tb-cm-code</code> (UNIT_PROCESS 저장)</h2>
+<h3>6.1 호출 코드</h3>
+<ul>
+<li><strong>파일·함수</strong>: <a href="../../renderer/src/lib/unitProcessMgmtApi.ts"><code>unitProcessMgmtApi.ts</code></a> — <code>saveUnitProcessGridRows(rawRows)</code> → 행별 <code>postTbCmCode(buildUnitProcessTbCmCodeBody(row))</code> (<a href="../../renderer/src/lib/tbCmCodeApi.ts"><code>tbCmCodeApi.ts</code></a>)</li>
+<li><strong>화면</strong>: <a href="../../renderer/src/screens/std/std_base_unit_process_mgmt.tsx"><code>std_base_unit_process_mgmt.tsx</code></a> — <code>runSave</code></li>
+</ul>
+<h3>6.2 URL·본문</h3>
+<pre><code>POST {base}/api/tb-cm-code
+Content-Type: application/json
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>JSON 필드</th>
+<th>출처·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>code_group</code></td>
+<td><strong>항상</strong> <code>&#39;UNIT_PROCESS&#39;</code></td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td>그리드 열 1 — 단위 공정코드(필수)</td>
+</tr>
+<tr>
+<td><code>code_name</code></td>
+<td>열 2 — 단위 공정명(필수)</td>
+</tr>
+<tr>
+<td><code>attribute01</code></td>
+<td>열 0 — 공정(필수)</td>
+</tr>
+<tr>
+<td><code>attribute02</code></td>
+<td>열 3 — Tact Time</td>
+</tr>
+<tr>
+<td><code>attribute03</code></td>
+<td>열 4 — 포장단위</td>
+</tr>
+<tr>
+<td><code>attribute04</code></td>
+<td>열 5 — 포장타입</td>
+</tr>
+<tr>
+<td><code>attribute05</code></td>
+<td><code>&#39;&#39;</code></td>
+</tr>
+<tr>
+<td><code>disp_seq</code></td>
+<td>열 6 — 빈 값이면 숫자 <code>0</code>으로 전송</td>
+</tr>
+<tr>
+<td><code>activated</code></td>
+<td><code>&#39;Y&#39;</code></td>
+</tr>
+<tr>
+<td><code>code_desc</code></td>
+<td>열 7 — 비고</td>
+</tr>
+</tbody></table>
+<h3>6.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>인자/조건</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>조회줄 <strong>Save</strong> 또는 툴바 <strong>save</strong></td>
+<td><code>saveUnitProcessGridRows(rawRows)</code> — <strong>필터와 무관한 전체 원본</strong></td>
+<td><code>onFilterSave</code> / <code>toolbarHandlers.save</code></td>
+</tr>
+<tr>
+<td><strong>행 건너뜀</strong></td>
+<td>모든 셀이 공백인 행</td>
+<td>저장 루프에서 <code>continue</code></td>
+</tr>
+</tbody></table>
+<h3>6.4 응답·UI</h3>
+<ul>
+<li><code>postTbCmCode</code> 성공 시 행별로 진행; 전부 성공하면 <code>setSaveMsg(&#39;[저장완료] 단위공정 정보가 저장되었습니다.&#39;)</code>(레거시 <code>MessageBox</code> 본문과 동일), <code>loadGrid(processFilter)</code>.</li>
+<li>실패 시 첫 <code>throw</code> 메시지를 <code>setErrorMsg</code>에 표시.</li>
+</ul>
+<h3>6.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>res.ok === false</code></td>
+<td><code>throw new Error(\</code>POST tb_cm_code ${status}: …`)`</td>
+</tr>
+<tr>
+<td>클라이언트 검증</td>
+<td>공정·단위공정·단위공정명 중 빈 값이 있으면 <code>throw new Error(&#39;[저장실패] …&#39;)</code>(레거시 <code>MessageBox</code> 본문과 동일)</td>
+</tr>
+</tbody></table>
+<h3>6.6 (선택) 클라이언트 검증</h3>
+<ul>
+<li><code>validateUnitProcessRow</code>: 열 0·1·2 trim 후 모두 비어 있지 않아야 함. 실패 메시지 본문: <code>공정, 단위공정, 단위공정명 중에 값이 없는 데이타가 있습니다. 확인하여 주십시요.</code> (<code>frmUnitProcessMng.cs</code> <code>[저장실패]</code>와 동일)</li>
+</ul>
+<hr>
+<h2>7. 테이블·응답 필드 (<code>fn_unit_process</code> 행 객체 관점)</h2>
 <p><code>rowToGridRow</code>가 객체일 때 읽는 키(우선순위 순). 실제 DB 함수·뷰는 서버 정의.</p>
 <table>
 <thead>
@@ -347,7 +470,7 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>7. 그리드·상세 UI 매핑</h2>
+<h2>8. 그리드·상세 UI 매핑</h2>
 <table>
 <thead>
 <tr>
@@ -364,22 +487,22 @@ ul { padding-left: 1.25rem; }
 <tr>
 <td>1</td>
 <td>단위 공정코드</td>
-<td>텍스트(읽기)</td>
+<td><code>PlainInput</code> <strong>readOnly</strong> — PK 성격, 변경 불가</td>
 </tr>
 <tr>
 <td>2</td>
 <td>단위 공정명</td>
-<td>텍스트(읽기)</td>
+<td><code>PlainInput</code> 편집 → <code>code_name</code></td>
 </tr>
 <tr>
 <td>3</td>
 <td>Tact Time (Sec)</td>
-<td>텍스트(읽기)</td>
+<td><code>PlainInput</code> 편집 → <code>attribute02</code></td>
 </tr>
 <tr>
 <td>4</td>
 <td>포장단위(E/A)</td>
-<td>텍스트(읽기)</td>
+<td><code>PlainInput</code> 편집 → <code>attribute03</code></td>
 </tr>
 <tr>
 <td>5</td>
@@ -389,26 +512,26 @@ ul { padding-left: 1.25rem; }
 <tr>
 <td>6</td>
 <td>순서</td>
-<td>텍스트(읽기)</td>
+<td><code>PlainInput</code> 편집 → <code>disp_seq</code></td>
 </tr>
 <tr>
 <td>7</td>
 <td>비고</td>
-<td>텍스트(읽기)</td>
+<td><code>PlainInput</code> 편집 → <code>code_desc</code></td>
 </tr>
 </tbody></table>
 <p><strong>조회줄 필터(클라이언트):</strong> <code>appliedUnitText</code>가 비어 있지 않으면 <strong>단위 공정코드</strong> 또는 <strong>단위 공정명</strong> 열에 <strong>부분 일치</strong>(대소문자 무시). 검색 적용은 <strong>Search 클릭</strong> 시 <code>appliedUnitField</code> / <code>appliedUnitText</code> 확정 후.</p>
 <hr>
-<h2>8. 보완·주의점(제안)</h2>
+<h2>9. 보완·주의점(제안)</h2>
 <ol>
-<li><strong>저장 미연동</strong>: 그리드 편집은 <strong>로컬 state</strong>만 변경 — 서버 반영은 별도 API·화면 필요.</li>
+<li><strong>저장은 행별 POST</strong>: 트랜잭션 묶음 없음 — 일부 성공 후 실패 시 DB는 부분 반영될 수 있음.</li>
 <li><strong><code>fn_unit_process</code> 응답 형태</strong>: <code>UNIT_PROCESS</code> 형태 공통코드(<code>code</code>/<code>code_name</code>)와 일반 컬럼명 혼용 가능 — <code>rowToGridRow</code>가 다중 키로 흡수.</li>
 <li><strong>포장타입 코드/라벨</strong>: DB <code>pack_type</code>이 <strong>코드</strong>(<code>MAZ</code>)인지 <strong>명</strong>인지에 따라 콤보 <code>value</code>와 불일치 시 <code>resolveCmCodeSelectValue</code>·orphan <code>&lt;option&gt;</code>으로 보강.</li>
 <li><strong><code>p1</code> 필터</strong>: 서버가 <code>code_group</code> <code>ASSY_PACKING_UNIT</code>과 다른 이름을 쓰면 상수 <code>PACK_TYPE_CM_GROUP</code>만 교체.</li>
 <li><strong>조회 시점</strong>: 그리드는 <strong>Search</strong> 시에만 <code>loadGrid</code> — 공정 콤보만 바꾸고 Search 안 하면 이전 데이터 유지.</li>
 </ol>
 <hr>
-<h2>9. 관련 소스 파일</h2>
+<h2>10. 관련 소스 파일</h2>
 <table>
 <thead>
 <tr>
@@ -417,6 +540,12 @@ ul { padding-left: 1.25rem; }
 </thead>
 <tbody><tr>
 <td><code>renderer/src/screens/std/std_base_unit_process_mgmt.tsx</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/unitProcessMgmtApi.ts</code></td>
+</tr>
+<tr>
+<td><code>renderer/src/lib/tbCmCodeApi.ts</code></td>
 </tr>
 <tr>
 <td><code>renderer/src/lib/fnCmCodeApi.ts</code></td>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_base_process_line_config_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_base_process_line_config_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_base_process_line_config_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_process_line_config_mgmt.tsx"><code>renderer/src/screens/std/std_base_process_line_config_mgmt.tsx</code></a> — 현재 <strong>PNG·샘플 데이터</strong> 위주 (<code>stdPngSampleData</code>).<br>BE: <a href="../../server/src/routes/byScreen/std_base_process_line_config_mgmt.mjs"><code>server/src/routes/byScreen/std_base_process_line_config_mgmt.mjs</code></a> — <a href="../../server/src/lib/queries/processLineMes.mjs"><code>processLineMes.mjs</code></a>, <a href="../../server/src/lib/queries/unitProcessLineCodeMes.mjs"><code>unitProcessLineCodeMes.mjs</code></a> (<code>/api/line-codes</code> 는 <a href="../../server/src/routes/byScreen/std_base_process_line_mgmt.mjs"><code>std_base_process_line_mgmt.mjs</code></a>)<br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmProcessLineConstMng.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmProcessLineConstMng.cs</code></a> — MDI <code>msBasic_ProcessLine</code></p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>향후 연동</strong></td>
+<td><a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>userMgmtBeBaseUrl.ts</code></a> + <code>/api/process-line/*</code>, <code>/api/unit-process-line-codes</code> (LINE 마스터 <code>/api/line-codes</code> 는 <strong><code>std_base_process_line_mgmt</code></strong> 진입점)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UNIT_PROCESS_LINE 코드</td>
+<td>GET/POST/DELETE</td>
+<td><code>/api/unit-process-line-codes</code></td>
+<td><a href="../../server/src/lib/queries/unitProcessLineCodeMes.mjs"><code>unitProcessLineCodeMes.mjs</code></a></td>
+</tr>
+<tr>
+<td>조인·라인별 조회·저장</td>
+<td>GET/POST</td>
+<td><code>/api/process-line/...</code></td>
+<td><a href="../../server/src/lib/queries/processLineMes.mjs"><code>processLineMes.mjs</code></a></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. 레거시와 PostgreSQL</h2>
+<ul>
+<li>레거시 <code>frmProcessLineConstMng</code>는 공정라인 구성(라인·단위공정라인·순서)을 Oracle에서 관리한다.</li>
+<li>BE는 <code>tb_mes_process_line</code>, <code>tb_cm_code</code> 등으로 이식한다.</li>
+</ul>
+<hr>
+<h2>4. 보완·주의점</h2>
+<ol>
+<li>UI가 실데이터와 연동되면 <code>cfgMesApi</code>·전용 훅 추가 후 본 문서에 <strong>호출 시점·그리드 매핑</strong>을 채운다.</li>
+</ol>
+<hr>
+<h2>5. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일 (경로)</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../../server/src/routes/byScreen/std_base_process_line_config_mgmt.mjs"><code>server/src/routes/byScreen/std_base_process_line_config_mgmt.mjs</code></a></td>
+<td><code>byScreen</code> 진입</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/processLineMes.mjs"><code>server/src/lib/queries/processLineMes.mjs</code></a></td>
+<td>공정라인 핵심</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/unitProcessLineCodeMes.mjs"><code>server/src/lib/queries/unitProcessLineCodeMes.mjs</code></a></td>
+<td>UNIT_PROCESS_LINE 코드</td>
+</tr>
+<tr>
+<td><a href="../DATABASE.md"><code>docs/DATABASE.md</code></a></td>
+<td>레거시 추출 메모</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>

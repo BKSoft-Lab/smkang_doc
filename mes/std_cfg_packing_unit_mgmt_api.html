@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>std_cfg_packing_unit_mgmt — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>std_cfg_packing_unit_mgmt — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>std_cfg_packing_unit_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_cfg_packing_unit_mgmt.tsx"><code>renderer/src/screens/std/std_cfg_packing_unit_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> — <strong><code>/api/cfg/*</code></strong><br>클라이언트 API: <a href="../../renderer/src/lib/cfgMesApi.ts"><code>renderer/src/lib/cfgMesApi.ts</code></a><br>그리드 매핑: <a href="../../renderer/src/lib/cfgMesScreenMaps.ts"><code>renderer/src/lib/cfgMesScreenMaps.ts</code></a><br>BE: <a href="../../server/src/lib/queries/cfgMes.mjs"><code>server/src/lib/queries/cfgMes.mjs</code></a>, <a href="../../server/src/lib/queries/cfgMesMutations.mjs"><code>cfgMesMutations.mjs</code></a><br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmPackingUnitMng.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmPackingUnitMng.cs</code></a> — MDI <code>msStandard_PackingUnitMng</code></p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>STD BE</strong></td>
+<td><code>userMgmtBeUrl(&#39;/api/cfg/...&#39;)</code></td>
+</tr>
+<tr>
+<td><strong>절대 URL 예</strong></td>
+<td><code>http://localhost:8787/api/cfg/packing-units?model_code=...</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델 목록</td>
+<td>GET</td>
+<td><code>/api/cfg/model-master</code></td>
+<td><code>process</code>, <code>model_name__prefix</code></td>
+</tr>
+<tr>
+<td>포장단위 조회</td>
+<td>GET</td>
+<td><code>/api/cfg/packing-units</code></td>
+<td><strong><code>model_code</code> 필수</strong> — <code>ASSY_PACKING_UNIT</code></td>
+</tr>
+<tr>
+<td>포장단위 저장</td>
+<td>POST</td>
+<td><code>/api/cfg/packing-unit</code></td>
+<td>모델별 DELETE 후 INSERT</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. GET — <code>/api/cfg/model-master</code></h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgModelMaster</code> — <code>runSearch</code>.</li>
+</ul>
+<h3>3.2 호출 시점</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Search</strong></td>
+<td>조회줄</td>
+</tr>
+</tbody></table>
+<h3>3.3 응답·UI</h3>
+<ul>
+<li><strong>모델</strong> 그리드 8열 — <code>cfgModelToPackingModelRow</code>.</li>
+</ul>
+<hr>
+<h2>4. GET — <code>/api/cfg/packing-units</code></h2>
+<h3>4.1 호출 코드</h3>
+<ul>
+<li><code>fetchCfgPackingUnits(modelCode)</code> — <code>selectedModelCode</code> 변경 시 <code>useEffect</code>.</li>
+</ul>
+<h3>4.2 URL·쿼리</h3>
+<pre><code>GET {base}/api/cfg/packing-units?model_code={model_code}
+</code></pre>
+<h3>4.3 응답·UI</h3>
+<ul>
+<li>단일 행이면 <code>attribute01</code>~`03<code>을 **4행 고정 라벨**(매거진/박스/트레이/출하)에 매핑 — </code>packingAttrsToRows`.</li>
+</ul>
+<hr>
+<h2>5. POST — <code>/api/cfg/packing-unit</code></h2>
+<h3>5.1 호출 코드</h3>
+<ul>
+<li><code>postCfgPackingUnit</code> — <code>onFilterSave</code>.</li>
+</ul>
+<h3>5.2 JSON 필드</h3>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>출처</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>value_code</code></td>
+<td>선택 모델 코드 (= <code>model_code</code>)</td>
+</tr>
+<tr>
+<td><code>attribute01</code></td>
+<td>그리드 1행 주석 열</td>
+</tr>
+<tr>
+<td><code>attribute02</code></td>
+<td>2행</td>
+</tr>
+<tr>
+<td><code>attribute03</code></td>
+<td>3행</td>
+</tr>
+</tbody></table>
+<h3>5.3 클라이언트 검증</h3>
+<ul>
+<li>레거시 203행 취지: <code>attribute01</code>~`03<code>이 비어 있지 않을 때 **숫자**인지 검사 — 아니면 </code>포장단위에 숫자가 아닌 값이 있습니다.`</li>
+</ul>
+<h3>5.4 응답 처리</h3>
+<ul>
+<li>성공 배너: <code>Assy 포장단위 정보가 저장 되었습니다.</code> (232행 취지)</li>
+</ul>
+<h3>5.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델 미선택</td>
+<td><code>Assy 모델을 선택하여 주십시요.</code> (196행)</td>
+</tr>
+<tr>
+<td>서버 오류</td>
+<td><code>error</code> 메시지</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. 테이블·응답 필드 (주)</h2>
+<table>
+<thead>
+<tr>
+<th>테이블</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tb_mes_model_master</code></td>
+<td>모델 조회</td>
+</tr>
+<tr>
+<td><code>tb_mes_common_value</code> <code>value_group=&#39;ASSY_PACKING_UNIT&#39;</code></td>
+<td>GET/POST packing</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>그리드</th>
+<th>컬럼</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>모델</td>
+<td>8열</td>
+<td>마스터 + Array Count 열은 API 미사용 시 빈 값</td>
+</tr>
+<tr>
+<td>포장단위</td>
+<td>포장단위, 주석</td>
+<td>4행 고정 라벨 + 값</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>8. 보완·주의점(제안)</h2>
+<ol>
+<li>상세 폼 편집 값은 <strong>저장 시</strong> 선택 행에 병합 후 <code>attribute01</code>~`03`으로 전송.</li>
+<li>PNG와 달리 서버는 <strong>모델당 최대 3개 속성</strong> — 4행 중 출하 행은 UI 라벨만 유지.</li>
+</ol>
+<hr>
+<h2>9. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일 (경로)</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../../renderer/src/screens/std/std_cfg_packing_unit_mgmt.tsx"><code>std_cfg_packing_unit_mgmt.tsx</code></a></td>
+<td>화면</td>
+</tr>
+<tr>
+<td><a href="../../renderer/src/lib/cfgMesApi.ts"><code>cfgMesApi.ts</code></a></td>
+<td>API</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/cfgMes.mjs"><code>cfgMes.mjs</code></a></td>
+<td>GET packing-units</td>
+</tr>
+<tr>
+<td><a href="../../server/src/lib/queries/cfgMesMutations.mjs"><code>cfgMesMutations.mjs</code></a></td>
+<td>POST packing-unit</td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>

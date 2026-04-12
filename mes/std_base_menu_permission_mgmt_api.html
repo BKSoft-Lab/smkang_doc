@@ -27,7 +27,7 @@ ul { padding-left: 1.25rem; }
 <body>
 <main class="wrap">
 <h1>std_base_menu_permission_mgmt — DB·HTTP API 상세 정리</h1>
-<p>화면 ID: <code>std_base_menu_permission_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_menu_permission_mgmt.tsx"><code>renderer/src/screens/std/std_base_menu_permission_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>공통코드: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a></p>
+<p>화면 ID: <code>std_base_menu_permission_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_menu_permission_mgmt.tsx"><code>renderer/src/screens/std/std_base_menu_permission_mgmt.tsx</code></a><br>BE 베이스: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> (STD BE, 기본 포트 8787)<br>메뉴·권한 API: <a href="../../renderer/src/lib/menuAuthorityApi.ts"><code>renderer/src/lib/menuAuthorityApi.ts</code></a><br>공통코드: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a> — <strong><code>/api/fn-cm-code</code></strong><br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmMenuAuthMng.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmMenuAuthMng.cs</code></a> (메뉴 목록 편집은 <a href="../legacy_mes/Basis/_2S_MES_Basis/frmMenuManagement.cs"><code>frmMenuManagement.cs</code></a> 별도)</p>
 <hr>
 <h2>1. 베이스 URL·환경</h2>
 <table>
@@ -38,16 +38,16 @@ ul { padding-left: 1.25rem; }
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
-<td><code>base === &#39;&#39;</code> → 요청은 <strong><code>/db/...</code></strong>, <strong><code>/func/...</code></strong> (상대). <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 <code>https://100.71.84.10:7443</code>에 전달(CORS 회피).</td>
+<td><strong>Vite dev</strong></td>
+<td>상대 <strong><code>/api/...</code></strong> → <a href="../../renderer/vite.config.ts"><code>vite.config.ts</code></a> 프록시 → STD BE(기본 <code>http://localhost:8787</code>).</td>
 </tr>
 <tr>
-<td><strong>프로덕션(Electron 빌드 등)</strong></td>
-<td>기본 <code>https://100.71.84.10:7443</code> + path, 또는 <code>VITE_MES_DB_API_BASE</code>로 지정한 베이스.</td>
+<td><strong>Electron</strong></td>
+<td><code>USER_MGMT_API_BASE</code> 등으로 주입된 베이스 + path.</td>
 </tr>
 <tr>
 <td><strong>절대 URL 예</strong></td>
-<td><code>https://100.71.84.10:7443/func/fn_mes_menu_user_class?p1=MM</code></td>
+<td><code>http://localhost:8787/api/fn-mes-menu-user-class?p1=MM</code></td>
 </tr>
 </tbody></table>
 <hr>
@@ -64,48 +64,37 @@ ul { padding-left: 1.25rem; }
 <tbody><tr>
 <td>권한그룹 콤보</td>
 <td>GET</td>
-<td><code>/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq</code></td>
-<td>콤보 옵션(18건)</td>
+<td><code>/api/fn-cm-code</code></td>
+<td><code>p1=USER_CLASS&amp;p2=disp_seq</code></td>
 </tr>
 <tr>
 <td>메뉴+권한 트리</td>
 <td>GET</td>
-<td><code>/func/fn_mes_menu_user_class?p1={user_class}</code></td>
-<td>선택 권한그룹의 전체 메뉴·권한 트리</td>
-</tr>
-<tr>
-<td>메뉴 마스터</td>
-<td>GET</td>
-<td><code>/db/tb_mes_menu</code></td>
-<td>메뉴 원본 테이블(521건)</td>
-</tr>
-<tr>
-<td>메뉴 전체(분리자 포함)</td>
-<td>GET</td>
-<td><code>/db/tb_mes_menu_all</code></td>
-<td>메뉴+구분선(367건)</td>
+<td><code>/api/fn-mes-menu-user-class</code></td>
+<td><code>p1={user_class}</code> — 서버에서 <code>tb_mes_menu</code> JOIN <code>tb_mes_menu_authority</code></td>
 </tr>
 <tr>
 <td>권한 저장</td>
 <td>POST</td>
-<td><code>/db/tb_mes_menu_authority</code></td>
+<td><code>/api/tb-mes-menu-authority</code></td>
 <td>권한 변경 반영</td>
 </tr>
 <tr>
 <td>권한 삭제</td>
 <td>DELETE</td>
-<td><code>/db/tb_mes_menu_authority</code></td>
-<td>권한 행 삭제</td>
+<td><code>/api/tb-mes-menu-authority</code></td>
+<td><code>pgm_code</code>·<code>menu_code</code>·<code>user_class</code> 쿼리</td>
 </tr>
 </tbody></table>
+<p><strong>참고:</strong> 레거시·게이트웨이에서 <code>tb_mes_menu</code>를 직접 GET 하던 경우가 있으나, <strong>현재 STD BE 화면</strong>은 위 API만 호출한다.</p>
 <hr>
-<h2>3. GET — <code>/func/fn_cm_code</code> (권한그룹 콤보)</h2>
+<h2>3. GET — <code>/api/fn-cm-code</code> (권한그룹 콤보)</h2>
 <h3>3.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(&#39;USER_CLASS&#39;)</code></li>
 </ul>
 <h3>3.2 URL</h3>
-<pre><code>GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
+<pre><code>GET {base}/api/fn-cm-code?p1=USER_CLASS&amp;p2=disp_seq
 </code></pre>
 <h3>3.3 호출 시점·조건</h3>
 <table>
@@ -209,13 +198,13 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>4. GET — <code>/func/fn_mes_menu_user_class</code> (핵심 — 메뉴 트리+권한)</h2>
+<h2>4. GET — <code>/api/fn-mes-menu-user-class</code> (핵심 — 메뉴 트리+권한)</h2>
 <h3>4.1 호출 코드</h3>
 <ul>
 <li><strong>함수</strong>: 화면 내 <code>fetch</code> 호출 (또는 전용 API 함수)</li>
 </ul>
 <h3>4.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_mes_menu_user_class?p1={user_class}
+<pre><code>GET {base}/api/fn-mes-menu-user-class?p1={user_class}
 </code></pre>
 <table>
 <thead>
@@ -392,213 +381,15 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>5. GET — <code>/db/tb_mes_menu</code> (메뉴 마스터)</h2>
-<h3>5.1 호출 코드</h3>
-<ul>
-<li>직접 호출하지 않고 <code>fn_mes_menu_user_class</code> 함수 내부에서 참조하는 원본 테이블.</li>
-</ul>
-<h3>5.2 URL</h3>
-<pre><code>GET {base}/db/tb_mes_menu
-</code></pre>
-<h3>5.3 응답 필드</h3>
-<p><strong>521건</strong> — depth=1(54건, 메뉴 그룹) + depth=2(467건, 하위 메뉴).</p>
-<table>
-<thead>
-<tr>
-<th>필드</th>
-<th>타입</th>
-<th>설명</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>pgm_code</code></td>
-<td>string</td>
-<td>모듈 코드</td>
-</tr>
-<tr>
-<td><code>parent_menu_code</code></td>
-<td>string</td>
-<td>상위 메뉴 코드</td>
-</tr>
-<tr>
-<td><code>menu_code</code></td>
-<td>string</td>
-<td>메뉴 코드</td>
-</tr>
-<tr>
-<td><code>menu_name</code></td>
-<td>string</td>
-<td>메뉴명</td>
-</tr>
-<tr>
-<td><code>form_code</code></td>
-<td>string</td>
-<td>폼 코드</td>
-</tr>
-<tr>
-<td><code>form_name</code></td>
-<td>string</td>
-<td>폼 이름</td>
-</tr>
-<tr>
-<td><code>depth</code></td>
-<td>number</td>
-<td>계층 (1 또는 2)</td>
-</tr>
-<tr>
-<td><code>seq_idx</code></td>
-<td>number</td>
-<td>정렬 순서</td>
-</tr>
-<tr>
-<td><code>menu_desc</code></td>
-<td>string</td>
-<td>메뉴 설명</td>
-</tr>
-<tr>
-<td><code>activated</code></td>
-<td>string</td>
-<td>활성 여부 (<code>&quot;Y&quot;</code> / <code>&quot;N&quot;</code>)</td>
-</tr>
-<tr>
-<td><code>attribute01</code>~`05`</td>
-<td>string</td>
-<td>확장 속성</td>
-</tr>
-<tr>
-<td><code>create_date</code></td>
-<td>datetime</td>
-<td>생성일시</td>
-</tr>
-<tr>
-<td><code>created_by</code></td>
-<td>string</td>
-<td>생성자</td>
-</tr>
-<tr>
-<td><code>update_date</code></td>
-<td>datetime</td>
-<td>수정일시</td>
-</tr>
-<tr>
-<td><code>updated_by</code></td>
-<td>string</td>
-<td>수정자</td>
-</tr>
-</tbody></table>
+<h2>5. DB 테이블 <code>tb_mes_menu</code> (참고 — 렌더러 직접 GET 없음)</h2>
+<p><code>GET /api/fn-mes-menu-user-class</code> 는 <a href="../../server/src/lib/queries/mesAuthority.mjs"><code>mesAuthority.mjs</code></a> 에서 <strong><code>tb_mes_menu</code> LEFT JOIN <code>tb_mes_menu_authority</code></strong> 로 한 번에 조회한다. 과거 문서의 <code>GET …/tb_mes_menu</code>·<code>tb_mes_menu_all</code> 직접 호출은 <strong>현재 STD BE 화면에서는 사용하지 않는다.</strong></p>
 <hr>
-<h2>6. GET — <code>/db/tb_mes_menu_all</code> (메뉴 전체 — 구분선 포함)</h2>
-<h3>6.1 URL</h3>
-<pre><code>GET {base}/db/tb_mes_menu_all
-</code></pre>
-<h3>6.2 응답 필드</h3>
-<p><strong>367건</strong> — <code>menu_type</code>으로 메뉴(MNU, 309건)와 구분선(SEP, 58건) 구분. MAT·PDM·BAS 모듈만 포함.</p>
-<table>
-<thead>
-<tr>
-<th>필드</th>
-<th>타입</th>
-<th>설명</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>pgm_code</code></td>
-<td>string</td>
-<td>모듈 코드</td>
-</tr>
-<tr>
-<td><code>menu_code</code></td>
-<td>string</td>
-<td>메뉴 코드</td>
-</tr>
-<tr>
-<td><code>menu_name</code></td>
-<td>string</td>
-<td>메뉴명 (SEP이면 <code>&quot;-&quot;</code>)</td>
-</tr>
-<tr>
-<td><code>menu_type</code></td>
-<td>string</td>
-<td><strong><code>&quot;MNU&quot;</code> (메뉴) / <code>&quot;SEP&quot;</code> (구분선)</strong></td>
-</tr>
-<tr>
-<td><code>depth</code></td>
-<td>number</td>
-<td>계층</td>
-</tr>
-<tr>
-<td><code>parent_menu_code</code></td>
-<td>string</td>
-<td>상위 메뉴 코드</td>
-</tr>
-<tr>
-<td><code>seq_idx</code></td>
-<td>number</td>
-<td>정렬 순서</td>
-</tr>
-<tr>
-<td><code>attribute01</code>~`05`</td>
-<td>string</td>
-<td>확장 속성</td>
-</tr>
-<tr>
-<td><code>create_date</code></td>
-<td>datetime</td>
-<td>생성일시</td>
-</tr>
-<tr>
-<td><code>created_by</code></td>
-<td>string</td>
-<td>생성자</td>
-</tr>
-<tr>
-<td><code>use_yn</code></td>
-<td>string</td>
-<td>사용 여부</td>
-</tr>
-</tbody></table>
-<h3>6.3 <code>tb_mes_menu</code>와의 차이</h3>
-<table>
-<thead>
-<tr>
-<th>항목</th>
-<th><code>tb_mes_menu</code></th>
-<th><code>tb_mes_menu_all</code></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>레코드 수</td>
-<td>521</td>
-<td>367</td>
-</tr>
-<tr>
-<td>포함 모듈</td>
-<td>6개 전체</td>
-<td>MAT·PDM·BAS만</td>
-</tr>
-<tr>
-<td>구분선(SEP)</td>
-<td>없음</td>
-<td>58건 포함</td>
-</tr>
-<tr>
-<td>폼 코드</td>
-<td><code>form_code</code>, <code>form_name</code></td>
-<td>없음 (<code>attribute01</code>에 폼 코드)</td>
-</tr>
-<tr>
-<td>활성 필드</td>
-<td><code>activated</code></td>
-<td><code>use_yn</code></td>
-</tr>
-</tbody></table>
-<hr>
-<h2>7. POST — <code>/db/tb_mes_menu_authority</code> (권한 저장)</h2>
-<h3>7.1 호출 시점</h3>
+<h2>6. POST — <code>/api/tb-mes-menu-authority</code> (권한 저장)</h2>
+<h3>6.1 호출 시점</h3>
 <ul>
 <li>Toolbar <strong>Save</strong> — 사용자가 트리에서 Dot을 변경한 항목만 diff 계산 후 전송.</li>
 </ul>
-<h3>7.2 JSON 필드</h3>
+<h3>6.2 JSON 필드</h3>
 <table>
 <thead>
 <tr>
@@ -636,7 +427,7 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <p><strong>복합 키</strong>: <code>pgm_code</code> + <code>menu_code</code> + <code>user_class</code> — 같은 <code>menu_code</code>가 여러 모듈에 존재하므로 <code>pgm_code</code>가 반드시 필요.</p>
-<h3>7.3 에러</h3>
+<h3>6.3 에러</h3>
 <table>
 <thead>
 <tr>
@@ -654,15 +445,15 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>8. DELETE — <code>/db/tb_mes_menu_authority</code> (권한 삭제)</h2>
-<h3>8.1 형태</h3>
-<pre><code>DELETE {base}/db/tb_mes_menu_authority?pgm_code={pgm_code}&amp;menu_code={menu_code}&amp;user_class={user_class}
+<h2>7. DELETE — <code>/api/tb-mes-menu-authority</code> (권한 삭제)</h2>
+<h3>7.1 형태</h3>
+<pre><code>DELETE {base}/api/tb-mes-menu-authority?pgm_code={pgm_code}&amp;menu_code={menu_code}&amp;user_class={user_class}
 </code></pre>
-<h3>8.2 호출 시점</h3>
+<h3>7.2 호출 시점</h3>
 <ul>
 <li>저장 시 기존 권한 행 제거가 필요한 경우(N/N으로 변경 등).</li>
 </ul>
-<h3>8.3 에러</h3>
+<h3>7.3 에러</h3>
 <table>
 <thead>
 <tr>
@@ -680,7 +471,7 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>9. 테이블·응답 필드 (<code>tb_mes_menu_authority</code> 관점)</h2>
+<h2>8. 테이블·응답 필드 (<code>tb_mes_menu_authority</code> 관점)</h2>
 <p><strong>7,784건</strong> (17개 <code>user_class</code> × 메뉴 수). <code>PS</code>(제조 구성원)만 데이터 0건(미설정).</p>
 <table>
 <thead>
@@ -764,8 +555,8 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>10. UI 트리 매핑</h2>
-<h3>10.1 Dot 색상 범례</h3>
+<h2>9. UI 트리 매핑</h2>
+<h3>9.1 Dot 색상 범례</h3>
 <table>
 <thead>
 <tr>
@@ -790,7 +581,7 @@ ul { padding-left: 1.25rem; }
 <td>모든권한 (<code>Y</code>/<code>Y</code>)</td>
 </tr>
 </tbody></table>
-<h3>10.2 트리 계층 구조</h3>
+<h3>9.2 트리 계층 구조</h3>
 <table>
 <thead>
 <tr>
@@ -819,7 +610,7 @@ ul { padding-left: 1.25rem; }
 <td>Dot 표시</td>
 </tr>
 </tbody></table>
-<h3>10.3 더블클릭 토글 순환</h3>
+<h3>9.3 더블클릭 토글 순환</h3>
 <table>
 <thead>
 <tr>
@@ -845,7 +636,7 @@ ul { padding-left: 1.25rem; }
 </tr>
 </tbody></table>
 <hr>
-<h2>11. 실행 흐름 요약</h2>
+<h2>10. 실행 흐름 요약</h2>
 <pre><code>┌── 화면 마운트 ──────────────────────────────────────────┐
 │ ① fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq → 콤보 18건     │
 │ ② 첫 번째 값 &quot;MM&quot; 자동 선택                              │
@@ -858,13 +649,13 @@ ul { padding-left: 1.25rem; }
 
 ┌── 저장 ─────────────────────────────────────────────────┐
 │ ① 변경된 항목 diff 계산                                   │
-│ ② POST /db/tb_mes_menu_authority (변경/신규)              │
-│    DELETE /db/tb_mes_menu_authority (삭제)                │
+│ ② POST /api/tb-mes-menu-authority (변경/신규)              │
+│    DELETE /api/tb-mes-menu-authority (삭제)                │
 │ ③ fn_mes_menu_user_class?p1={현재값} → 트리 갱신          │
 └──────────────────────────────────────────────────────────┘
 </code></pre>
 <hr>
-<h2>12. 공통 메뉴 중복 (주의)</h2>
+<h2>11. 공통 메뉴 중복 (주의)</h2>
 <p>같은 <code>menu_code</code>가 여러 <code>pgm_code</code>에 등록된 경우:</p>
 <table>
 <thead>
@@ -900,7 +691,7 @@ ul { padding-left: 1.25rem; }
 </tbody></table>
 <p><strong>저장·삭제 시 반드시 <code>pgm_code</code>를 함께 전송</strong>해야 올바른 행을 특정할 수 있다.</p>
 <hr>
-<h2>13. 보완·주의점(제안)</h2>
+<h2>12. 보완·주의점(제안)</h2>
 <ol>
 <li><strong>한글 컬럼명</strong>: <code>fn_mes_menu_user_class</code> 응답에 <code>접근권한</code>, <code>실행권한</code> 한글 키가 사용됨 — 프론트에서 <code>row[&#39;접근권한&#39;]</code>으로 접근 필요.</li>
 <li><strong><code>PS</code> 미설정</strong>: 18개 <code>user_class</code> 중 <code>PS</code>(제조 구성원)만 <code>tb_mes_menu_authority</code>에 데이터 0건. 콤보에서 선택 시 모든 메뉴가 <code>N</code>/<code>N</code>(권한없음)으로 표시될 수 있음.</li>
@@ -909,7 +700,7 @@ ul { padding-left: 1.25rem; }
 <li><strong><code>N/Y</code> 조합 부재</strong>: 접근 불가인데 실행 가능(<code>access=N</code>, <code>execute=Y</code>)한 데이터는 없음 — 논리적으로 타당하나 프론트에서 방어 로직 권장.</li>
 </ol>
 <hr>
-<h2>14. 관련 소스 파일</h2>
+<h2>13. 관련 소스 파일</h2>
 <table>
 <thead>
 <tr>

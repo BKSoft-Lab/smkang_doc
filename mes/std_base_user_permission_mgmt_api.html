@@ -27,7 +27,7 @@ ul { padding-left: 1.25rem; }
 <body>
 <main class="wrap">
 <h1>std_base_user_permission_mgmt — DB·HTTP API 상세 정리</h1>
-<p>화면 ID: <code>std_base_user_permission_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_user_permission_mgmt.tsx"><code>renderer/src/screens/std/std_base_user_permission_mgmt.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/mesDbBaseUrl.ts"><code>renderer/src/lib/mesDbBaseUrl.ts</code></a>의 <code>mesDbUrl()</code><br>권한 API: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>renderer/src/lib/userAuthorityApi.ts</code></a><br>사용자 API: <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>renderer/src/lib/tbCmUserApi.ts</code></a><br>공통코드: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a></p>
+<p>화면 ID: <code>std_base_user_permission_mgmt</code><br>구현: <a href="../../renderer/src/screens/std/std_base_user_permission_mgmt.tsx"><code>renderer/src/screens/std/std_base_user_permission_mgmt.tsx</code></a><br>BE 베이스: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code> (STD BE, 기본 포트 8787)<br>권한 API: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>renderer/src/lib/userAuthorityApi.ts</code></a><br>사용자 목록 API: <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>renderer/src/lib/tbCmUserApi.ts</code></a> — <strong><code>GET /api/users</code></strong><br>공통코드: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>renderer/src/lib/fnCmCodeApi.ts</code></a> — <strong><code>/api/fn-cm-code</code></strong><br>레거시(Oracle): <a href="../legacy_mes/Basis/_2S_MES_Basis/frmUserAuthority.cs"><code>docs/legacy_mes/Basis/_2S_MES_Basis/frmUserAuthority.cs</code></a></p>
 <hr>
 <h2>1. 베이스 URL·환경</h2>
 <table>
@@ -38,16 +38,16 @@ ul { padding-left: 1.25rem; }
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>Vite dev</strong> + <code>VITE_MES_DB_API_BASE</code> 비어 있음</td>
-<td><code>base === &#39;&#39;</code> → 요청은 <strong><code>/db/...</code></strong>, <strong><code>/func/...</code></strong> (상대). <a href="../../renderer/vite.config.ts"><code>renderer/vite.config.ts</code></a>의 <code>server.proxy</code>로 <code>https://100.71.84.10:7443</code>에 전달(CORS 회피).</td>
+<td><strong>Vite dev</strong></td>
+<td>상대 <strong><code>/api/...</code></strong> → <a href="../../renderer/vite.config.ts"><code>vite.config.ts</code></a> 프록시 → STD BE(기본 <code>http://localhost:8787</code>).</td>
 </tr>
 <tr>
-<td><strong>프로덕션(Electron 빌드 등)</strong></td>
-<td>기본 <code>https://100.71.84.10:7443</code> + path, 또는 <code>VITE_MES_DB_API_BASE</code>로 지정한 베이스.</td>
+<td><strong>Electron</strong></td>
+<td><code>USER_MGMT_API_BASE</code> 등으로 주입된 베이스 + path.</td>
 </tr>
 <tr>
 <td><strong>절대 URL 예</strong></td>
-<td><code>https://100.71.84.10:7443/func/fn_user_authority_base?p1=A</code></td>
+<td><code>http://localhost:8787/api/fn-user-authority-base?p1=A</code></td>
 </tr>
 </tbody></table>
 <hr>
@@ -64,68 +64,68 @@ ul { padding-left: 1.25rem; }
 <tbody><tr>
 <td>부서 콤보</td>
 <td>GET</td>
-<td><code>/func/fn_cm_code</code></td>
+<td><code>/api/fn-cm-code</code></td>
 <td><code>p1=DEPT&amp;p2=disp_seq</code></td>
 </tr>
 <tr>
 <td>직급 콤보</td>
 <td>GET</td>
-<td><code>/func/fn_cm_code</code></td>
+<td><code>/api/fn-cm-code</code></td>
 <td><code>p1=DUTY&amp;p2=disp_seq</code></td>
 </tr>
 <tr>
 <td>권한그룹 콤보</td>
 <td>GET</td>
-<td><code>/func/fn_cm_code</code></td>
+<td><code>/api/fn-cm-code</code></td>
 <td><code>p1=USER_CLASS&amp;p2=disp_seq</code></td>
 </tr>
 <tr>
 <td>부서별 사용자 목록</td>
 <td>GET</td>
-<td><code>/func/fn_cm_user_dept</code></td>
+<td><code>/api/fn-cm-user-dept</code></td>
 <td><code>p1=&lt;dept&gt;</code></td>
 </tr>
 <tr>
 <td>전체 사용자 (부서 &quot;전체&quot;)</td>
 <td>GET</td>
-<td><code>/db/tb_cm_user</code></td>
+<td><code>/api/users</code></td>
 <td><code>_orderBy=user_id</code></td>
 </tr>
 <tr>
 <td>선택 사용자 권한그룹</td>
 <td>GET</td>
-<td><code>/func/fn_user_authority_userid</code></td>
+<td><code>/api/fn-user-authority-userid</code></td>
 <td><code>p1=&lt;user_id&gt;</code></td>
 </tr>
 <tr>
 <td>권한그룹별 사용자</td>
 <td>GET</td>
-<td><code>/func/fn_user_authority_base</code></td>
+<td><code>/api/fn-user-authority-base</code></td>
 <td><code>p1=&lt;user_class&gt;</code></td>
 </tr>
 <tr>
 <td>권한 추가</td>
 <td>POST</td>
-<td><code>/db/tb_mes_user_authority</code></td>
+<td><code>/api/tb-mes-user-authority</code></td>
 <td>JSON body</td>
 </tr>
 <tr>
 <td>권한 삭제</td>
 <td>DELETE</td>
-<td><code>/db/tb_mes_user_authority</code></td>
+<td><code>/api/tb-mes-user-authority</code></td>
 <td><code>user_id</code> + <code>user_class</code></td>
 </tr>
 </tbody></table>
 <hr>
-<h2>3. GET — <code>/func/fn_cm_code</code> (콤보 3종)</h2>
+<h2>3. GET — <code>/api/fn-cm-code</code> (콤보 3종)</h2>
 <h3>3.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/fnCmCodeApi.ts"><code>fnCmCodeApi.ts</code></a> — <code>fetchFnCmCodeOptions(p1, p2)</code></li>
 </ul>
 <h3>3.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_cm_code?p1=DEPT&amp;p2=disp_seq
-GET {base}/func/fn_cm_code?p1=DUTY&amp;p2=disp_seq
-GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
+<pre><code>GET {base}/api/fn-cm-code?p1=DEPT&amp;p2=disp_seq
+GET {base}/api/fn-cm-code?p1=DUTY&amp;p2=disp_seq
+GET {base}/api/fn-cm-code?p1=USER_CLASS&amp;p2=disp_seq
 </code></pre>
 <table>
 <thead>
@@ -176,13 +176,13 @@ GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
 </tr>
 </tbody></table>
 <hr>
-<h2>4. GET — <code>/func/fn_cm_user_dept</code> (좌측 사용자 그리드)</h2>
+<h2>4. GET — <code>/api/fn-cm-user-dept</code> (좌측 사용자 그리드)</h2>
 <h3>4.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchCmUserDept(dept)</code></li>
 </ul>
 <h3>4.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_cm_user_dept?p1=&lt;dept&gt;
+<pre><code>GET {base}/api/fn-cm-user-dept?p1=&lt;dept&gt;
 </code></pre>
 <table>
 <thead>
@@ -215,7 +215,7 @@ GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
 <tr>
 <td>부서 <strong>&quot;전체&quot;</strong> 선택</td>
 <td><code>filterDept === &#39;&#39;</code></td>
-<td><code>fetchAllCmUsersForDeptGrid</code> — <code>GET /db/tb_cm_user</code> 대체</td>
+<td><code>fetchAllCmUsersForDeptGrid</code> — <code>GET /api/users</code> 대체</td>
 </tr>
 </tbody></table>
 <h3>4.4 응답·UI</h3>
@@ -237,13 +237,13 @@ GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
 </tr>
 </tbody></table>
 <hr>
-<h2>5. GET — <code>/db/tb_cm_user</code> (부서 &quot;전체&quot; 대체)</h2>
+<h2>5. GET — <code>/api/users</code> (부서 &quot;전체&quot; 대체)</h2>
 <h3>5.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/tbCmUserApi.ts"><code>tbCmUserApi.ts</code></a> — <code>fetchTbCmUsers({})</code><br>→ <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchAllCmUsersForDeptGrid(deptOpts, dutyOpts)</code></li>
 </ul>
 <h3>5.2 URL·쿼리</h3>
-<pre><code>GET {base}/db/tb_cm_user?_orderBy=user_id
+<pre><code>GET {base}/api/users?_orderBy=user_id
 </code></pre>
 <h3>5.3 호출 시점·조건</h3>
 <table>
@@ -266,13 +266,13 @@ GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
 <li><code>dept</code>/<code>duty</code> 코드를 <code>resolveFnCmCodeLabel</code>로 <strong>명칭</strong>(<code>dept_code_name</code>, <code>duty_code_name</code>) 치환.</li>
 </ul>
 <hr>
-<h2>6. GET — <code>/func/fn_user_authority_userid</code> (선택 사용자 권한그룹)</h2>
+<h2>6. GET — <code>/api/fn-user-authority-userid</code> (선택 사용자 권한그룹)</h2>
 <h3>6.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchUserAuthorityOfUser(userId)</code></li>
 </ul>
 <h3>6.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_user_authority_userid?p1=&lt;user_id&gt;
+<pre><code>GET {base}/api/fn-user-authority-userid?p1=&lt;user_id&gt;
 </code></pre>
 <table>
 <thead>
@@ -330,13 +330,13 @@ GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
 </tr>
 </tbody></table>
 <hr>
-<h2>7. GET — <code>/func/fn_user_authority_base</code> (우측 탭1 권한그룹 그리드)</h2>
+<h2>7. GET — <code>/api/fn-user-authority-base</code> (우측 탭1 권한그룹 그리드)</h2>
 <h3>7.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>fetchUserAuthorityBase(userClass)</code></li>
 </ul>
 <h3>7.2 URL·쿼리</h3>
-<pre><code>GET {base}/func/fn_user_authority_base?p1=&lt;user_class&gt;
+<pre><code>GET {base}/api/fn-user-authority-base?p1=&lt;user_class&gt;
 </code></pre>
 <table>
 <thead>
@@ -390,13 +390,13 @@ GET {base}/func/fn_cm_code?p1=USER_CLASS&amp;p2=disp_seq
 </tr>
 </tbody></table>
 <hr>
-<h2>8. POST — <code>/db/tb_mes_user_authority</code> (권한 추가)</h2>
+<h2>8. POST — <code>/api/tb-mes-user-authority</code> (권한 추가)</h2>
 <h3>8.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>postUserAuthority(body)</code></li>
 </ul>
 <h3>8.2 URL·Body</h3>
-<pre><code>POST {base}/db/tb_mes_user_authority
+<pre><code>POST {base}/api/tb-mes-user-authority
 Content-Type: application/json
 </code></pre>
 <h3>8.3 JSON 필드</h3>
@@ -454,13 +454,13 @@ Content-Type: application/json
 </tr>
 </tbody></table>
 <hr>
-<h2>9. DELETE — <code>/db/tb_mes_user_authority</code> (권한 삭제)</h2>
+<h2>9. DELETE — <code>/api/tb-mes-user-authority</code> (권한 삭제)</h2>
 <h3>9.1 호출 코드</h3>
 <ul>
 <li><strong>파일</strong>: <a href="../../renderer/src/lib/userAuthorityApi.ts"><code>userAuthorityApi.ts</code></a> — <code>deleteUserAuthority(userId, userClass)</code></li>
 </ul>
 <h3>9.2 URL·쿼리</h3>
-<pre><code>DELETE {base}/db/tb_mes_user_authority?user_id=&lt;id&gt;&amp;user_class=&lt;cls&gt;
+<pre><code>DELETE {base}/api/tb-mes-user-authority?user_id=&lt;id&gt;&amp;user_class=&lt;cls&gt;
 </code></pre>
 <table>
 <thead>
