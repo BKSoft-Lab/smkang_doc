@@ -17,7 +17,20 @@
 
 ---
 
+## 2026-04-18
+### HANDOVER HTML — BK MES.docx 링크
+- 질문: docs/BK MES.docx 파일도 HANDOVER_NEW_DEVELOPER.html에서 링크로 연결되도록 파일를 복사하고 HANDOVER_NEW_DEVELOPER.html도 수정해줘.
+- 답 요약: (응답 후 기입)
+
+### smkang_doc mes/handover Git 반영
+- 질문: D:\\smkang_data\\docs\\mes 에 추가한 파일들을 모두 git에 반영하라.
+- 답 요약: **`D:\smkang_data\docs`** 저장소에서 **`mes/handover/**` 스테이징·커밋 `165bd41`·**`git push origin main`** (`BKSoft-Lab/smkang_doc`). **`renderer/src/data/manual.csv`** 는 루트 `.gitignore`의 `data/` 때문에 **`git add -f`** 로 포함.
+
 ## 2026-04-17
+### handover 오프라인 번들 (smkang_data)
+- 질문: HANDOVER_NEW_DEVELOPER.html 및 연결 파일을 D:\\smkang_data\\docs\\mes\\handover 에 동일 구조로 복사·웹에서 열기.
+- 답 요약: **`scripts/copy-handover-to-smkang.mjs`** 추가·실행, **`index.html`** 리다이렉트. 문서 링크 수정(`MesScreenShell` 경로·`screenPngPresence` 제거). **`HANDOVER_NEW_DEVELOPER.md/html`** 갱신.
+
 ### HANDOVER_NEW_DEVELOPER.md HTML 변환
 - 질문: 이 문서를 html로 변환
 - 답 요약: **`node scripts/render-db-doc-html.mjs docs/HANDOVER_NEW_DEVELOPER.md docs/HANDOVER_NEW_DEVELOPER.html`** 로 생성. **DOCUMENTATION_INDEX**·**CHANGELOG** 반영.

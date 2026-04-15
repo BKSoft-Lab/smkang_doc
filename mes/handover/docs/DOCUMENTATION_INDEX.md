@@ -8,6 +8,7 @@
 
 - [`docs/HANDOVER_NEW_DEVELOPER.md`](HANDOVER_NEW_DEVELOPER.md): **신규 개발자 인수인계** — 레거시 정합 작업 순서(캡처·`legacy_mes`·FE/BE·연동)·문서 지도
 - [`docs/HANDOVER_NEW_DEVELOPER.html`](HANDOVER_NEW_DEVELOPER.html): 위 MD의 **브라우저용 HTML** (`scripts/render-db-doc-html.mjs` 변환)
+- 오프라인 번들(링크 대상 포함): 로컬 `D:\smkang_data\docs\mes\handover` — [`scripts/copy-handover-to-smkang.mjs`](../scripts/copy-handover-to-smkang.mjs) 로 갱신
 - `docs/CONTEXT.md`: 현재 상태/다음 단계
 - `docs/CHANGELOG.md`: 작업 이력
 - `docs/TODO.md`: 남은 작업

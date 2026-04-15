@@ -1,4 +1,24 @@
-﻿## 2026-04-17 (문서 — 신규 개발자 인수인계 HTML)
+﻿## 2026-04-18 (smkang_doc — mes/handover 푸시)
+### 작업 내용
+- **`D:\smkang_data\docs`** (`BKSoft-Lab/smkang_doc`) — **`mes/handover/**`** 커밋·`origin/main` 푸시. `manual.csv`는 `.gitignore` `data/` 예외로 **`git add -f`** 포함.
+
+### 변경된 파일 (MES 저장소)
+- `docs/USER_PROMPTS_LOG.md`, `docs/CHANGELOG.md`
+
+---
+
+## 2026-04-17 (문서 — handover 오프라인 번들 smkang_data)
+### 작업 내용
+- **[`scripts/copy-handover-to-smkang.mjs`](../scripts/copy-handover-to-smkang.mjs)** — `docs/HANDOVER_NEW_DEVELOPER.html` 의 `href`를 해석해 MES 루트 상대 경로 그대로 **`D:\smkang_data\docs\mes\handover`** 에 복사(`docs/db-doc` 전체 포함). **`index.html`** 리다이렉트·**`README.txt`**.
+- **[`docs/HANDOVER_NEW_DEVELOPER.md`](HANDOVER_NEW_DEVELOPER.md)** — `MesScreenShell` 링크 경로 수정, 존재하지 않는 `screenPngPresence.ts` 문구 정리, 오프라인 번들 안내 추가. HTML 재생성.
+
+### 변경된 파일
+- `scripts/copy-handover-to-smkang.mjs`, `docs/HANDOVER_NEW_DEVELOPER.md`, `docs/HANDOVER_NEW_DEVELOPER.html`, `docs/CHANGELOG.md`, `docs/USER_PROMPTS_LOG.md`
+- (로컬) `D:\smkang_data\docs\mes\handover\**` — Git 미추적
+
+---
+
+## 2026-04-17 (문서 — 신규 개발자 인수인계 HTML)
 ### 작업 내용
 - **[`docs/HANDOVER_NEW_DEVELOPER.html`](HANDOVER_NEW_DEVELOPER.html)** — [`HANDOVER_NEW_DEVELOPER.md`](HANDOVER_NEW_DEVELOPER.md) 를 [`scripts/render-db-doc-html.mjs`](../scripts/render-db-doc-html.mjs) 로 변환(GFM·인라인 CSS). MD 하단에 재생성 명령·HTML 경로 안내 추가.
 
