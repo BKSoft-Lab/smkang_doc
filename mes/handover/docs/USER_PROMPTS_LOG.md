@@ -17,10 +17,27 @@
 
 ---
 
+## 2026-04-16
+### smkang_doc 오프라인 동기화 + Git 푸시
+- 질문: smkang_doc 에 반영하고 smkang_doc 깃 반영
+- 답 요약: (응답 후 기입)
+
 ## 2026-04-18
+### HANDOVER — 번호 체계 표 제거
+- 질문: (1.2.1~1.2.4 번호 체계 표) 이부분 제거
+- 답 요약: **`HANDOVER_NEW_DEVELOPER.md`** 서두의 **번호 체계** 문단·표·구분선 제거 후 **`render-db-doc-html.mjs`** 로 **HTML 재생성**. 본문 **`#### 1.2.3` / `#### 1.2.4`** 절 제목은 유지.
+
+### smkang_doc Git 반영 (의도 정정)
+- 질문: 아니 smkang_doc 저장소를 깃에 반영하라는 것이었다.
+- 답 요약: **`D:\smkang_data\docs`** (`smkang_doc`) — **`mes/handover/**` 만 스테이징·커밋 **`ac8e3eb`** (`BK MES.docx`, HANDOVER·CHANGELOG 등)·**`git push origin main`**. `02.WorkList`·`03.Tip` 은 미포함.
+
+### docs Git 반영
+- 질문: docs git에 반영하라.
+- 답 요약: **`docs/`만** 스테이징·커밋 **`30df63e`** (`인수인계·BK MES.docx, db-doc·DATABASE·CHANGELOG 등`). 이전 커밋에 섞였던 **`server/` 쿼리 rename** 은 **`git reset`** 으로 분리해 **미커밋** 상태로 복구 후 **`git push origin main`**.
+
 ### HANDOVER HTML — BK MES.docx 링크
 - 질문: docs/BK MES.docx 파일도 HANDOVER_NEW_DEVELOPER.html에서 링크로 연결되도록 파일를 복사하고 HANDOVER_NEW_DEVELOPER.html도 수정해줘.
-- 답 요약: (응답 후 기입)
+- 답 요약: **`docs/BK MES.docx`** 는 이미 `docs/`에 있음. **MD에 `BK%20MES.docx` 링크** 추가 후 **`render-db-doc-html.mjs`** 로 HTML 재생성 → **`href="BK%20MES.docx"`**. **`copy-handover-to-smkang.mjs`** 실행 시 **`docs/BK MES.docx`** 오프라인 번들에 포함 확인.
 
 ### smkang_doc mes/handover Git 반영
 - 질문: D:\\smkang_data\\docs\\mes 에 추가한 파일들을 모두 git에 반영하라.

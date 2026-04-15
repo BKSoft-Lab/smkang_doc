@@ -1,4 +1,14 @@
-﻿## 2026-04-18 (smkang_doc — mes/handover 푸시)
+﻿## 2026-04-18 (문서 — HANDOVER에서 BK MES.docx 링크)
+### 작업 내용
+- **[`docs/HANDOVER_NEW_DEVELOPER.md`](HANDOVER_NEW_DEVELOPER.md)** — 부록 B에 [`BK MES.docx`](BK%20MES.docx) 상대 링크·문구 정리. HTML 재생성.
+- **`scripts/copy-handover-to-smkang.mjs`** — HTML의 `href`에 `BK%20MES.docx`가 있으면 **`docs/BK MES.docx`** 가 오프라인 번들에 포함됨(기존 로직).
+
+### 변경된 파일
+- `docs/HANDOVER_NEW_DEVELOPER.md`, `docs/HANDOVER_NEW_DEVELOPER.html`, `docs/CHANGELOG.md`, `docs/USER_PROMPTS_LOG.md`
+
+---
+
+## 2026-04-18 (smkang_doc — mes/handover 푸시)
 ### 작업 내용
 - **`D:\smkang_data\docs`** (`BKSoft-Lab/smkang_doc`) — **`mes/handover/**`** 커밋·`origin/main` 푸시. `manual.csv`는 `.gitignore` `data/` 예외로 **`git add -f`** 포함.
 
