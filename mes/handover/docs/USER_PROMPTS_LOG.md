@@ -17,12 +17,11 @@
 
 ---
 
-## 2026-04-16
+## 2026-04-18
 ### smkang_doc 오프라인 동기화 + Git 푸시
 - 질문: smkang_doc 에 반영하고 smkang_doc 깃 반영
 - 답 요약: **`copy-handover-to-smkang.mjs`** 로 **`D:\smkang_data\docs\mes\handover`** 갱신 → **`mes/handover/**` 커밋·**`git push origin main`** (`BKSoft-Lab/smkang_doc`, 핸드오버·CHANGELOG·USER_PROMPTS_LOG 등).
 
-## 2026-04-18
 ### HANDOVER — 번호 체계 표 제거
 - 질문: (1.2.1~1.2.4 번호 체계 표) 이부분 제거
 - 답 요약: **`HANDOVER_NEW_DEVELOPER.md`** 서두의 **번호 체계** 문단·표·구분선 제거 후 **`render-db-doc-html.mjs`** 로 **HTML 재생성**. 본문 **`#### 1.2.3` / `#### 1.2.4`** 절 제목은 유지.
