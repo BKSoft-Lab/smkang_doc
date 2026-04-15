@@ -20,7 +20,7 @@
 ## 2026-04-16
 ### smkang_doc 오프라인 동기화 + Git 푸시
 - 질문: smkang_doc 에 반영하고 smkang_doc 깃 반영
-- 답 요약: **`copy-handover-to-smkang.mjs`** 로 오프라인 번들 갱신 → **`mes/handover/**` 스테이징·**`git push origin main`** (핸드오버·CHANGELOG·USER_PROMPTS_LOG 등 반영, 최종 `main` **`482030e`**).
+- 답 요약: **`copy-handover-to-smkang.mjs`** 로 **`D:\smkang_data\docs\mes\handover`** 갱신 → **`mes/handover/**` 커밋·**`git push origin main`** (`BKSoft-Lab/smkang_doc`, 핸드오버·CHANGELOG·USER_PROMPTS_LOG 등).
 
 ## 2026-04-18
 ### HANDOVER — 번호 체계 표 제거
