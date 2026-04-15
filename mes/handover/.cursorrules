@@ -1,0 +1,91 @@
+# Cursor Rules — Cursor 전용 규칙
+
+이 파일은 Cursor IDE에서 사용하는 전용 규칙입니다.
+범용 규칙은 `project-rules.md`를 참조하세요.
+
+## 범용 규칙 참조
+
+이 프로젝트의 모든 범용 규칙은 `project-rules.md` 파일에 정의되어 있습니다.
+Cursor는 이 파일의 규칙을 우선적으로 따르며, 아래의 Cursor 전용 규칙을 추가로 적용합니다.
+
+**중요**: 작업 시작 전에 `project-rules.md`를 먼저 읽고 이해해야 합니다. **`ai-rules.md`** 는 `project-rules.md` **위임·표**만 두고 본문을 중복하지 않는다.
+
+**프로젝트 화면 정의(범용 규칙 §6.0)**: 기능 목록은 `renderer/src/data/manual.csv`의 **`모듈명` · `메뉴` · `하위메뉴` · `화면 ID`** 구조를 따르고, **`docs/매뉴얼.csv`와 내용 동기화**를 유지하며, 각 화면 UI는 **`docs/image/<화면 ID>.png`** 를 참고해 구성한다. **PNG 유무는 glob만으로 판단하지 말고** `project-rules.md` §6.0의 **PNG 존재 확인 절차**(직접 Read·터미널 검색 등)를 따른다.
+
+**타 모듈·신규 화면 작업 시**: `project-rules.md` **§6.0.1·§6.0.2** — CSV 동기화·**BK MES**·스플래시 **`bksoft.png`**(`splashAssets`)·모듈/내부창 타이틀·**MDI에서는 `document.title` 미갱신**·Electron 모듈 창 제목·**MDI 클라이언트 측정·Tile/Cascade·`registerMdiClientMeasure`·모듈 창 리사이즈 시 격자**(`MesMdiContext`/`MesMdiLayer`)·그리드/골격(`LAYOUT_RULES`)을 **다른 모듈에도 동일 적용**한다. **`docs/legacy_mes`** 와 저장/삭제/조회·메시지 정합이 필요하면 **§6.0.3**·`docs/DATABASE.md`(화면 ID ↔ `frm`)·`docs/legacy_mes/README.md` 를 본다.
+
+**UI 레이아웃·Tailwind 패턴**: 폼 라벨, 조회줄(`FilterBarButtons`, `MesFilterRow`, 필터–버튼 `border-l`), **`MesSearchSaveBar`** 의 **`filterLeading`**: `leading` 컨테이너 **`flex-1`**·필터와 **`pr-[10px]`** 간격·긴 배너는 **`truncate` 고정폭 금지**(`LAYOUT_RULES` 「조회 Search/Save 표준 스트립」), 그리드 `sticky`/`slate` 등은 **`docs/LAYOUT_RULES.md`** 를 따른다(§6.0 Chrome 골격과 병행). **Chrome**: **Toolbar만**(인앱 `MesMenuBar` 기본 추가 금지·Electron 메뉴와 이중 방지) — 경로 줄·뒤로가기 없음; **타이틀**: 모듈 창은 **모듈명만**; 내부(MDI)·기능 화면은 **`메뉴 > 하위메뉴 (화면ID)`** (`manualInnerWindowTitle`). PNG **예시 데이터 행·셀은 전부** 목업.
+
+**사용자 관리 BE·PostgreSQL `tb_cm_user`**: 레거시 스키마 정합(bcrypt **`user_pwd` 길이**·**UPDATE/INSERT upsert**·**날짜 varchar**)은 **`project-rules.md` §4.1**·**`docs/DATABASE.md`**·**`docs/db-doc/std_base_user_mgmt_api.md`** 를 따른다.
+
+## Cursor 전용 규칙
+
+
+### 페이지 DB 분석 워크플로
+
+**`.cursor/rules/page-db-analysis-workflow.mdc`** 를 따른다 — 트리거 **「페이지에 대한 DB분석」**, `docs/db-doc/*_api.md` 작성·수정 시 § MD 템플릿, 2·3단계(HTML·smkang_doc 푸시). 세부 경로·명령·커밋 메시지는 해당 파일(본문 전체가 정본).
+
+### 1. 코드 인용 형식 (Code Citation)
+
+Cursor에서 기존 코드를 참조할 때는 다음 형식을 사용합니다:
+
+```startLine:endLine:filepath
+// 코드 내용
+```
+
+**요구사항**:
+- `startLine`: 시작 줄 번호 (필수)
+- `endLine`: 끝 줄 번호 (필수)
+- `filepath`: 파일 경로 (필수)
+- 언어 태그는 사용하지 않음
+- 최소 1줄의 실제 코드 포함
+
+**예시**:
+```
+```12:14:app/components/Todo.tsx
+export const Todo = () => {
+  return <div>Todo</div>;
+};
+```
+```
+
+### 2. 새 코드 제안 형식
+
+기존 코드베이스에 없는 새 코드를 제안할 때는 표준 마크다운 코드 블록을 사용합니다:
+
+```typescript
+export const newComponent = () => {
+  return <div>New Component</div>;
+};
+```
+
+### 3. Cursor 특정 최적화
+
+- **파일 읽기 최소화**: Cursor의 컨텍스트 윈도우를 효율적으로 사용하기 위해 필요한 파일만 읽습니다.
+- **점진적 검색**: `codebase_search`를 사용할 때는 구체적인 질문을 사용합니다.
+- **병렬 도구 호출**: 가능한 경우 여러 도구를 병렬로 호출하여 응답 시간을 단축합니다.
+
+### 4. Cursor 워크플로우
+
+1. **컨텍스트 복구**: `project-rules.md`에 정의된 브리핑 절차를 따릅니다.
+2. **작업 수행**: 범용 규칙을 따르면서 Cursor 전용 기능을 활용합니다.
+3. **문서 자동 갱신 (필수)**: 작업 완료 후 `project-rules.md`에 정의된 문서 갱신 규칙을 **반드시 자동으로** 따릅니다.
+   - 문서 갱신은 선택 사항이 아닌 필수 사항입니다.
+   - 모든 코드 변경, 설정 변경, 구조 변경은 즉시 관련 문서에 반영해야 합니다.
+   - 문서 갱신을 건너뛰거나 미루는 것은 절대 금지됩니다.
+4. **사용자 프롬프트 로그 (필수)**: 각 턴에서 **다른 작업보다 먼저** `docs/USER_PROMPTS_LOG.md`에 **질문만** 기록하고, **응답 종료 후** 같은 항목에 **답 요약**을 채운다(`project-rules.md` §2 **USER_PROMPTS_LOG**). 상세 순서·예외 없음은 **`.cursor/rules/user-prompts-log-workflow.mdc`**(alwaysApply)를 따른다.
+
+### 5. Cursor 도구 사용 가이드
+
+- `read_file`: 파일을 읽을 때 필요한 부분만 읽도록 offset과 limit을 사용합니다.
+- `codebase_search`: 구체적이고 명확한 질문을 사용합니다.
+- `grep`: 정확한 문자열 검색에 사용합니다.
+- `todo_write`: 복잡한 작업(3단계 이상)에만 사용합니다.
+
+### 6. Cursor 특정 주의사항
+
+- **인용 형식 혼용 금지**: 기존 코드는 코드 인용 형식, 새 코드는 마크다운 코드 블록을 사용합니다.
+- **트리플 백틱 들여쓰기 금지**: 코드 블록은 항상 컬럼 0에서 시작합니다.
+- **줄 번호 표시 금지**: 코드 내용에 줄 번호를 포함하지 않습니다.
+- **문서 자동 갱신 필수**: 모든 작업 종료 시 관련 문서를 자동으로 갱신해야 합니다. 사용자가 명시적으로 요청하지 않아도 변경사항이 있으면 문서를 갱신합니다.
+

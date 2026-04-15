@@ -1,0 +1,141 @@
+---
+description: 「페이지 DB분석」트리거 및 docs/db-doc/*_api.md 수정 시 HTML·smkang_doc 푸시 워크플로
+alwaysApply: true
+---
+
+# 페이지 DB 분석 워크플로 (트리거 문구)
+
+## 트리거
+
+사용자가 아래에 **준하는 표현**으로 요청하면 **이 절차 전체**를 수행한다.
+
+- **「페이지에 대한 DB분석」**
+- 동일 의미: *해당 화면의 DB/API 연동 분석*, *화면 DB 문서화*, *DB 분석* 등 — **대상 화면 ID(`screenId`)** 가 메시지에 없으면 짧게 확인 질문 후 진행.
+
+## db-doc `*_api.md` 수정 시 후속 (필수)
+
+**MES 저장소에서 `docs/db-doc/*_api.md` 가 수정·추가**되면(위 **트리거**로 1단계까지 했는지와 무관), **같은 작업 안에서** 아래 **「2단계」「3단계」** 를 반드시 수행한다. (변경된 각 `*.md`마다 대응 `*.html`을 `mes/`에 두고, 갱신된 `mes/*_api.html`만 스테이징·푸시.)
+
+**예외**: 사용자가 **HTML 생략·smkang_doc 푸시 생략**을 명시한 경우에만 생략한다.
+
+## 전제·경로 (고정값)
+
+| 항목 | 값 |
+|------|-----|
+| MD 저장 위치 (MES 저장소) | `docs/db-doc/<screenId>_api.md` |
+| HTML 출력 디렉터리 (로컬, Git 저장소 smkang_doc) | `D:\smkang_data\docs\mes\` |
+| HTML 파일명 | `<screenId>_api.html` |
+| HTML 변환 스크립트 | `scripts/render-db-doc-html.mjs` |
+| 외부 Git 루트 | `D:\smkang_data\docs` |
+| Git 실행 파일 (PowerShell) | `C:\Program Files\Git\bin\git.exe` |
+| 원격 | `origin` (기본 `BKSoft-Lab/smkang_doc`) — URL 변경 시 사용자 확인 |
+
+---
+
+## 1단계 — DB·HTTP 분석 및 MD 작성
+
+1. 화면 TSX(`renderer/src/screens/**/<screenId>.tsx` 등)·연동 **`lib/*Api.ts`**·`mesDbBaseUrl.ts`·관련 매퍼를 읽고 정리한다.
+2. **`docs/db-doc/<screenId>_api.md`** 에 아래 **§ MD 템플릿** 구조·스타일대로 상세 기술한다 (신규 작성 또는 기존 파일 전면 갱신).
+3. MES 쪽 **`docs/DOCUMENTATION_INDEX.md`** 에 해당 md 링크가 없으면 **db-doc** 절에 한 줄 추가.
+4. **`docs/CHANGELOG.md`** · **`docs/USER_PROMPTS_LOG.md`** 에 작업 요약 반영 (`project-rules.md` / `.cursorrules` 의 문서 갱신 규칙 준수).
+
+## 2단계 — HTML 변환
+
+1. 기존 변환 스크립트 사용:
+   ```
+   node scripts/render-db-doc-html.mjs docs/db-doc/<screenId>_api.md D:\smkang_data\docs\mes\<screenId>_api.html
+   ```
+2. 스크립트가 없거나 깨진 경우에만 재생성.
+3. MES `docs/db-doc/` 에 html 파일이 생기면 삭제 — 정식 HTML은 **smkang_doc `mes/`** 에만.
+
+## 3단계 — Git commit & push (smkang_doc)
+
+1. 터미널에서 **`D:\smkang_data\docs`** 로 이동한다.
+2. **`mes/<screenId>_api.html`** (및 이번 작업으로만 갱신된 동일 목적 파일)만 스테이징하는 것을 **원칙**으로 한다 — 사용자가 명시적으로「전부」를 요청하지 않는 한, 무관한 수정(예: WorkList)은 포함하지 않는다.
+3. 커밋 메시지: **`만든 파일 업로드`** (사용자가 다른 메시지를 명시하면 그것을 우선).
+4. **`git push`** (현재 브랜치의 `origin` 추적 브랜치).
+5. PowerShell에서 `git`가 PATH에 없을 수 있으므로 `& 'C:\Program Files\Git\bin\git.exe'`로 호출.
+
+## 완료 보고
+
+사용자에게 **저장된 MD 경로**, **HTML 절대 경로**, **푸시 결과(커밋·원격)** 를 짧게 알린다.
+
+---
+
+## § MD 템플릿 — 구조·구성·스타일 규칙
+
+모든 `docs/db-doc/<screenId>_api.md` 는 **아래 섹션 순서·번호·제목·표 형식**을 따른다.  
+섹션이 해당 화면에 없으면 생략하되, **번호를 당겨 빈 번호 없이** 연속 부여한다.  
+기존 문서 2건(`std_base_user_mgmt_api.md`, `std_base_common_code_mgmt_api.md`)이 레퍼런스이며, 향후 새 문서도 동일 톤·밀도를 유지한다.
+
+### 헤더 블록
+
+```markdown
+# <screenId> — DB·HTTP API 상세 정리
+
+화면 ID: `<screenId>`  
+구현: [`renderer/src/screens/<모듈>/<screenId>.tsx`](상대경로)  
+베이스 URL: [`renderer/src/lib/mesDbBaseUrl.ts`](상대경로)의 `mesDbUrl()`  
+<해당 화면 관련 API·매퍼·공통코드 파일을 한 줄씩 — 링크 포함>
+
+---
+```
+
+- **`# 제목`**: `<screenId> — DB·HTTP API 상세 정리` (고정 패턴).
+- 제목 아래 메타(화면 ID, 구현 파일, 베이스 URL, API/매퍼/공통코드 등)를 **한 줄씩** 나열하고 **상대 링크** 첨부.
+
+### 섹션 목록 (번호 순서)
+
+| # | 섹션 제목 | 필수 | 내용 |
+|---|----------|------|------|
+| 1 | **베이스 URL·환경** | O | 표: 환경 \| 동작 — Vite dev, 프로덕션, 절대 URL 예 |
+| 2 | **엔드포인트 요약** | O | 표: 구분 \| Method \| Path \| 용도 — 화면에서 호출하는 **모든** 엔드포인트 한 눈에 |
+| 3~ | **엔드포인트별 상세** | O | GET → POST → DELETE 순. 같은 메서드라도 경로가 다르면 별도 섹션 |
+| — | **테이블·응답 필드** | O | 주 테이블 전 필드 표: 필드 \| 비고 |
+| — | **그리드·상세 UI 매핑** | O | 표: 그리드 인덱스 \| 컬럼명 \| DB·비고 |
+| — | **보완·주의점(제안)** | O | 번호 목록. 데이터 무결성·보안·미연동 필드·에러 등 |
+| — | **관련 소스 파일** | O | 표: 파일 (경로) |
+
+### 엔드포인트별 상세 — 하위 구조
+
+각 엔드포인트 섹션(`## N. <METHOD> — <path>`)은 아래 하위 제목(`### N.x`)을 갖는다.
+
+| 하위 | 제목 | 내용 |
+|------|------|------|
+| N.1 | **호출 코드** | 파일·함수명, 링크 |
+| N.2 | **URL·쿼리** | 코드블록(`GET {base}/...`)으로 URL 패턴, 이어서 쿼리 파라미터 표(파라미터 \| 전송 조건 \| 의미) |
+| N.3 | **호출 시점·조건** | 표: 시점 \| 인자/조건 \| 트리거 — 마운트, Search, 저장/삭제 후 등 |
+| N.4 | **응답 처리** (또는 **응답·UI**) | 파싱 로직, 타입, UI 연동 |
+| N.5 | **에러** | 표: 원인 \| 동작 (`throw`, 배너 메시지 등) |
+| — | (선택) **클라이언트 검증** | POST 전 프론트 검증 로직 — 해당 시 삽입 |
+| — | (선택) **JSON 필드** | POST body 필드 표: 필드 \| 출처·비고 |
+
+### 서식 규칙
+
+1. **표(table)**: 정보가 2건 이상이면 표 사용. 열 순서는 위 템플릿 그대로.
+2. **코드블록**: URL 패턴은 ```(언어 태그 없이) 안에 `GET {base}/db/...` 형태.
+3. **볼드**: 키워드·조건·값(`**항상**`, `**부분 일치**`, `**최초 마운트**` 등) — 스캔 가독성.
+4. **인라인 코드**: 필드명·함수명·파일명·HTTP 메서드·상태코드.
+5. **수평선(`---`)**: 각 §2 레벨 섹션 사이에 삽입.
+6. **링크**: 소스 파일은 상대 경로(`../../renderer/src/...`) 마크다운 링크.
+7. **한국어**: 본문·제목 한국어, 기술 용어(Method, Path, JSON 등)는 영문 병기.
+8. **문서 길이**: 한 화면 평균 150~250줄 — 불필요한 반복·프로즈 최소화, 표·코드 위주.
+
+### HTML 변환 스타일 (`scripts/render-db-doc-html.mjs`)
+
+변환 스크립트는 `npx marked@14 --gfm`으로 GFM 변환 후, 아래 인라인 CSS를 `<style>`에 삽입한다. **스타일은 이 규칙을 기준으로 유지**하며, 변경 시 이 규칙도 갱신한다.
+
+| 요소 | 스타일 |
+|------|--------|
+| `html` | `system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5` |
+| `body` | `background: #f8fafc; color: #0f172a` |
+| `main.wrap` | `max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; box-shadow: 0 0 0 1px #e2e8f0` |
+| `h1` | `font-size: 1.35rem; border-bottom: 2px solid #0ea5e9` |
+| `h2` | `font-size: 1.1rem; color: #0c4a6e` |
+| `h3` | `font-size: 1rem` |
+| `code` | `ui-monospace, Consolas, monospace; background: #f1f5f9; border-radius: 4px` |
+| `pre` | `background: #0f172a; color: #e2e8f0; border-radius: 6px` |
+| `table` | `border-collapse; width: 100%; font-size: 0.88rem` |
+| `th` | `background: #f1f5f9; font-weight: 600` |
+| `th, td` | `border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem` |
+| `a` | `color: #0369a1` |

@@ -1,0 +1,29 @@
+---
+description: MesDataGridPanel + MesDetailForm 마스터–상세 화면의 반응성(행 선택·콤보) — ref·useMemo·virtualizeRows 패턴
+alwaysApply: true
+---
+
+# 마스터–상세 성능 (그리드 + `MesDetailForm`)
+
+`MesDetailForm`은 레이아웃 래퍼뿐이므로, 지연은 보통 **부모 리렌더**, **`MesDataGridPanel` 행 수**, **네이티브 `<select>` 옵션 수**에서 난다.
+
+## 구현 체크리스트
+
+1. **`onSelectRow` / `onDoubleClickRow`의 `useCallback` 의존성 최소화**  
+   - 조회 결과 배열(`users`, `searchResult` 등)을 의존성에 넣으면 조회마다 콜백이 바뀌어 `MesDataGridPanel`(memo)이 불필요하게 갱신될 수 있다.  
+   - 최신 배열은 **`useRef`에 동기화**하고 핸들러 안에서는 **`ref.current`로만 조회**한다.  
+   - 정렬 후 그리드의 `rowIndex`는 **원본 배열 인덱스와 다를 수 있다** — 키(예: `user_id`, `cust_code`)로 `find`하는 쪽이 안전하다.
+
+2. **`cellValues`·콤보용 `mergeLegacy*Option` 결과는 `useMemo`**  
+   - 타이핑·조회 조건이 상위 핸들러를 자주 바꾸지 않도록, 조회줄은 가능하면 **`useRef` + Search 시에만 조회** 패턴을 쓴다(예: `renderer/src/screens/std/std_base_vendor_mgmt.tsx` 주석).
+
+3. **행 수가 많을 때 `MesDataGridPanel`에 `virtualizeRows`**  
+   - 공통코드·사용자·거래처 등 대량 행 화면에 적용 검토.
+
+4. **콤보(키보드로 항목 이동)가 무거울 때**  
+   - 옵션이 수백 개 이상이면 네이티브 `<select>` 한계가 있다. 옵션 배열은 **`useMemo`로 안정화**하고, 필요 시 검색형·자동완성 UI 도입을 검토(별도 작업).
+
+## 참고
+
+- 공통 선택 훅: `renderer/src/lib/useMesGridRowSelection.ts` — `onSelectRow` 의존성이 `[columnCount]`만이라 기본적으로 안정적이다.  
+- 레이아웃: `docs/LAYOUT_RULES.md` — 행 상세 폼.

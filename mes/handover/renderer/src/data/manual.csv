@@ -1,0 +1,297 @@
+모듈명,메뉴,하위메뉴,화면 ID
+기준정보,기초정보,공통코드 관리,std_base_common_code_mgmt
+기준정보,기초정보,사용자 관리,std_base_user_mgmt
+기준정보,기초정보,사용자권한 관리,std_base_user_permission_mgmt
+기준정보,기초정보,메뉴권한 관리,std_base_menu_permission_mgmt
+기준정보,기초정보,단위공정 관리,std_base_unit_process_mgmt
+기준정보,기초정보,단위공정라인 관리,std_base_unit_process_line_mgmt
+기준정보,기초정보,공정라인 관리,std_base_process_line_mgmt
+기준정보,기초정보,공정라인 구성 관리,std_base_process_line_config_mgmt
+기준정보,기초정보,업체 관리,std_base_vendor_mgmt
+기준정보,기초정보,사용자 LOG 조회,std_base_user_log_inq
+기준정보,기준설정,라우터 관리,std_cfg_router_mgmt
+기준정보,기준설정,생산 라우터 관리,std_cfg_prod_router_mgmt
+기준정보,기준설정,Tact Time 관리,std_cfg_tact_time_mgmt
+기준정보,기준설정,포장단위 관리,std_cfg_packing_unit_mgmt
+제품관리,품번관리,품번 관리(완제품/반제품),prd_itemno_item_no_mgmt_fg_semi
+제품관리,품번관리,품번 속성 일괄 편집,prd_itemno_item_attr_bulk_edit
+제품관리,품번관리,품번별 BOM 생성 현황,prd_itemno_bom_create_status_by_item
+제품관리,품번관리,자재Master 등록,prd_itemno_material_master_reg
+제품관리,BOM관리,EBOM 등록 및 수정,prd_bom_ebom_reg_edit
+제품관리,BOM관리,EBOM 일괄 변경,prd_bom_ebom_bulk_change
+제품관리,BOM관리,EBOM 일괄 변경 내역 조회,prd_bom_ebom_bulk_change_hist_inq
+제품관리,BOM관리,EBOM 조회,prd_bom_ebom_inq
+제품관리,BOM관리,EBOM 상향식 조회,prd_bom_ebom_where_used_inq
+제품관리,BOM관리,EBOM 사용여부 관리,prd_bom_ebom_usage_mgmt
+제품관리,BOM관리,Prod BOM 조회,prd_bom_prod_bom_inq
+제품관리,BOM관리,Prod BOM 상향식 조회,prd_bom_prod_bom_where_used_inq
+제품관리,BOM관리,Prod BOM 사용여부 관리,prd_bom_prod_bom_usage_mgmt
+제품관리,재고관리,품번별 재고 조회,prd_inv_inq_by_item
+제품관리,재고관리,품번별 (재공) 재고 조회,prd_inv_wip_inq_by_item
+제품관리,재고관리,품번별 재고 수량 조정,prd_inv_qty_adj_by_item
+제품관리,재고관리,품번별 재고 수량 조정 내역,prd_inv_qty_adj_hist_by_item
+자재관리,기초정보,부품분류코드 관리,mat_base_part_class_code_mgmt
+자재관리,기초정보,검사항목 등록,mat_base_insp_item_reg
+자재관리,기초정보,검사항목 변경 이력,mat_base_insp_item_change_hist
+자재관리,기초정보,부품분류별 검사항목 등록,mat_base_insp_item_reg_by_class
+자재관리,기초정보,Item별 검사항목 등록,mat_base_insp_item_reg_by_item
+자재관리,기초정보,불량항목 등록,mat_base_defect_code_reg
+자재관리,기초정보,불량항목 변경 이력,mat_base_defect_code_change_hist
+자재관리,기초정보,부품분류별 불량항목 등록,mat_base_defect_code_reg_by_class
+자재관리,기초정보,Item별 불량항목 등록,mat_base_defect_code_reg_by_item
+자재관리,기초정보,샘플링 검사기준,mat_base_sampling_insp_std
+자재관리,기초정보,Item별 샘플링 기준,mat_base_sampling_std_by_item
+자재관리,기초정보,공급업체별 샘플링 기준,mat_base_sampling_std_by_vendor
+자재관리,기초정보,Item별 샘플링 기준 변경 이력,mat_base_sampling_std_change_hist_by_item
+자재관리,자재정보,자재Master 등록,mat_item_material_master_reg
+자재관리,자재정보,Item 속성 일괄 편집,mat_item_item_attr_bulk_edit
+자재관리,자재정보,Maker PartNo 등록,mat_item_maker_part_no_reg
+자재관리,자재정보,Maker PartNo 일괄 등록,mat_item_maker_part_no_bulk_reg
+자재관리,자재정보,공급업체별 자재 조회,mat_item_material_inq_by_vendor
+자재관리,자재정보,Maker Barcode 사용 설정,mat_item_maker_barcode_use_setup
+자재관리,자재정보,자재라벨 발행 수량 설정,mat_item_material_label_issue_qty_setup
+자재관리,자재단가관리,환율 이력 조회,mat_price_exchange_rate_hist_inq
+자재관리,자재단가관리,자재단가 관리,mat_price_material_price_mgmt
+자재관리,자재단가관리,자재단가 Excel Upload,mat_price_material_price_excel_upload
+자재관리,자재단가관리,자재단가 확정,mat_price_material_price_confirm
+자재관리,자재단가관리,자재단가 조회,mat_price_material_price_inq
+자재관리,자재단가관리,자재단가 변경 이력 조회,mat_price_material_price_change_hist_inq
+자재관리,자재단가관리,자재단가 변경 작업 이력 조회,mat_price_material_price_job_hist_inq
+자재관리,가입고관리,가입고 등록 및 취소 [수작업],mat_prein_pre_grn_reg_cancel_manual
+자재관리,가입고관리,가입고 및 Lot 라벨 발행,mat_prein_pre_grn_lot_label_issue
+자재관리,가입고관리,가입고 내역 조회,mat_prein_pre_grn_hist_inq
+자재관리,가입고관리,TID별 가입고 내역 조회,mat_prein_pre_grn_hist_inq_by_tid
+자재관리,가입고관리,일자별 가입고 내역 집계,mat_prein_pre_grn_daily_sum
+자재관리,가입고관리,가입고 취소 내역 조회,mat_prein_pre_grn_cancel_hist_inq
+자재관리,가입고관리,검사대기품 샘플 수량 조회,mat_prein_insp_wait_sample_qty_inq
+자재관리,가입고관리,수기 바코드 발행,mat_prein_manual_barcode_issue
+자재관리,수입검사,Item별 검사여부 조회,mat_iqc_insp_required_inq_by_item
+자재관리,수입검사,Item별 검사항목 조회,mat_iqc_insp_item_inq_by_item
+자재관리,수입검사,Item별 불량항목 조회,mat_iqc_defect_item_inq_by_item
+자재관리,수입검사,수입검사 결과 일괄 처리,mat_iqc_iqc_result_bulk_proc
+자재관리,수입검사,수입검사 결과 등록,mat_iqc_iqc_result_reg
+자재관리,수입검사,수입검사 결과 조회,mat_iqc_iqc_result_inq
+자재관리,수입검사,일자별 수입검사 내역 조회,mat_iqc_iqc_hist_inq_by_date
+자재관리,수입검사,기간별 수입검사 현황,mat_iqc_iqc_status_by_period
+자재관리,수입검사,기간별 수입검사 현황 집계,mat_iqc_iqc_status_sum_by_period
+자재관리,수입검사,일별 수입검사 품질 현황,mat_iqc_iqc_quality_daily
+자재관리,수입검사,유형별 불량내역 조회,mat_iqc_defect_hist_inq_by_type
+자재관리,수입검사,수입검사 기준서 등록,mat_iqc_iqc_spec_reg
+자재관리,수입검사,수입검사 기준서 조회,mat_iqc_iqc_spec_inq
+자재관리,수입검사,품질판단 설정,mat_iqc_quality_judgment_setup
+자재관리,입고관리,자재입고 확정 및 취소,mat_gr_material_grn_confirm_cancel
+자재관리,입고관리,입고 내역 수정,mat_gr_grn_hist_edit
+자재관리,입고관리,입고 내역 조회,mat_gr_grn_hist_inq
+자재관리,입고관리,TID별 입고 내역 조회,mat_gr_grn_hist_inq_by_tid
+자재관리,입고관리,일자별 입고 내역 집계,mat_gr_grn_daily_sum
+자재관리,입고관리,기간내 입고수량 집계,mat_gr_grn_qty_sum_by_period
+자재관리,입고관리,입고별 TID 위치 조회,mat_gr_tid_location_inq_by_grn
+자재관리,입고관리,자재라벨 발행,mat_gr_material_label_issue
+자재관리,입고관리,자재라벨 재발행,mat_gr_material_label_reissue
+자재관리,입고관리,분할자재라벨 발행,mat_gr_split_material_label_issue
+자재관리,입고관리,자재라벨 발행이력 조회,mat_gr_material_label_issue_hist_inq
+자재관리,입고관리,자재라벨 재발행이력 조회,mat_gr_material_label_reissue_hist_inq
+자재관리,입고관리,분할자재라벨 조회,mat_gr_split_material_label_inq
+자재관리,입고관리,자재입고 취소(자재라벨별),mat_gr_material_grn_cancel_by_label
+자재관리,입고관리,자재라벨 폐기,mat_gr_material_label_dispose
+자재관리,입고관리,월별 입고 내역 집계(부품분류별),mat_gr_grn_monthly_sum_by_part_class
+자재관리,입고관리,월별 입고 내역 집계(공급업체별),mat_gr_grn_monthly_sum_by_vendor
+자재관리,입고관리,월별 입고 내역 집계(Item별),mat_gr_grn_monthly_sum_by_item
+자재관리,입고관리,일별 입고내역 집계(Item별),mat_gr_grn_daily_sum_by_item
+자재관리,입고관리,입고관련 설정,mat_gr_grn_related_setup
+자재관리,입고관리,SIMS 미확인 자재 찾기,mat_gr_sims_unconfirmed_material_find
+자재관리,입고관리,수입 자재 신고 총액 정보 관리,mat_gr_import_decl_total_amt_mgmt
+자재관리,MSL자재,MSL 자재 목록,mat_msl_msl_material_list
+자재관리,MSL자재,MSL 개봉 관리,mat_msl_msl_open_mgmt
+자재관리,MSL자재,MSL 개봉 내역,mat_msl_msl_open_hist
+자재관리,MSL자재,MSL 자재 관리 통합,mat_msl_msl_material_mgmt_hub
+자재관리,MSL자재,MSL 재고 소진 이력 조회,mat_msl_msl_stock_deplete_hist_inq
+자재관리,MSL자재,MSL 통합 이력 조회,mat_msl_msl_combined_hist_inq
+자재관리,MSL자재,제습함 관리,mat_msl_dry_cabinet_mgmt
+자재관리,MSL자재,제습함 내 자재 내역,mat_msl_dry_cabinet_material_hist
+자재관리,MSL자재,제습함 내 자재 현황 (세로),mat_msl_dry_cabinet_material_status_v
+자재관리,MSL자재,제습함 입출고 현황,mat_msl_dry_cabinet_io_status
+자재관리,MSL자재,자재별 베이킹 환경정보,mat_msl_baking_profile_by_material
+자재관리,MSL자재,자재별 베이킹 환경정보 변경 이력,mat_msl_baking_profile_change_hist
+자재관리,MSL자재,베이킹 관리,mat_msl_baking_mgmt
+자재관리,MSL자재,베이킹 입출고 현황,mat_msl_baking_io_status
+자재관리,MSL자재,베이킹 오류 발생 이력,mat_msl_baking_error_hist
+자재관리,MSL자재,베이킹 관련 설정,mat_msl_baking_related_setup
+자재관리,MSL자재,진공포장 관리,mat_msl_vacuum_pack_mgmt
+자재관리,MSL자재,진공포장 이력 조회,mat_msl_vacuum_pack_hist_inq
+자재관리,출고관리,자재 출고 및 취소,mat_gi_material_gi_confirm_cancel
+자재관리,출고관리,자재 출고 일괄 처리,mat_gi_material_gi_bulk_proc
+자재관리,출고관리,출고내역 조회,mat_gi_gi_hist_inq
+자재관리,출고관리,일자별 출고내역 집계,mat_gi_gi_daily_sum
+자재관리,출고관리,기간내 출고수량 집계,mat_gi_gi_qty_sum_by_period
+자재관리,출고관리,출고가능 라벨 List,mat_gi_gi_ready_label_list
+자재관리,출고관리,공정반납 내역 조회,mat_gi_wip_return_hist_inq
+자재관리,출고관리,출고 취소 내역 조회,mat_gi_gi_cancel_hist_inq
+자재관리,출고관리,자재반품 등록,mat_gi_material_return_reg
+자재관리,출고관리,자재반품 내역 조회,mat_gi_material_return_hist_inq
+자재관리,출고관리,일자별 반품 내역 조회,mat_gi_return_hist_inq_by_date
+자재관리,출고관리,자재 이체 (PartNo 변경),mat_gi_material_transfer_part_change
+자재관리,출고관리,자재 이체 (PartNo 변경) 이력 조회,mat_gi_material_transfer_part_change_hist_inq
+자재관리,출고관리,투입금지 자재 등록,mat_gi_do_not_issue_material_reg
+자재관리,출고관리,투입금지 자재 현황 조회,mat_gi_do_not_issue_material_status_inq
+자재관리,출고관리,월별 출고내역 집계(부품분류별),mat_gi_gi_monthly_sum_by_part_class
+자재관리,출고관리,월별 출고내역 집계(Item별),mat_gi_gi_monthly_sum_by_item
+자재관리,출고관리,일별 출고내역 집계(Item별),mat_gi_gi_daily_sum_by_item
+자재관리,출고관리,업체 대여 현황,mat_gi_vendor_loan_status
+자재관리,출고관리,업체 대여 이력,mat_gi_vendor_loan_hist
+자재관리,출고관리,자재 키팅 지시서 관리,mat_gi_material_kitting_order_mgmt
+자재관리,출고관리,자재 키팅 이력 및 지시서 발행,mat_gi_material_kitting_hist_order_issue
+자재관리,재고실사 및 조정,재고 실사 등록,mat_cyclecnt_cycle_count_reg
+자재관리,재고실사 및 조정,재고 실사 수정 및 확정,mat_cyclecnt_cycle_count_edit_confirm
+자재관리,재고실사 및 조정,재고 실사 이력 조회,mat_cyclecnt_cycle_count_hist_inq
+자재관리,재고실사 및 조정,창고 재고 수량 조정,mat_cyclecnt_wh_inv_qty_adj
+자재관리,재고실사 및 조정,창고 재고 수량 조정 이력,mat_cyclecnt_wh_inv_qty_adj_hist
+자재관리,재고실사 및 조정,공정 재고 수량 조정,mat_cyclecnt_wip_inv_qty_adj
+자재관리,재고실사 및 조정,공정 재고 수량 조정 이력,mat_cyclecnt_wip_inv_qty_adj_hist
+자재관리,재고실사 및 조정,TID별 자재수량 조정,mat_cyclecnt_material_qty_adj_by_tid
+자재관리,재고실사 및 조정,Lot No별 자재수량 조정 [현장 사용자용],mat_cyclecnt_material_qty_adj_by_lot_field
+자재관리,재고실사 및 조정,TID별 자재수량 조정 이력,mat_cyclecnt_material_qty_adj_hist_by_tid
+자재관리,재고관리,자재 재고 조회 메인,mat_inv_material_inv_main
+자재관리,재고관리,자재창고 재고 조회,mat_inv_material_wh_inv_inq
+자재관리,재고관리,SMT 재고 조회,mat_inv_smt_inv_inq
+자재관리,재고관리,조립 재고 조회,mat_inv_assy_inv_inq
+자재관리,재고관리,자재 원자재 조회,mat_inv_raw_material_inv_inq
+자재관리,재고관리,전체 창고 자재 재고 조회,mat_inv_all_wh_material_inv_inq
+자재관리,재고관리,자재 입출고 내역 조회,mat_inv_material_io_hist_inq
+자재관리,재고관리,월별 자재수불 조회,mat_inv_material_monthly_txn_inq
+자재관리,재고관리,자재LOT 추적,mat_inv_material_lot_trace
+자재관리,재고관리,업체 LOT 추적 (라벨별),mat_inv_vendor_lot_trace_by_label
+자재관리,재고관리,자재 라벨별 이력 추적,mat_inv_material_label_hist_trace
+자재관리,재고관리,자재별 현재위치 조회,mat_inv_material_location_inq
+자재관리,재고관리,자재불출계획,mat_inv_material_issue_plan
+자재관리,재고관리,생산계획 대비 소요량 조회,mat_inv_req_vs_plan_inq
+자재관리,재고관리,일별 자재 소진 내역 (Item별),mat_inv_material_deplete_daily_by_item
+자재관리,재고관리,일별 자재 소진 상세 내역,mat_inv_material_deplete_daily_detail
+자재관리,재고관리,월 품번별 자재 소진 내역,mat_inv_material_deplete_monthly_by_item
+자재관리,재고관리,장기 재고 현황,mat_inv_slow_moving_inv_status
+자재관리,재고관리,자재 유효기간 관리,mat_inv_material_shelf_life_mgmt
+생산관리,생산정보,SMT 생산계획,mfg_plan_smt_prod_plan
+생산관리,생산정보,마킹계획,mfg_plan_marking_plan
+생산관리,생산정보,SMT 라인생산계획,mfg_plan_smt_line_prod_plan
+생산관리,생산정보,생산계획 관리,mfg_plan_prod_plan_mgmt
+생산관리,생산정보,무작업 관리,mfg_plan_idle_time_mgmt
+생산관리,생산정보,모델별 계획대비 실적,mfg_plan_plan_vs_actual_by_model
+생산관리,생산정보,일별 계획대비 실적,mfg_plan_plan_vs_actual_daily
+생산관리,생산정보,조별 일별 생산실적,mfg_plan_prod_result_daily_by_shift
+생산관리,생산정보,생산 실적 조회,mfg_plan_prod_result_inq
+생산관리,생산정보,마운트 재결 자재 조회,mfg_plan_mount_rejudge_material_inq
+생산관리,생산정보,제조 원가 관리,mfg_plan_mfg_cost_mgmt
+생산관리,생산정보,제조 원가 이력 조회,mfg_plan_mfg_cost_hist_inq
+생산관리,공정관리,메탈 마스크 Master,mfg_proc_metal_mask_master
+생산관리,공정관리,메탈 마스크 사용내역 입력,mfg_proc_metal_mask_usage_entry
+생산관리,공정관리,메탈 마스크 사용내역 조회,mfg_proc_metal_mask_usage_inq
+생산관리,공정관리,솔더 Master,mfg_proc_solder_master
+생산관리,공정관리,솔더 냉장고 입고,mfg_proc_solder_fridge_grn
+생산관리,공정관리,솔더 사용내역 입력,mfg_proc_solder_usage_entry
+생산관리,공정관리,솔더 사용내역 조회,mfg_proc_solder_usage_inq
+생산관리,공정관리,스퀴지 Master,mfg_proc_squeegee_master
+생산관리,공정관리,스퀴지 사용내역 입력,mfg_proc_squeegee_usage_entry
+생산관리,공정관리,마스터샘플 Master,mfg_proc_master_sample_master
+생산관리,공정관리,백업 블럭 Master,mfg_proc_backup_block_master
+생산관리,공정관리,백업 블럭 사용내역 입력,mfg_proc_backup_block_usage_entry
+생산관리,공정관리,오삽 검정,mfg_proc_solder_paste_insp
+생산관리,공정관리,안돈 관리자처리 관리,mfg_proc_andon_admin_action_mgmt
+생산관리,공정관리,안돈 이력 조회,mfg_proc_andon_hist_inq
+생산관리,공정관리,안돈 시스템 코드 관리,mfg_proc_andon_system_code_mgmt
+생산관리,공정관리,양방향 통신 이력 조회,mfg_proc_bidirectional_comm_hist_inq
+생산관리,공정관리,재고실사 수정 및 확정,mfg_proc_cycle_count_edit_confirm
+생산관리,이력조회,생산계획 조회,mfg_hist_prod_plan_hist_inq
+생산관리,이력조회,부자재 투입 조회,mfg_hist_sub_material_issue_inq
+생산관리,이력조회,검사 데이터 조회,mfg_hist_insp_data_inq
+생산관리,이력조회,마킹 흐름 이력 조회,mfg_hist_marking_flow_hist_inq
+생산관리,이력조회,제품 이력 조회,mfg_hist_product_hist_inq
+생산관리,이력조회,마운트 자재 스캔 이력 조회,mfg_hist_mount_material_scan_hist_inq
+생산관리,이력조회,SPI 가성불량 이력 조회,mfg_hist_spi_pseudo_defect_hist_inq
+생산관리,이력조회,공정별 재검 횟수 조회,mfg_hist_reinsp_count_inq_by_proc
+생산관리,이력조회,품질지수 조회 - 월별처리 결과,mfg_hist_quality_index_month
+생산관리,이력조회,품질지수 조회 - 실적(납품)수량,mfg_hist_quality_index_qty
+생산관리,이력조회,기간별 부적합 조회,mfg_hist_period_inq
+생산관리,이력조회,기간별 부적합 분석,mfg_hist_period_analysis
+생산관리,이력조회,Client 실적처리 이력 조회,mfg_hist_client_result_proc_hist_inq
+생산관리,출하,출하가능 재고 조회,mfg_ship_shippable_inv_inq
+생산관리,출하,출하가능 재고 상세 조회,mfg_ship_shippable_inv_detail_inq
+생산관리,출하,출하 박스/매거진 수량 조정,mfg_ship_ship_box_magazine_qty_adj
+생산관리,출하,출하 박스/매거진 수량 조정 이력,mfg_ship_ship_box_magazine_qty_adj_hist
+생산관리,출하,고객사 반품 등록,mfg_ship_customer_return_reg
+생산관리,출하,출하 내역 조회,mfg_ship_shipment_hist_inq
+생산관리,출하,출하 내역 상세 조회(QR),mfg_ship_shipment_hist_detail_inq_qr
+생산관리,출하,납품계획 등록,mfg_ship_delivery_plan_reg
+생산관리,출하,납품계획 이력 조회,mfg_ship_delivery_plan_hist_inq
+생산관리,출하,일별 출하 현황,mfg_ship_shipment_status_daily
+생산관리,출하,고객사 일별 출하 현황,mfg_ship_shipment_status_daily_by_customer
+생산관리,출하,고객사 월별 출하 현황,mfg_ship_shipment_status_monthly_by_customer
+생산관리,출하,LOT별 출하 현황,mfg_ship_shipment_status_by_lot
+생산관리,포장,포장 이력 조회,mfg_pkg_packing_hist_inq
+생산관리,수리,수리내역 관리,mfg_repair_repair_order_mgmt
+생산관리,출하검사 설정,검사항목 등록,mfg_oqcset_ship_insp_item_reg
+생산관리,출하검사 설정,Model분류별 검사항목 등록,mfg_oqcset_ship_insp_item_reg_by_model_class
+생산관리,출하검사 설정,Model별 검사항목 등록,mfg_oqcset_ship_insp_item_reg_by_model
+생산관리,출하검사 설정,불량항목 등록,mfg_oqcset_ship_defect_code_reg
+생산관리,출하검사 설정,Model분류별 불량항목 등록,mfg_oqcset_ship_defect_reg_by_model_class
+생산관리,출하검사 설정,Model별 불량항목 등록,mfg_oqcset_ship_defect_reg_by_model
+생산관리,출하검사 설정,샘플링 검사기준,mfg_oqcset_ship_sampling_insp_std
+생산관리,출하검사 설정,Model별 샘플링 기준,mfg_oqcset_ship_sampling_std_by_model
+생산관리,출하검사 설정,Model별 샘플링 기준 변경 이력,mfg_oqcset_ship_sampling_std_change_hist_by_model
+생산관리,출하검사 설정,출하검사 기준서 등록,mfg_oqcset_ship_insp_spec_reg
+생산관리,출하검사 설정,출하검사 기준서 조회,mfg_oqcset_ship_insp_spec_inq
+생산관리,출하검사 설정,품질관련 설정,mfg_oqcset_ship_quality_related_setup
+생산관리,출하검사,출하검사 대상 조회,mfg_oqc_ship_insp_target_inq
+생산관리,출하검사,출하검사 결과 등록 (전수검사용),mfg_oqc_ship_insp_result_reg_100pct
+생산관리,출하검사,출하검사 결과 등록,mfg_oqc_ship_insp_result_reg
+생산관리,출하검사,출하검사 결과 조회,mfg_oqc_ship_insp_result_inq
+생산관리,출하검사,일자별 출하검사 내역 조회,mfg_oqc_ship_insp_hist_inq_by_date
+생산관리,출하검사,기간별 출하검사 현황,mfg_oqc_ship_insp_status_by_period
+생산관리,출하검사,기간별 출하검사 현황 집계,mfg_oqc_ship_insp_status_sum_by_period
+생산관리,출하검사,일별 출하검사 품질 현황,mfg_oqc_ship_insp_quality_daily
+생산관리,출하검사,유형별 불량내역 조회,mfg_oqc_ship_defect_hist_inq_by_type
+생산관리,출하검사,고객사별 출하검사 품질 현황,mfg_oqc_ship_insp_quality_by_customer
+생산관리,설정,출하금지설정,mfg_cfg_ship_block_setup
+생산관리,설정,공정별 재검횟수 설정,mfg_cfg_reinsp_limit_setup_by_proc
+생산관리,설정,Assy 그룹 관리,mfg_cfg_assy_group_mgmt
+생산관리,설정,Assy QR 코드 발생 순서 관리,mfg_cfg_assy_qr_seq_mgmt
+생산관리,설정,공정별 모델 Array 수량,mfg_cfg_model_array_qty_by_proc
+생산관리,설정,레이아웃 관리,mfg_cfg_layout_mgmt
+구매관리,자재단가관리,환율 등록,pur_price_exchange_rate_reg
+구매관리,자재단가관리,환율 이력 조회,pur_price_exchange_rate_hist_inq
+구매관리,자재단가관리,자재단가 관리,pur_price_material_price_mgmt
+구매관리,자재단가관리,자재단가 Excel Upload,pur_price_material_price_excel_upload
+구매관리,자재단가관리,자재단가 확정,pur_price_material_price_confirm
+구매관리,자재단가관리,자재단가 조회,pur_price_material_price_inq
+구매관리,자재단가관리,자재단가 변경 이력 조회,pur_price_material_price_change_hist_inq
+구매관리,자재단가관리,자재단가 변경 작업 이력 조회,pur_price_material_price_job_hist_inq
+구매관리,제품단가관리,제품단가 관리,pur_pprice_product_price_mgmt
+구매관리,제품단가관리,제품단가 Excel Upload,pur_pprice_product_price_excel_upload
+구매관리,제품단가관리,제품단가 확정,pur_pprice_product_price_confirm
+구매관리,제품단가관리,제품단가 조회,pur_pprice_product_price_inq
+구매관리,제품단가관리,제품단가 변경 이력 조회,pur_pprice_product_price_change_hist_inq
+구매관리,제품단가관리,제품단가 변경 작업 이력 조회,pur_pprice_product_price_job_hist_inq
+구매관리,조회,월 생산계획 대비 발주 현황,pur_rpt_po_status_vs_monthly_plan
+구매관리,조회,MRP 실행계획 대비 발주 현황,pur_rpt_po_status_vs_mrp_plan
+구매관리,조회,발주 대비 입고 현황,pur_rpt_grn_status_vs_po
+구매관리,조회,입고 현황,pur_rpt_grn_status
+구매관리,조회,월별 입고 현황,pur_rpt_grn_status_monthly
+구매관리,조회,매입처별 입고 현황,pur_rpt_grn_status_by_vendor
+구매관리,조회,고객사별 입고 현황,pur_rpt_grn_status_by_customer
+구매관리,조회,제품 자재단위표,pur_rpt_product_material_uom_sheet
+구매관리,MRP 관리,일별 생산계획 관리,pur_mrp_daily_prod_plan_mgmt
+구매관리,MRP 관리,일별 생산계획 변경 이력 관리,pur_mrp_daily_prod_plan_change_hist_mgmt
+구매관리,MRP 관리,MRP 관리,pur_mrp_mgmt
+구매관리,MRP 관리,MRP 미등록 현황,pur_mrp_not_registered_status
+구매관리,MRP 관리,MRP 소요량 이력 조회,pur_mrp_requirement_hist_inq
+구매관리,MRP 관리,MRP 산출 이력 조회,pur_mrp_output_hist_inq
+구매관리,MRP 관리,자재별 평균 배송일수 관리,pur_mrp_avg_lead_time_mgmt_by_material
+구매관리,발주관리,발주 등록,pur_po_reg
+구매관리,발주관리,발주일괄 등록,pur_po_bulk_reg
+구매관리,발주관리,발주 조회,pur_po_inq
+구매관리,발주관리,발주 품목 조회,pur_po_line_inq
+구매관리,입고관리,입고 등록,pur_gr_grn_reg
+구매관리,입고관리,입고 내역 조회,pur_gr_grn_hist_inq
+구매관리,입고관리,입고 품목 조회,pur_gr_grn_line_inq
+구매관리,입고관리,입고 미등록 입고 내역,pur_gr_grn_pending_reg_hist
+구매관리,입고관리,미입고 현황 조회,pur_gr_open_grn_status_inq
+구매관리,입고관리,납기지연 조회,pur_gr_late_delivery_inq
