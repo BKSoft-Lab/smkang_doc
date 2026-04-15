@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>prd_itemno_bom_create_status_by_item — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>prd_itemno_bom_create_status_by_item — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>prd_itemno_bom_create_status_by_item</code><br>구현: <a href="../../renderer/src/screens/prd/prd_itemno_bom_create_status_by_item.tsx"><code>renderer/src/screens/prd/prd_itemno_bom_create_status_by_item.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code><br>PDM 클라이언트: <a href="../../renderer/src/lib/pdmScreenApi.ts"><code>renderer/src/lib/pdmScreenApi.ts</code></a><br>BE: <a href="../../server/src/lib/queries/pdmModelMes.mjs"><code>server/src/lib/queries/pdmModelMes.mjs</code></a> (도메인 스텁 또는 전용 라우트)</p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vite dev</td>
+<td><code>userMgmtBeUrl(&#39;/api/pdm/...&#39;)</code> → 프록시 → MES BE(기본 <code>http://localhost:8787</code>).</td>
+</tr>
+<tr>
+<td>Electron</td>
+<td>INI <code>USER_MGMT_API_BASE</code> — <code>userMgmtBeBaseUrl.ts</code> 참고.</td>
+</tr>
+</tbody></table>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PDM 화면</td>
+<td>GET</td>
+<td><code>/api/pdm/model/screens/prd_itemno_bom_create_status_by_item</code></td>
+<td>툴바 <strong>Search</strong> — 현재 <strong>501</strong> 스텁(스키마 확정 후 실쿼리)</td>
+</tr>
+</tbody></table>
+<h2>3. GET — <code>/api/pdm/model/screens/prd_itemno_bom_create_status_by_item</code></h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><a href="../../renderer/src/lib/pdmScreenApi.ts"><code>pdmScreenApi.ts</code></a> — <code>fetchPdmScreenJson</code></li>
+<li><a href="../../renderer/src/screens/prd/prdPdmSearch.tsx"><code>prdPdmSearch.tsx</code></a> — <code>usePrdPdmToolbarSearch</code></li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<pre><code>GET {userMgmtBase}/api/pdm/model/screens/prd_itemno_bom_create_status_by_item
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(없음)</td>
+<td>—</td>
+<td>스텁 단계</td>
+</tr>
+</tbody></table>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Search</strong></td>
+<td><code>MesScreenShell</code> 툴바 조회</td>
+</tr>
+</tbody></table>
+<h3>3.4 응답 처리</h3>
+<ul>
+<li><strong>501</strong> JSON: <code>{ stub, domain, screenId, message }</code> — <a href="../../renderer/src/screens/prd/prdPdmSearch.tsx"><code>PrdPdmApiBanner</code></a>에 <code>message</code> 표시.</li>
+</ul>
+<h3>3.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>네트워크·5xx</td>
+<td>배너에 조회 실패 문구</td>
+</tr>
+</tbody></table>
+<h2>4. 테이블·응답 필드</h2>
+<ul>
+<li>PDM·BOM·재고 테이블 매핑은 <a href="../prd_pdm_pg_mapping.md"><code>docs/prd_pdm_pg_mapping.md</code></a> 및 환경별 DDL 확정 후 반영.</li>
+</ul>
+<h2>5. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>목업 그리드</td>
+<td>동일 경로 TSX 내 <code>COLS</code>·행 상수 — BE 연동 시 교체</td>
+</tr>
+</tbody></table>
+<h2>6. 보완·주의점</h2>
+<ol>
+<li>레거시 Oracle 문자열은 BE에 복사하지 않는다 (project-rules 6.0.3).</li>
+<li>동일 HTTP 경로를 두 <code>byScreen</code>에서 중복 마운트하지 않는다 — PDM은 <code>pdm*Mes.mjs</code> 도메인 라우터만 사용.</li>
+</ol>
+<h2>7. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+<th>경로</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>화면</td>
+<td><code>renderer/src/screens/prd/prd_itemno_bom_create_status_by_item.tsx</code></td>
+</tr>
+<tr>
+<td>BE</td>
+<td><code>server/src/lib/queries/pdmModelMes.mjs</code></td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>prd_itemno_item_no_mgmt_fg_semi — DB·HTTP API 상세 정리</title>
+<style>
+:root { color-scheme: light dark; }
+html { font-family: system-ui, "Segoe UI", "Malgun Gothic", sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+main.wrap { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; background: #fff; min-height: 100vh; box-shadow: 0 0 0 1px #e2e8f0; }
+h1 { font-size: 1.35rem; border-bottom: 2px solid #0ea5e9; padding-bottom: 0.35rem; margin-top: 0; }
+h2 { font-size: 1.1rem; margin-top: 1.75rem; color: #0c4a6e; }
+h3 { font-size: 1rem; margin-top: 1.25rem; }
+p, li { font-size: 0.92rem; }
+code { font-family: ui-monospace, Consolas, monospace; font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; }
+pre code { background: transparent; padding: 0; color: inherit; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 0.75rem 0; }
+th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.55rem; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; font-weight: 600; }
+tr:nth-child(even) td { background: #f8fafc; }
+a { color: #0369a1; }
+ul { padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>prd_itemno_item_no_mgmt_fg_semi — DB·HTTP API 상세 정리</h1>
+<p>화면 ID: <code>prd_itemno_item_no_mgmt_fg_semi</code><br>구현: <a href="../../renderer/src/screens/prd/prd_itemno_item_no_mgmt_fg_semi.tsx"><code>renderer/src/screens/prd/prd_itemno_item_no_mgmt_fg_semi.tsx</code></a><br>베이스 URL: <a href="../../renderer/src/lib/userMgmtBeBaseUrl.ts"><code>renderer/src/lib/userMgmtBeBaseUrl.ts</code></a>의 <code>userMgmtBeUrl()</code><br>PDM 클라이언트: <a href="../../renderer/src/lib/pdmScreenApi.ts"><code>renderer/src/lib/pdmScreenApi.ts</code></a><br>BE: <a href="../../server/src/lib/queries/pdmModelMes.mjs"><code>server/src/lib/queries/pdmModelMes.mjs</code></a></p>
+<hr>
+<h2>1. 베이스 URL·환경</h2>
+<table>
+<thead>
+<tr>
+<th>환경</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vite dev</td>
+<td><code>userMgmtBeUrl(&#39;/api/pdm/model/screens/...&#39;)</code> → 프록시 → MES BE.</td>
+</tr>
+<tr>
+<td>Electron</td>
+<td><code>userMgmtBeBaseUrl.ts</code> 규칙.</td>
+</tr>
+</tbody></table>
+<h2>2. 엔드포인트 요약</h2>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>Method</th>
+<th>Path</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>품번 목록</td>
+<td>GET</td>
+<td><code>/api/pdm/model/screens/prd_itemno_item_no_mgmt_fg_semi</code></td>
+<td><code>tb_mes_model_master</code> 조회 → 그리드 <code>rows</code> (<code>string[][]</code>)</td>
+</tr>
+<tr>
+<td>기준 참고</td>
+<td>GET</td>
+<td><code>/api/cfg/model-master</code></td>
+<td>동일 WHERE 의미 (<a href="../../server/src/lib/queries/cfgMes.mjs"><code>cfgMes.mjs</code></a>)</td>
+</tr>
+</tbody></table>
+<h2>3. GET — <code>/api/pdm/model/screens/prd_itemno_item_no_mgmt_fg_semi</code></h2>
+<h3>3.1 호출 코드</h3>
+<ul>
+<li><a href="../../renderer/src/lib/pdmScreenApi.ts"><code>pdmScreenApi.ts</code></a> — <code>fetchPdmScreenJson</code></li>
+<li><a href="../../renderer/src/screens/prd/prdPdmSearch.tsx"><code>prdPdmSearch.tsx</code></a> — <code>usePrdItemnoMgmtGridSearch</code></li>
+</ul>
+<h3>3.2 URL·쿼리</h3>
+<pre><code>GET {userMgmtBase}/api/pdm/model/screens/prd_itemno_item_no_mgmt_fg_semi?process=&amp;model_code=&amp;model_name__prefix=
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>파라미터</th>
+<th>전송 조건</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>process</code></td>
+<td>비어 있지 않고 <code>ALL</code>이 아닐 때</td>
+<td><code>tb_mes_model_master.attribute01</code> (공정)</td>
+</tr>
+<tr>
+<td><code>model_code</code></td>
+<td>비어 있지 않을 때</td>
+<td>정확 일치</td>
+</tr>
+<tr>
+<td><code>model_name__prefix</code></td>
+<td>비어 있지 않을 때</td>
+<td><code>model_name</code> 접두(대소문자 무시)</td>
+</tr>
+</tbody></table>
+<h3>3.3 호출 시점·조건</h3>
+<table>
+<thead>
+<tr>
+<th>시점</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Search</strong></td>
+<td>툴바 조회(필터→쿼리스트링 연동은 후속)</td>
+</tr>
+</tbody></table>
+<h3>3.4 응답 처리</h3>
+<ul>
+<li><strong>200</strong> JSON: <code>{ ok: true, screenId, rows }</code> — <code>rows</code>는 25열 <code>string[]</code> (앞 열은 cfg model-master 필드 매핑, 나머지 빈 문자열).</li>
+<li><strong>500</strong> <code>{ error }</code></li>
+</ul>
+<h3>3.5 에러</h3>
+<table>
+<thead>
+<tr>
+<th>원인</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PG 오류</td>
+<td>500 + <code>friendlyPgError</code></td>
+</tr>
+</tbody></table>
+<h2>4. 테이블·응답 필드</h2>
+<p>주 테이블: <code>tb_mes_model_master</code> (조인: <code>tb_cm_customer</code>, <code>tb_cm_item_class</code>, <code>tb_cm_code</code> — <code>pdmModelMes.mjs</code>·<code>cfgMes.mjs</code>와 동일 패턴).</p>
+<h2>5. 그리드·상세 UI 매핑</h2>
+<table>
+<thead>
+<tr>
+<th>인덱스(예)</th>
+<th>컬럼명</th>
+<th>DB·비고</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>품번분류</td>
+<td><code>model_class_name</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>품번</td>
+<td><code>model_code</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>규격</td>
+<td><code>model_spec</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>고객사</td>
+<td><code>cust_name</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>완성품명</td>
+<td><code>product_class_name</code> / <code>model_name</code></td>
+</tr>
+</tbody></table>
+<h2>6. 보완·주의점</h2>
+<ol>
+<li>나머지 열(형태·Rev 등)은 스키마 확정 후 매핑.</li>
+<li><code>LIMIT 500</code> — 대량 시 페이징 후속.</li>
+</ol>
+<h2>7. 관련 소스 파일</h2>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+<th>경로</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>화면</td>
+<td><code>renderer/src/screens/prd/prd_itemno_item_no_mgmt_fg_semi.tsx</code></td>
+</tr>
+<tr>
+<td>BE</td>
+<td><code>server/src/lib/queries/pdmModelMes.mjs</code></td>
+</tr>
+</tbody></table>
+
+
+</main>
+</body>
+</html>
